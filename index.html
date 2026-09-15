@@ -4932,10 +4932,12 @@ function bindView() {
   on('selSort', 'change', e => { ITEMS_UI.sort = e.target.value; render(); });
   on('chkFlag', 'change', e => { ITEMS_UI.onlyFlagged = e.target.checked; render(); });
 
-  /* uploads — the generic pair is always Teacher 1; T2/T3 zones only
-     exist in the DOM when multiTeacherPanel() rendered them, so this
-     naturally does nothing extra for an ordinary single-teacher subject. */
+  /* uploads — the generic pair above is a fixed fallback; whenever the
+     multi-teacher panel is showing 2 or 3 slots it renders its OWN
+     Teacher 1/2/3 zones (dropExamT1..3 etc), so all three need wiring
+     here too, not just T2/T3. */
   [['dropExam', 'fileExam', 1], ['dropTOS', 'fileTOS', 1], ['dropCreate', 'fileCreate', 1],
+   ['dropExamT1', 'fileExamT1', 1], ['dropTOST1', 'fileTOST1', 1],
    ['dropExamT2', 'fileExamT2', 2], ['dropTOST2', 'fileTOST2', 2],
    ['dropExamT3', 'fileExamT3', 3], ['dropTOST3', 'fileTOST3', 3]].forEach(([dz, fi, slot]) => {
     const d = $(dz), f = $(fi);
