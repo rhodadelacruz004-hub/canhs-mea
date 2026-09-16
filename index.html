@@ -2505,7 +2505,7 @@ function toast(msg, bad) {
 }
 
 /* ---------- login ---------- */
-const LOCAL_USERS = { admin: 'canhs*5281' };
+const LOCAL_USERS = { admin: 'canhs*5281', canhs_ht: 'canhs*5281', teacher: 'canhsteachers123' };
 function attemptLogin(u, p) {
   const user = String(u || '').trim().toLowerCase();
   return LOCAL_USERS[user] !== undefined && LOCAL_USERS[user] === String(p || '');
@@ -2968,6 +2968,8 @@ const NAV = [
   { id: 'remediation', label: 'Remediation List' },
   { id: 'leastLearned', label: 'Least Learned Competencies' },
   { id: 'competency', label: 'Mastered Competencies' },
+  { g: 'Learner Reports' },
+  { id: 'studentScores', label: 'Scores by Student' },
   { g: 'Action' },
   { id: 'export', label: 'Export test results', show: () => can('export') },
   { g: 'Setup' },
@@ -3038,7 +3040,7 @@ function renderInner(main) {
     dashboard: viewDashboard, upload: viewUpload,
     items: viewItems, competency: viewCompetency,
     assessmentArea: viewAssessmentArea, leastLearned: viewLeastLearned,
-    remediation: viewRemediation,
+    remediation: viewRemediation, studentScores: viewStudentScores,
     export: viewExport, settings: viewSettings,
     users: viewUsers, learners: viewLearners
   };
@@ -3572,6 +3574,91 @@ function viewAssessmentArea() {
 
   h += '</div>';
   return h;
+}
+
+/* ---------------- Scores by student ----------------
+   The reports above answer "how did this class do"; this answers "how
+   did this one learner do across every subject". One row per learner,
+   one column per learning area with results in the ticked cycle.
+   Ticking a learning area narrows which columns show; ticking none
+   shows every subject on file. Reads the same records as everywhere
+   else, so it excludes LSEN learners the same way studentsOf() always
+   does, and respects a subject split across more than one teacher
+   automatically (each learner's own class supplies their score). */
+function studentScoreRows() {
+  const areas = FILTER.areas.length ? allAreas().filter(a => FILTER.areas.includes(a)) : allAreas();
+  const students = new Map();
+  EXAMS().forEach(exam => {
+    if (!areas.includes(exam.area)) return;
+    studentsOf(exam).forEach(s => {
+      const key = exam.grade + '|' + s.section + '|' + (s.id || '\u2014') + '|' + nameKey(s.name);
+      if (!students.has(key)) students.set(key, { name: s.name, id: s.id, section: s.section, grade: exam.grade, scores: {} });
+      students.get(key).scores[exam.area] = { score: s.score, total: exam.totalItems };
+    });
+  });
+  const order = sortSections([...new Set([...students.values()].map(r => r.section))]);
+  const rows = [...students.values()].sort((a, b) =>
+    (order.indexOf(a.section) - order.indexOf(b.section)) || a.name.localeCompare(b.name));
+  return { areas, rows };
+}
+function studentAverage(row, areas) {
+  const pcts = areas.map(a => row.scores[a]).filter(Boolean).map(sc => 100 * sc.score / sc.total);
+  return pcts.length ? Math.round(pcts.reduce((a, b) => a + b, 0) / pcts.length) : null;
+}
+function viewStudentScores() {
+  let h = head('Scores by Student',
+    'Every learner\u2019s score in each subject area for the ticked school year, term, assessment and section.');
+  h += '<div class="wrap">' + contextBar();
+  if (!DB.exams.length) return h + noData('No ZipGrade results have been uploaded.') + '</div>';
+  if (!EXAMS().length) return h + noCycleData() + '</div>';
+  if (!FILTER.sections.length) {
+    h += '<div class="panel"><div class="panel-body"><div class="empty-state"><div class="big">Tick a section above</div>' +
+      '<p>This report lists every learner by name, so pick at least one section from the filters to keep the table to a class-sized list.</p>' +
+      '</div></div></div>';
+    return h + '</div>';
+  }
+
+  const { areas, rows } = studentScoreRows();
+  if (!rows.length) return h + noData('No learner in the ticked section has a result for this cycle.') + '</div>';
+  if (!areas.length) return h + noData('No ticked learning area has results for this cycle.') + '</div>';
+
+  const cell = sc => sc
+    ? '<div>' + sc.score + '/' + sc.total + '</div><div class="comp-sub">' + Math.round(100 * sc.score / sc.total) + '%</div>'
+    : '<span class="pill mute">\u2014</span>';
+
+  h += '<div class="panel"><h3>By learner<span class="sub">' + rows.length + ' learner' + (rows.length === 1 ? '' : 's') +
+    ' \u00b7 ' + areas.length + ' subject' + (areas.length === 1 ? '' : 's') + '</span></h3>' +
+    '<div class="panel-body flush"><div class="tbl-scroll"><table class="grid"><thead><tr>' +
+    '<th>Learner</th><th>Section</th>' + areas.map(a => '<th class="num">' + esc(a) + '</th>').join('') +
+    '<th class="num">Average</th></tr></thead><tbody>';
+  rows.forEach(r => {
+    const avg = studentAverage(r, areas);
+    h += '<tr><td class="rowhead">' + esc(r.name) + '</td><td>' + esc(r.section) + '</td>' +
+      areas.map(a => '<td class="num">' + cell(r.scores[a]) + '</td>').join('') +
+      '<td class="num"><strong>' + (avg === null ? '\u2014' : avg + '%') + '</strong></td></tr>';
+  });
+  h += '</tbody></table></div>' +
+    '<div class="dlbar" style="padding:0 16px 16px"><span class="spacer"></span>' +
+    '<button class="btn sm ghost" id="dlStudentScoresXlsx">Download as Excel</button></div></div>';
+
+  h += '</div>';
+  return h;
+}
+async function exportStudentScoresXLSX() {
+  const { areas, rows } = studentScoreRows();
+  const headRow = ['Learner', 'Section', ...areas, 'Average'];
+  const body = rows.map(r => [
+    r.name, r.section,
+    ...areas.map(a => r.scores[a] ? (r.scores[a].score + '/' + r.scores[a].total) : ''),
+    (() => { const avg = studentAverage(r, areas); return avg === null ? '' : avg + '%'; })()
+  ]);
+  await simpleTableXLSX({
+    sheetName: 'Scores by student',
+    title: 'Scores by Student',
+    subtitle: ctxLabel(),
+    tables: [{ head: headRow, body }],
+    filename: 'Scores by student ' + stampFileDate() + '.xlsx'
+  });
 }
 
 function viewLeastLearned() {
@@ -5038,6 +5125,7 @@ function bindView() {
   on('dlLSENAssessmentXlsx', 'click', async e => { e.target.disabled = true; try { await exportLSENAssessmentXLSX(); } catch (err) { toast('Export failed: ' + err.message, true); } e.target.disabled = false; });
   on('pdfAssessmentArea', 'click', () => { try { exportAssessmentAreaPDF(); toast('PDF downloaded'); } catch (err) { toast('Could not build the PDF: ' + err.message, true); } });
   on('dlAssessmentAreaXlsx', 'click', async e => { e.target.disabled = true; try { await exportAssessmentAreaXLSX(); } catch (err) { toast('Export failed: ' + err.message, true); } e.target.disabled = false; });
+  on('dlStudentScoresXlsx', 'click', async e => { e.target.disabled = true; try { await exportStudentScoresXLSX(); } catch (err) { toast('Export failed: ' + err.message, true); } e.target.disabled = false; });
   on('pdfCompetency', 'click', () => { try { exportCompetencyPDF(); toast('PDF downloaded'); } catch (err) { toast('Could not build the PDF: ' + err.message, true); } });
   on('dlCompetencyXlsx', 'click', async e => { e.target.disabled = true; try { await exportCompetencyXLSX(); } catch (err) { toast('Export failed: ' + err.message, true); } e.target.disabled = false; });
   on('pdfLeastLearned', 'click', () => { try { exportLeastLearnedPDF(); toast('PDF downloaded'); } catch (err) { toast('Could not build the PDF: ' + err.message, true); } });
@@ -6319,7 +6407,7 @@ function competencyObjectives(c) {
 
   /* Put the school's server address between the quotes below and every copy
      of this file connects on its own, with no setup on each computer. */
-  var BUILT_IN_URL = '';
+  var BUILT_IN_URL = 'https://script.google.com/macros/s/AKfycbxKjj_D4XB6X0x-wjIFx4umO7U53J7aOop7FxsJjo4G7-AHeofqLXCFAOk-1ejUu8UMpA/exec';
 
   var storedUrl = BUILT_IN_URL;
   try { storedUrl = BUILT_IN_URL || localStorage.getItem('canhs-url') || ''; } catch (e) {}
