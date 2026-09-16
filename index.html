@@ -1120,6 +1120,37 @@ function detectCycle(text) {
   return out;
 }
 
+/* The school's own TOS filename convention, e.g.
+   "CANHS2026-2027_Term1_TE_TOS" — school year, then term, then exam
+   type, always in that order. When a filename follows it, that is a
+   deliberate label and takes priority in parseTOS() over detectCycle's
+   looser scan of header cells (which vary from teacher to teacher).
+   Returns null for any filename that doesn't follow the convention, so
+   the caller falls back to that looser scan unchanged. */
+function tosFilenameCycle(fileName) {
+  const raw = norm(fileName).toUpperCase();
+  const syMatch = raw.match(/(20\d{2})\s*[-–—_]\s*(20\d{2})/);
+  if (!syMatch) return null;
+
+  /* Underscores and dashes count as "word" characters to \b, so turn
+     every run of separator punctuation into a plain space before doing
+     any word-boundary matching — the same trick detectCycle uses. */
+  const s = ' ' + raw.slice(syMatch.index + syMatch[0].length).replace(/[^A-Z0-9]+/g, ' ').trim() + ' ';
+
+  const termMatch = s.match(/\bTERM\s*([123])\b/);
+  if (!termMatch) return null;
+  const afterTerm = s.slice(termMatch.index + termMatch[0].length);
+
+  const st = afterTerm.match(/\bST\s*([12])\b/);
+  const te = afterTerm.match(/\bTE\b/);
+  let examType = '';
+  if (st && (!te || st.index < te.index)) examType = 'ST' + st[1];
+  else if (te) examType = 'TE';
+  if (!examType) return null;
+
+  return { sy: syMatch[1] + '-' + syMatch[2], term: +termMatch[1], examType };
+}
+
 /* ============================================================
    ZipGrade parsing
    ============================================================ */
@@ -1554,7 +1585,11 @@ function parseTOS(rows, fileName, sheetName) {
 
   const area = canonArea(subject.replace(/\d+/g, ' '));
   const grade = extractGrade(subject);
-  const cycle = detectCycle([subject, sy, sheetName, fileName].join(' '));
+  /* A filename that follows the school's "<year>_Term<n>_<examtype>"
+     convention is a deliberate label — trust it over detectCycle's
+     looser scan of header cells, which varies from teacher to teacher.
+     Anything that doesn't follow it falls back to that scan unchanged. */
+  const cycle = tosFilenameCycle(fileName) || detectCycle([subject, sy, sheetName, fileName].join(' '));
   return {
     kind: 'tos', fileName, sheetName, subject, teacher,
     sy: cycle.sy || norm(sy), term: cycle.term, examType: cycle.examType,
