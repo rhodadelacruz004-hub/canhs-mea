@@ -450,6 +450,7 @@ table.grid tr.lsenrow td:first-child{box-shadow:inset 3px 0 0 var(--red)}
 .msfbar{row-gap:16px}
 table.grid tbody tr.combined-row{background:var(--blue-wash);box-shadow:inset 3px 0 0 var(--blue)}
 table.grid tbody tr.combined-row td{font-weight:600}
+table.grid tbody tr.needs-grade{background:var(--amber-wash)}
 </style>
 </head>
 <body>
@@ -1121,15 +1122,16 @@ function detectCycle(text) {
 }
 
 /* The school's own TOS filename convention, e.g.
-   "CANHS2026-2027_Filipino_Term1_TE_TOS" — school year, subject, term,
-   then exam type, always in that order. When a filename follows it,
-   that is a deliberate label and takes priority in parseTOS() over
-   detectCycle's and the header row's looser scans, which vary from
-   teacher to teacher. Returns null for any filename that doesn't
-   follow the convention, so the caller falls back to those unchanged.
-   The subject segment is optional — a filename with nothing between
-   the school year and "Term" still matches, just with area left blank
-   so the caller keeps whatever the header row found. */
+   "CANHS2026-2027_Filipino_Grade7_Term1_TE_TOS" — school year, subject,
+   grade level, term, then exam type, always in that order. When a
+   filename follows it, that is a deliberate label and takes priority
+   in parseTOS() over detectCycle's and the header row's looser scans,
+   which vary from teacher to teacher. Returns null for any filename
+   that doesn't follow the convention, so the caller falls back to
+   those unchanged. Subject and grade are each optional on their own —
+   a filename with nothing between the school year and "Term" still
+   matches, just with area/grade left blank so the caller keeps
+   whatever the header row found for that piece. */
 function tosFilenameParts(fileName) {
   const raw = norm(fileName).toUpperCase();
   const syMatch = raw.match(/(20\d{2})\s*[-–—_]\s*(20\d{2})/);
@@ -1143,11 +1145,19 @@ function tosFilenameParts(fileName) {
   const termMatch = s.match(/\bTERM\s*([123])\b/);
   if (!termMatch) return null;
 
-  /* Whatever sits between the school year and "Term" is the subject —
-     canonArea() already treats underscores the same as spaces, so
-     "ARALING PANLIPUNAN" reads correctly whether the filename joined
-     it with one underscore or two. */
-  const subjectSegment = s.slice(0, termMatch.index).trim();
+  /* Everything between the school year and "Term" is subject + grade
+     level, in either order. Pull the grade token out first (matching
+     the same "GRADE 7" / "G7" / bare-number shapes extractGrade()
+     already recognizes elsewhere), and treat whatever text is left as
+     the subject — canonArea() already treats underscores the same as
+     spaces, so "ARALING PANLIPUNAN" reads correctly either way. */
+  const preTerm = s.slice(0, termMatch.index).trim();
+  let grade = null, subjectSegment = preTerm;
+  const gradeMatch = preTerm.match(/\bG(?:RADE)?\s*0?([789]|1[0-2])\b/) || preTerm.match(/\b([789]|1[0-2])\b/);
+  if (gradeMatch) {
+    grade = +gradeMatch[1];
+    subjectSegment = (preTerm.slice(0, gradeMatch.index) + ' ' + preTerm.slice(gradeMatch.index + gradeMatch[0].length)).trim();
+  }
   const area = subjectSegment ? canonArea(subjectSegment) : '';
 
   const afterTerm = s.slice(termMatch.index + termMatch[0].length);
@@ -1158,7 +1168,7 @@ function tosFilenameParts(fileName) {
   else if (te) examType = 'TE';
   if (!examType) return null;
 
-  return { sy: syMatch[1] + '-' + syMatch[2], term: +termMatch[1], examType, area };
+  return { sy: syMatch[1] + '-' + syMatch[2], term: +termMatch[1], examType, area, grade };
 }
 
 /* ============================================================
@@ -1594,14 +1604,15 @@ function parseTOS(rows, fileName, sheetName) {
   if (!kept.length) throw new Error('no item placement found — this looks like a blank TOS template rather than a completed one.');
 
   const inFileArea = canonArea(subject.replace(/\d+/g, ' '));
-  const grade = extractGrade(subject);
-  /* A filename that follows the school's "<year>_<subject>_Term<n>_<examtype>"
+  const inFileGrade = extractGrade(subject);
+  /* A filename that follows the school's "<year>_<subject>_<grade>_Term<n>_<examtype>"
      convention is a deliberate label — trust it over detectCycle's and
      the header row's looser scans, which vary from teacher to teacher.
      Anything that doesn't follow it falls back to those scans unchanged. */
   const named = tosFilenameParts(fileName);
   const cycle = named || detectCycle([subject, sy, sheetName, fileName].join(' '));
   const area = (named && named.area) ? named.area : inFileArea;
+  const grade = (named && named.grade !== null) ? named.grade : inFileGrade;
   return {
     kind: 'tos', fileName, sheetName, subject, teacher,
     sy: cycle.sy || norm(sy), term: cycle.term, examType: cycle.examType,
@@ -2062,6 +2073,7 @@ function recordsOf() {
   out.push({ id: 'links', type: 'links', meta: {}, data: DB.links });
   out.push({ id: 'rosters', type: 'rosters', meta: {}, data: DB.rosters });
   out.push({ id: 'teacherSetup', type: 'teacherSetup', meta: {}, data: DB.teacherSetup });
+  out.push({ id: 'sectionGrades', type: 'sectionGrades', meta: {}, data: DB.sectionGrades });
   return out;
 }
 
@@ -2084,6 +2096,7 @@ function applyRecord(rec) {
   else if (rec.type === 'links') DB.links = rec.data || {};
   else if (rec.type === 'rosters') DB.rosters = rec.data || {};
   else if (rec.type === 'teacherSetup') DB.teacherSetup = rec.data || {};
+  else if (rec.type === 'sectionGrades') DB.sectionGrades = rec.data || {};
 }
 
 function removeRecord(id) {
@@ -2357,6 +2370,21 @@ const DB = {
   lsen: {},       // learner key -> true; these learners sit outside the analysis
   rosters: {},    // school year -> { learners: [...] }; the standing enrolment census, independent of exam uploads
   teacherSetup: {}, // "area||grade||sy" -> 1|2|3; subjects split across more than one teacher, each with their own items and TOS
+  /* sy -> { sectionNameLower: grade }; lets a roster file that only lists
+     Section (not "Grade and Section" combined) resolve each learner's
+     grade level. Seeded from the SY 2026-2027 enrollment list — each
+     grade level's sections share a naming theme (Grade 7: character
+     traits, Grade 8: scientists, Grade 9: flowers, Grade 10: trees).
+     Settings -> Section directory lets you fix or extend this for a
+     school year whose section names don't match. */
+  sectionGrades: {
+    '2026-2027': {
+      adorable: 7, benevolent: 7, creative: 7, diligent: 7, enthusiastic: 7, fabulous: 7, generous: 7,
+      aristotle: 8, bernoulli: 8, copernicus: 8, descartes: 8, einstein: 8, faraday: 8, galilei: 8,
+      anthurium: 9, bougainvillea: 9, chrysanthemum: 9, daisy: 9, everlasting: 9, forsythia: 9,
+      acacia: 10, bamboo: 10, cacao: 10, duhat: 10, evergreen: 10, formosa: 10
+    }
+  },
   cfg: { ...DEFAULT_CFG }
 };
 
@@ -2509,7 +2537,7 @@ function saveLocal() {
     localStorage.setItem(cacheKey(), JSON.stringify({
       exams: DB.exams.map(packExam), toses: DB.toses, links: DB.links,
       enrolment: DB.enrolment, lsenCount: DB.lsenCount, lsen: DB.lsen,
-      rosters: DB.rosters, teacherSetup: DB.teacherSetup,
+      rosters: DB.rosters, teacherSetup: DB.teacherSetup, sectionGrades: DB.sectionGrades,
       cfg: DB.cfg, uid, rev: SYNC.rev
     }));
   } catch (e) { storageOK = false; }
@@ -2535,6 +2563,7 @@ function load() {
     DB.lsenCount = d.lsenCount || {}; DB.lsen = d.lsen || {};
     DB.rosters = d.rosters || {};
     DB.teacherSetup = d.teacherSetup || {};
+    DB.sectionGrades = d.sectionGrades || DB.sectionGrades;
     DB.cfg = { ...DEFAULT_CFG, ...(d.cfg || {}) };
     uid = d.uid || 1;
   } catch (e) { storageOK = false; }
@@ -2705,61 +2734,100 @@ function parseGradeSection(v) {
 }
 function parseRosterRows(rows) {
   let hdr = -1;
-  const idx = { gs: -1, code: -1, name: -1 };
+  const idx = { gs: -1, section: -1, code: -1, name: -1, lrn: -1, sex: -1, age: -1 };
   for (let i = 0; i < Math.min(10, rows.length); i++) {
     const H = (rows[i] || []).map(norm);
     const L = H.map(h => h.toLowerCase());
     const gs = L.findIndex(l => l.includes('grade') && l.includes('section'));
-    const nm = L.findIndex(l => l.includes('name of learner') || l === 'name' || l.includes('learner name'));
-    if (gs >= 0 && nm >= 0) {
-      hdr = i; idx.gs = gs; idx.name = nm;
-      idx.code = L.findIndex(l => l.includes('learner code') || l.includes('lrn') || l === 'code');
+    const sectionOnly = L.findIndex(l => l === 'section');
+    const nm = L.findIndex(l => l.includes('name of learner') || l === 'name' || l.includes('learner name') || l.includes('last name'));
+    if ((gs >= 0 || sectionOnly >= 0) && nm >= 0) {
+      hdr = i; idx.gs = gs; idx.section = sectionOnly; idx.name = nm;
+      idx.lrn = L.findIndex(l => l.includes('lrn'));
+      idx.code = L.findIndex(l => l === 'code' || l.includes('learner code'));
+      idx.sex = L.findIndex(l => l === 'sex' || l === 'gender');
+      idx.age = L.findIndex(l => l === 'age');
       break;
     }
   }
-  if (hdr < 0) throw new Error('No "Grade and Section" and learner-name columns found.');
+  if (hdr < 0) throw new Error('No "Grade and Section" (or "Section") and learner-name columns found.');
   const out = [];
   for (let i = hdr + 1; i < rows.length; i++) {
     const r = rows[i];
     if (!r || !r.some(c => norm(c) !== '')) continue;
-    const gsRaw = norm(r[idx.gs]);
     const name = norm(r[idx.name]);
     const code = idx.code >= 0 ? norm(r[idx.code]) : '';
-    if (!gsRaw && !name) continue;
-    const gs = parseGradeSection(gsRaw);
-    out.push({ grade: gs.grade, section: gs.section, code, name });
+    const lrn = idx.lrn >= 0 ? norm(r[idx.lrn]) : '';
+    const sex = idx.sex >= 0 ? norm(r[idx.sex]) : '';
+    const ageRaw = idx.age >= 0 ? r[idx.age] : '';
+    const age = (ageRaw !== '' && ageRaw !== null && ageRaw !== undefined && !isNaN(+ageRaw)) ? +ageRaw : '';
+    let grade = '', section = '';
+    if (idx.gs >= 0) {
+      const gs = parseGradeSection(norm(r[idx.gs]));
+      grade = gs.grade; section = gs.section;
+    } else if (idx.section >= 0) {
+      /* Grade isn't a column here — it's resolved from the section name
+         by the caller, via gradeForSection(sy, section), since that
+         needs the school year this file is being filed under. */
+      section = norm(r[idx.section]);
+    }
+    if (!section && !name) continue;
+    out.push({ grade, section, code, name, lrn, sex, age });
   }
   if (!out.length) throw new Error('No learner rows found.');
   return out;
 }
-/* Adds new learners and refreshes name/grade/section on matches; every
-   LSEN-tagging field on an existing learner (basis, condition/s, notes) is
-   left exactly as it was. */
+/* Adds new learners and refreshes name/grade/section/LRN/sex/age on
+   matches; every LSEN-tagging field on an existing learner (basis,
+   condition/s, notes) is left exactly as it was. Matching prefers LRN
+   — a learner's permanent, unique DepEd number — over the grade +
+   section + code key, since a spelling correction should update the
+   same learner rather than create a duplicate; LRN-less rows (or a
+   file with no LRN column at all) fall back to the same code/name
+   matching used before. Rows whose section has no known grade are
+   still added, with grade left blank, and their section names are
+   returned so the caller can flag them for a one-time fix in the
+   Section directory. */
 function mergeRoster(sy, parsedRows) {
   const roster = rosterFor(sy);
-  const byKey = {};
-  roster.learners.forEach(l => { byKey[rosterMatchKey(l.grade, l.section, l.code, l.name)] = l; });
+  const byKey = {}, byLrn = {};
+  roster.learners.forEach(l => {
+    byKey[rosterMatchKey(l.grade, l.section, l.code, l.name)] = l;
+    if (l.lrn) byLrn[l.lrn] = l;
+  });
   let added = 0, updated = 0;
+  const unresolvedSections = new Set();
   const now = new Date().toISOString();
   parsedRows.forEach(row => {
-    const key = rosterMatchKey(row.grade, row.section, row.code, row.name);
-    const existing = byKey[key];
+    let grade = row.grade;
+    if (grade === '' && row.section) {
+      grade = gradeForSection(sy, row.section);
+      if (grade === '') unresolvedSections.add(row.section);
+    }
+    const key = rosterMatchKey(grade, row.section, row.code, row.name);
+    let existing = row.lrn ? byLrn[row.lrn] : null;
+    if (!existing) existing = byKey[key];
     if (existing) {
-      existing.grade = row.grade; existing.section = row.section; existing.code = row.code; existing.name = row.name;
+      existing.grade = grade; existing.section = row.section; existing.code = row.code; existing.name = row.name;
+      if (row.lrn) existing.lrn = row.lrn;
+      if (row.sex) existing.sex = row.sex;
+      if (row.age !== '') existing.age = row.age;
       existing.updatedAt = now;
       updated++;
     } else {
       const rec = {
-        rid: nextId(), grade: row.grade, section: row.section, code: row.code, name: row.name,
+        rid: nextId(), grade, section: row.section, code: row.code, name: row.name,
+        lrn: row.lrn || '', sex: row.sex || '', age: row.age !== '' ? row.age : '',
         lsenBasis: '', notes: '', conditions: [], conditionsOther: '',
         source: 'upload', addedAt: now, updatedAt: now
       };
       roster.learners.push(rec);
-      byKey[key] = rec;
+      byKey[rosterMatchKey(rec.grade, rec.section, rec.code, rec.name)] = rec;
+      if (rec.lrn) byLrn[rec.lrn] = rec;
       added++;
     }
   });
-  return { added, updated };
+  return { added, updated, unresolvedSections: [...unresolvedSections] };
 }
 const ROSTER_LOG = [];
 function rosterLogHTML() {
@@ -2788,6 +2856,7 @@ async function ingestRosterFile(file, sy, logEl) {
     return { added: 0, updated: 0 };
   }
   let added = 0, updated = 0, sheetsUsed = 0;
+  const unresolvedSections = new Set();
   for (const sheetName of wb.SheetNames) {
     const rows = sheetToRows(wb.Sheets[sheetName]);
     if (!rows.length) continue;
@@ -2795,14 +2864,19 @@ async function ingestRosterFile(file, sy, logEl) {
       const parsed = parseRosterRows(rows);
       const r = mergeRoster(sy, parsed);
       added += r.added; updated += r.updated; sheetsUsed++;
+      r.unresolvedSections.forEach(s => unresolvedSections.add(s));
     } catch (e) { /* this sheet is not a grade-and-section list — try the next one */ }
   }
   if (!sheetsUsed) {
-    line('er', file.name + ' — no "Grade and Section" learner list recognised in this file.');
+    line('er', file.name + ' — no "Grade and Section" (or "Section") learner list recognised in this file.');
     return { added: 0, updated: 0 };
   }
   line('ok', file.name + ' — SY ' + sy + ': ' + added + ' learner' + (added === 1 ? '' : 's') + ' added' +
     (updated ? ', ' + updated + ' refreshed' : '') + '.');
+  if (unresolvedSections.size) {
+    line('wr', 'Grade level not on file for: ' + [...unresolvedSections].join(', ') +
+      ' — those learners were still added, with grade blank. Set it once in Section directory below.');
+  }
   return { added, updated };
 }
 
@@ -2891,6 +2965,24 @@ function setTeacherCount(area, grade, sy, n) {
    labels at all, since a single-teacher subject should look exactly
    as it always has. */
 function teacherCountForExam(exam) { return teacherCountFor(exam.area, exam.grade, exam.sy); }
+
+/* ---------- resolving grade level from section name ----------
+   Some roster exports list Section on its own, with no combined
+   "Grade and Section" column and no separate Grade column at all — the
+   grade has to come from which section a learner is in. */
+function gradeForSection(sy, section) {
+  const table = DB.sectionGrades[sy];
+  if (!table) return '';
+  const g = table[norm(section).toLowerCase()];
+  return g ? +g : '';
+}
+function setSectionGrade(sy, section, grade) {
+  if (!DB.sectionGrades[sy]) DB.sectionGrades[sy] = {};
+  const key = norm(section).toLowerCase();
+  if (grade) DB.sectionGrades[sy][key] = +grade;
+  else delete DB.sectionGrades[sy][key];
+  save('sectionGrades');
+}
 
 /* ---------- learners with special educational needs ---------- */
 /* A learner is marked once and stays marked across every learning area,
@@ -4949,11 +5041,31 @@ function bindView() {
     const section = norm($('addSection') ? $('addSection').value : '');
     const now = new Date().toISOString();
     rosterFor(ROSTER_SY).learners.push({
-      rid: nextId(), grade, section, code, name,
+      rid: nextId(), grade, section, code, name, lrn: '', sex: '', age: '',
       lsenBasis: '', notes: '', conditions: [], conditionsOther: '',
       source: 'manual', addedAt: now, updatedAt: now
     });
     save('rosters'); render(); toast(name + ' added to SY ' + ROSTER_SY);
+  });
+  document.querySelectorAll('[data-section-grade]').forEach(sel => sel.onchange = () => {
+    const section = sel.dataset.sectionGrade;
+    const grade = sel.value ? +sel.value : '';
+    setSectionGrade(ROSTER_SY, section, grade);
+    /* Fix up anyone already on the roster in this section whose grade
+       came back blank because this mapping didn't exist yet — setting
+       it here should make them show correctly right away, not just on
+       the next re-upload. */
+    let fixed = 0;
+    if (grade) {
+      rosterFor(ROSTER_SY).learners.forEach(l => {
+        if (!l.grade && norm(l.section).toLowerCase() === norm(section).toLowerCase()) {
+          l.grade = grade; l.updatedAt = new Date().toISOString(); fixed++;
+        }
+      });
+      if (fixed) save('rosters');
+    }
+    render();
+    toast(section + ' set to ' + (grade ? 'Grade ' + grade : 'no grade') + (fixed ? ' — ' + fixed + ' learner' + (fixed === 1 ? '' : 's') + ' updated' : ''));
   });
   document.querySelectorAll('[data-roster-basis]').forEach(sel => sel.onchange = () => {
     const l = rosterFor(ROSTER_SY).learners.find(x => x.rid === sel.dataset.rosterBasis);
@@ -5968,6 +6080,41 @@ function addLearnerForm() {
    Independent of the exam-driven tick further down: a learner here needs no
    uploaded answer sheet to be added, tagged with a basis of classification,
    one or more condition/s, and a free-text assessment result / manifestation. */
+/* Which grade level each section belongs to, for the school year on
+   screen — shown whenever there's at least one section to show,
+   combining sections already assigned (Settings-style, editable here)
+   with any section actually on the roster that still has no grade
+   set, so an unrecognised section from an upload surfaces here rather
+   than staying silently blank. */
+function sectionDirectoryPanel(learners) {
+  const table = DB.sectionGrades[ROSTER_SY] || {};
+  const label = {};
+  Object.keys(table).forEach(k => { label[k] = label[k] || k; });
+  learners.forEach(l => { if (l.section) label[norm(l.section).toLowerCase()] = l.section; });
+  const rows = Object.keys(label)
+    .map(k => ({ key: k, label: label[k], grade: table[k] || '' }))
+    .sort((a, b) => a.label.localeCompare(b.label));
+  if (!rows.length) return '';
+
+  const unresolved = rows.filter(r => !r.grade).length;
+  let h = '<div class="panel"><h3>Section directory<span class="sub">SY ' + esc(ROSTER_SY) + ' — which grade level each section belongs to</span></h3>' +
+    '<div class="panel-body">';
+  h += '<p class="sub" style="margin:0 0 14px;max-width:760px">Used to fill in grade level when an uploaded list has a Section column but no ' +
+    'Grade column. ' + (unresolved
+      ? unresolved + ' section' + (unresolved === 1 ? '' : 's') + ' below ' + (unresolved === 1 ? 'has' : 'have') + ' no grade level set yet.'
+      : 'Every section below has a grade level set.') + '</p>';
+  h += '<div class="tbl-scroll"><table class="grid tight"><thead><tr><th>Section</th><th class="num">Grade level</th></tr></thead><tbody>';
+  rows.forEach(r => {
+    h += '<tr' + (!r.grade ? ' class="needs-grade"' : '') + '><td>' + esc(r.label) + '</td>' +
+      '<td class="num"><select data-section-grade="' + esc(r.label) + '">' +
+      '<option value=""' + (!r.grade ? ' selected' : '') + '>\u2014</option>' +
+      GRADES.map(g => '<option value="' + g + '"' + (+r.grade === g ? ' selected' : '') + '>Grade ' + g + '</option>').join('') +
+      '</select></td></tr>';
+  });
+  h += '</tbody></table></div></div></div>';
+  return h;
+}
+
 function rosterSection() {
   const roster = rosterFor(ROSTER_SY);
   const learners = roster.learners.slice().sort((a, b) => {
@@ -5996,14 +6143,18 @@ function rosterSection() {
     '</div></div>';
   h += '<div class="two" style="margin-top:16px;align-items:start">' +
     '<div><div class="drop" id="dropRoster" tabindex="0" role="button">' +
-    '<div class="big">Drop the grade-and-section learner list</div>' +
-    '<div class="small">The DepEd export: Grade and Section, Learner Code, Name of Learner (Last Name, First Name MI.). ' +
-    'Filed under SY ' + esc(ROSTER_SY) + ' — adds new learners and refreshes names without touching any LSEN tags already recorded.</div>' +
+    '<div class="big">Drop the enrollees list</div>' +
+    '<div class="small">Either the DepEd export (Grade and Section, Learner Code, Name of Learner) or a Section / Code / Name / Sex / LRN / Age list — ' +
+    'grade level is looked up from Section directory below when the file has no Grade column. ' +
+    'Filed under SY ' + esc(ROSTER_SY) + ' — adds new learners and refreshes names and LRN without touching any LSEN tags already recorded. ' +
+    'A learner already on file with the same LRN is matched and updated even if the name\u2019s spelling changed.</div>' +
     '</div><input type="file" id="fileRoster" multiple accept=".xlsx,.xls,.csv" class="sr">' +
     '<div class="log" id="rosterLog" style="margin-top:10px">' + rosterLogHTML() + '</div></div>' +
     addLearnerForm() +
     '</div>';
   h += '</div></div>';
+
+  h += sectionDirectoryPanel(learners);
 
   h += '<div class="panel"><h3>Roster and LSEN tags' +
     (filtered.length !== learners.length ? '<span class="sub">' + filtered.length + ' of ' + learners.length + ' shown</span>' : '') +
@@ -6016,12 +6167,12 @@ function rosterSection() {
 
   if (!learners.length) {
     h += '<p style="margin:0;color:var(--ink-soft)">No learners on file yet for SY ' + esc(ROSTER_SY) +
-      '. Upload the grade-and-section list above, or add a learner one at a time.</p>';
+      '. Upload the enrollees list above, or add a learner one at a time.</p>';
   } else if (!filtered.length) {
     h += '<p style="margin:0;color:var(--ink-soft)">No learner matches that search.</p>';
   } else {
     h += '<div class="tbl-scroll"><table class="grid tight"><thead><tr>' +
-      '<th class="num">#</th><th>Learner</th><th>Code</th><th class="num">Grade</th><th>Section</th>' +
+      '<th class="num">#</th><th>Learner</th><th>Code</th><th>LRN</th><th class="num">Grade</th><th>Section</th>' +
       '<th>LSEN basis</th><th>Condition/s</th><th>Assessment result / manifestation</th><th></th>' +
       '</tr></thead><tbody>';
     filtered.forEach((l, i) => {
@@ -6030,6 +6181,7 @@ function rosterSection() {
         '<td class="num">' + (i + 1) + '</td>' +
         '<td><strong>' + esc(l.name) + '</strong></td>' +
         '<td>' + esc(l.code) + '</td>' +
+        '<td>' + esc(l.lrn || '\u2014') + '</td>' +
         '<td class="num">' + (l.grade || '—') + '</td>' +
         '<td>' + esc(l.section || '—') + '</td>' +
         '<td><select data-roster-basis="' + esc(l.rid) + '">' +
@@ -6041,7 +6193,7 @@ function rosterSection() {
         '<td><button class="btn sm ghost" data-roster-del="' + esc(l.rid) + '">Remove</button></td>' +
         '</tr>';
       if (ROSTER_COND_OPEN === l.rid) {
-        h += '<tr class="roster-cond-row"><td></td><td colspan="8"><div class="cond-box">' +
+        h += '<tr class="roster-cond-row"><td></td><td colspan="9"><div class="cond-box">' +
           '<div class="cond-grid">' + LSEN_CONDITIONS.map(c =>
             '<label class="cond-item"><input type="checkbox" data-roster-condbox="' + esc(l.rid) + '|' + esc(c) + '"' +
             ((l.conditions || []).includes(c) ? ' checked' : '') + '> ' + esc(c) + '</label>').join('') +
