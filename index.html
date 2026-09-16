@@ -1121,13 +1121,16 @@ function detectCycle(text) {
 }
 
 /* The school's own TOS filename convention, e.g.
-   "CANHS2026-2027_Term1_TE_TOS" — school year, then term, then exam
-   type, always in that order. When a filename follows it, that is a
-   deliberate label and takes priority in parseTOS() over detectCycle's
-   looser scan of header cells (which vary from teacher to teacher).
-   Returns null for any filename that doesn't follow the convention, so
-   the caller falls back to that looser scan unchanged. */
-function tosFilenameCycle(fileName) {
+   "CANHS2026-2027_Filipino_Term1_TE_TOS" — school year, subject, term,
+   then exam type, always in that order. When a filename follows it,
+   that is a deliberate label and takes priority in parseTOS() over
+   detectCycle's and the header row's looser scans, which vary from
+   teacher to teacher. Returns null for any filename that doesn't
+   follow the convention, so the caller falls back to those unchanged.
+   The subject segment is optional — a filename with nothing between
+   the school year and "Term" still matches, just with area left blank
+   so the caller keeps whatever the header row found. */
+function tosFilenameParts(fileName) {
   const raw = norm(fileName).toUpperCase();
   const syMatch = raw.match(/(20\d{2})\s*[-–—_]\s*(20\d{2})/);
   if (!syMatch) return null;
@@ -1139,8 +1142,15 @@ function tosFilenameCycle(fileName) {
 
   const termMatch = s.match(/\bTERM\s*([123])\b/);
   if (!termMatch) return null;
-  const afterTerm = s.slice(termMatch.index + termMatch[0].length);
 
+  /* Whatever sits between the school year and "Term" is the subject —
+     canonArea() already treats underscores the same as spaces, so
+     "ARALING PANLIPUNAN" reads correctly whether the filename joined
+     it with one underscore or two. */
+  const subjectSegment = s.slice(0, termMatch.index).trim();
+  const area = subjectSegment ? canonArea(subjectSegment) : '';
+
+  const afterTerm = s.slice(termMatch.index + termMatch[0].length);
   const st = afterTerm.match(/\bST\s*([12])\b/);
   const te = afterTerm.match(/\bTE\b/);
   let examType = '';
@@ -1148,7 +1158,7 @@ function tosFilenameCycle(fileName) {
   else if (te) examType = 'TE';
   if (!examType) return null;
 
-  return { sy: syMatch[1] + '-' + syMatch[2], term: +termMatch[1], examType };
+  return { sy: syMatch[1] + '-' + syMatch[2], term: +termMatch[1], examType, area };
 }
 
 /* ============================================================
@@ -1583,13 +1593,15 @@ function parseTOS(rows, fileName, sheetName) {
   const kept = entries.filter(e => e.items.length);
   if (!kept.length) throw new Error('no item placement found — this looks like a blank TOS template rather than a completed one.');
 
-  const area = canonArea(subject.replace(/\d+/g, ' '));
+  const inFileArea = canonArea(subject.replace(/\d+/g, ' '));
   const grade = extractGrade(subject);
-  /* A filename that follows the school's "<year>_Term<n>_<examtype>"
-     convention is a deliberate label — trust it over detectCycle's
-     looser scan of header cells, which varies from teacher to teacher.
-     Anything that doesn't follow it falls back to that scan unchanged. */
-  const cycle = tosFilenameCycle(fileName) || detectCycle([subject, sy, sheetName, fileName].join(' '));
+  /* A filename that follows the school's "<year>_<subject>_Term<n>_<examtype>"
+     convention is a deliberate label — trust it over detectCycle's and
+     the header row's looser scans, which vary from teacher to teacher.
+     Anything that doesn't follow it falls back to those scans unchanged. */
+  const named = tosFilenameParts(fileName);
+  const cycle = named || detectCycle([subject, sy, sheetName, fileName].join(' '));
+  const area = (named && named.area) ? named.area : inFileArea;
   return {
     kind: 'tos', fileName, sheetName, subject, teacher,
     sy: cycle.sy || norm(sy), term: cycle.term, examType: cycle.examType,
