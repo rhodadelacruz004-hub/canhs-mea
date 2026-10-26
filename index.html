@@ -341,7 +341,7 @@ button.cell:hover{outline:2px solid var(--blue);outline-offset:-2px}
 .fstep.locked .fstep-head .t,.fstep.locked .fstep-head label{color:var(--ink-faint)}
 .fstep-opt{border-top:1px solid var(--rule);padding-top:12px;align-items:start}
 .fstep-opt .fstep-head{padding-top:8px}
-.ticks{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:8px;align-items:stretch;min-width:0}
+.ticks{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;align-items:stretch;min-width:0;max-width:760px}
 .ticks select{grid-column:1 / span 3;min-width:0;width:100%;padding:8px 10px;border:1px solid var(--rule-strong);border-radius:2px;background:#fff}
 .ticks .ticks-note{grid-column:1 / -1;margin:0;align-self:center}
 .fstep-all{min-width:0}
@@ -360,12 +360,10 @@ button.cell:hover{outline:2px solid var(--blue);outline-offset:-2px}
 .tick.tickall.on{border-style:solid;color:var(--ink)}
 .fstep-all{align-self:start}
 .fstep-opt .msf{min-width:180px}
-/* as many columns as fit without wrapping a label ("Values Ed.", "Term Exam") */
-@media(max-width:1599px){.ticks{grid-template-columns:repeat(6,minmax(0,1fr))}}
-@media(max-width:1329px){.ticks{grid-template-columns:repeat(4,minmax(0,1fr))}}
-@media(max-width:1099px){.fstep{grid-template-columns:130px 96px minmax(0,1fr)}.ticks{grid-template-columns:repeat(3,minmax(0,1fr))}}
-@media(min-width:861px) and (max-width:960px){.ticks{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media(max-width:860px){.ticks{grid-template-columns:repeat(4,minmax(0,1fr))}}
+/* four columns — subjects four to a line — on every screen wide enough
+   for "Values Ed." without wrapping; two on the narrowest */
+@media(max-width:1199px){.fstep{grid-template-columns:118px 92px minmax(0,1fr)}.fstep .tick{padding:6px;gap:6px}}
+@media(min-width:861px) and (max-width:1010px){.ticks{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:760px){.fstep{grid-template-columns:1fr auto}.fstep-head{grid-column:1}.fstep-all{grid-column:2;justify-self:end}
   .ticks{grid-column:1 / -1;grid-template-columns:repeat(2,minmax(0,1fr))}.ticks select{grid-column:1 / -1}}
 
@@ -530,6 +528,13 @@ table.grid td.wide .comp-sub{white-space:normal}
 table.grid td.w1,table.grid th.w1{min-width:170px;max-width:230px;white-space:normal}
 table.grid td.w2,table.grid th.w2{min-width:230px;max-width:340px;white-space:normal}
 table.grid td.w2 .ksa{margin-right:4px;vertical-align:1px}
+table.grid.itemtbl{table-layout:fixed;width:100%;min-width:960px}
+table.grid.itemtbl th{white-space:normal;overflow-wrap:break-word;line-height:1.25}
+table.grid.itemtbl td{overflow-wrap:break-word}
+table.grid.itemtbl td.w1,table.grid.itemtbl td.w2{font-size:12.7px;line-height:1.4}
+table.grid.itemtbl td.w1 strong{font-weight:600}
+table.grid.itemtbl .pill{white-space:normal;line-height:1.25;display:inline-block}
+table.grid.itemtbl td:last-child{font-size:12.7px;line-height:1.35}
 
 /* the competency and K/S/A block above each remediation list */
 .objblock{border:1px solid var(--rule);background:#F8FAFD;margin-bottom:13px}
@@ -1218,7 +1223,7 @@ const DOMAIN_NAMES = {
    per-account subject lists use them); what people see is the short
    name from AREA_LABELS. */
 const LEARNING_AREAS = ['Filipino', 'English', 'Science', 'Mathematics',
-  'Araling Panlipunan', 'TLE', 'MAPEH', 'EsP'];
+  'TLE', 'MAPEH', 'Araling Panlipunan', 'EsP'];
 const AREA_LABELS = {
   Filipino: 'Fil', English: 'Eng', Science: 'Sci', Mathematics: 'Math',
   'Araling Panlipunan': 'AP', TLE: 'TLE', MAPEH: 'MAPEH', EsP: 'Values Ed.'
@@ -4798,9 +4803,10 @@ function filterTicks(key, n, label, options, enabled, note, emptyText) {
     /* "Tick all" is the first column of the row, shown as a box like the
        others: ticked when every available choice is ticked; unticking it
        clears the row */
-    '<div class="fstep-all"><label class="tick tickall' + (allOn ? ' on' : '') + (enabled && avail.length ? '' : ' off') + '">' +
+    '<div class="fstep-all">' + (key === 'term' || key === 'exam' ? '' :
+      '<label class="tick tickall' + (allOn ? ' on' : '') + (enabled && avail.length ? '' : ' off') + '">' +
       '<input type="checkbox" data-tick-all="' + key + '"' + (allOn ? ' checked' : '') + (enabled && avail.length ? '' : ' disabled') + '>' +
-      '<span>Tick all</span></label></div>' +
+      '<span>Tick all</span></label>') + '</div>' +
     '<div class="ticks" role="group" aria-labelledby="' + lblId + '">';
   options.forEach(o => {
     const on = sel.has(String(o.v));
@@ -4849,9 +4855,9 @@ function contextBar() {
      unticked includes every grade level / section. Sections open once a
      grade level is ticked, so the list is that grade's own sections. */
   const s6 = ready && FILTER.grades.length > 0;
-  h += filterTicks('grades', 5, 'Grade level', filterTickOptions('grades'), ready, 'optional \u2014 none ticked shows all');
+  h += filterTicks('grades', 5, 'Grade level', filterTickOptions('grades'), ready);
   h += filterTicks('sections', 6, 'Section', s6 ? filterTickOptions('sections') : [], s6,
-    'optional \u2014 none ticked shows all', ready ? 'Tick a grade level in step 5 to choose its sections.' : '');
+    '', ready ? 'Tick a grade level in step 5 to choose its sections.' : '');
   return h + '</div></div>';
 }
 /* ---------- subjects split between teachers: show the combined figure
@@ -5103,7 +5109,11 @@ function renderItemsPanel(exam, cfg) {
   h += '<div class="panel-body flush">' +
     '<div class="dlbar"><span>' + list.length + ' item' + (list.length === 1 ? '' : 's') + ' shown' +
       (ITEMS_UI.onlyFlagged ? ', filtered to those needing review' : '') + '</span></div>' +
-    '<div class="tbl-scroll"><table class="grid tight"><thead><tr>' +
+    /* fixed proportions so every column fits: the three text columns are
+       kept narrow and wrap, the figures get just the room they need */
+    '<div class="tbl-scroll"><table class="grid tight itemtbl"><colgroup>' +
+      [40, 130, 155, 165, 56, 60, 54, 66, 44, 96, 44, 104, 46, 112].map(w => '<col style="width:' + (w / 11.72).toFixed(2) + '%">').join('') +
+    '</colgroup><thead><tr>' +
     '<th class="num">Item</th><th class="w1">Topic</th><th class="w2">Learning competency</th>' +
     '<th class="w2">Lesson objectives</th><th class="mid">Domain</th>' +
     '<th class="num">Correct</th><th class="num">Wrong</th><th class="num">% correct</th>' +
