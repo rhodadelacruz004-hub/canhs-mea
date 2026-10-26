@@ -120,7 +120,7 @@ html,body{height:100%}
 
 #topBanner{
   flex:none;display:flex;align-items:center;gap:16px;
-  padding:11px 28px;background:var(--surface);
+  padding:11px 30px 11px 28px;background:var(--surface);
   border-bottom:3px solid #E8B93B;
 }
 #topBanner img{width:50px;height:50px;flex:none;display:block}
@@ -130,6 +130,61 @@ html,body{height:100%}
 .tb-spacer{flex:1;min-width:12px}
 .tb-kicker{font-size:25.4px;font-weight:700;color:var(--teal);text-transform:uppercase;letter-spacing:.06em;white-space:nowrap;flex:none}
 
+/* upper right of the banner: the page title, and under it when the data
+   on screen was last updated, with a button to fetch the latest now */
+.tb-right{flex:none;display:flex;flex-direction:column;align-items:flex-end;gap:5px}
+.tb-right .tb-kicker{line-height:1.15}
+.tb-status{display:flex;align-items:center;gap:12px}
+.tb-updated{font-size:14.8px;color:var(--ink-faint);white-space:nowrap}
+.tb-updated.bad{color:var(--red)}
+.tb-refresh{
+  border:1px solid var(--rule);background:var(--surface);color:var(--blue-deep);
+  font-weight:600;font-size:14.8px;line-height:1.35;padding:4px 14px;border-radius:3px;cursor:pointer;
+}
+.tb-refresh:hover{background:var(--teal-wash);border-color:var(--rule-strong)}
+.tb-refresh:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
+.tb-refresh:disabled{opacity:.55;cursor:progress}
+
+/* account menu at the right end of the teal title bar */
+.usermenu{
+  flex:none;align-self:center;margin-left:auto;
+  display:flex;align-items:center;gap:14px;
+  padding-left:20px;border-left:1px solid rgba(255,255,255,.2);
+}
+.um-hi{color:#fff;font-weight:700;font-size:16.5px;white-space:nowrap;max-width:280px;overflow:hidden;text-overflow:ellipsis}
+.um-toggle{
+  width:40px;height:40px;padding:0;display:grid;place-items:center;cursor:pointer;
+  background:none;border:0;border-radius:3px;color:#fff;
+}
+.um-toggle:hover,.usermenu.open .um-toggle{background:rgba(255,255,255,.12)}
+.um-toggle:focus-visible{outline:2px solid #E8B93B;outline-offset:2px}
+.um-toggle svg{width:22px;height:22px;display:block}
+.um-panel{
+  position:absolute;top:calc(100% + 3px);right:30px;z-index:5;
+  width:360px;max-width:calc(100vw - 32px);
+  background:var(--surface);color:var(--ink);
+  border:1px solid var(--rule);border-top:0;border-radius:0 0 4px 4px;
+  box-shadow:0 14px 34px rgba(4,18,38,.2);
+}
+.um-panel[hidden]{display:none}
+.um-id{padding:18px 18px 16px}
+.um-name{font-weight:700;font-size:16.5px;letter-spacing:.02em;line-height:1.3;overflow-wrap:anywhere}
+.um-mail{font-size:15.4px;color:var(--ink-soft);margin-top:4px;overflow-wrap:anywhere}
+.um-role{font-size:13.8px;color:var(--ink-faint);margin-top:6px}
+.um-group{border-top:1px solid var(--rule)}
+.um-item{
+  display:flex;align-items:center;gap:14px;width:100%;padding:15px 20px;
+  background:none;border:0;cursor:pointer;text-align:left;
+  font-weight:700;font-size:16.5px;color:var(--ink);
+}
+.um-item:hover{background:var(--teal-wash)}
+.um-item:focus-visible{outline:2px solid var(--teal);outline-offset:-2px}
+.um-item:disabled{opacity:.55;cursor:progress}
+.um-item svg{width:20px;height:20px;flex:none;color:var(--ink-soft)}
+.um-item .um-sub{display:block;font-weight:400;font-size:13.2px;color:var(--ink-faint);margin-top:1px}
+.um-item .um-sub.bad{color:var(--red)}
+.um-mobile{display:none}
+
 #appBody{flex:1;min-height:0;display:grid;grid-template-columns:var(--rail) 1fr}
 
 #rail{
@@ -138,8 +193,7 @@ html,body{height:100%}
   height:100%;
 }
 .rail-head{padding:20px 20px 16px;border-bottom:1px solid rgba(255,255,255,.14)}
-.rail-head .mark{font-family:var(--serif);font-size:23.1px;color:#fff;font-weight:600;letter-spacing:.01em}
-.rail-head .school{font-size:12.7px;color:#8FA6C0;margin-top:3px;line-height:1.35}
+.rail-head .mark{font-family:var(--serif);font-size:21px;line-height:1.25;color:#fff;font-weight:700;letter-spacing:.01em}
 #nav{flex:1;overflow:auto;padding:10px 0}
 .nav-group{padding:14px 20px 5px;font-size:12.1px;color:#E8B93B;letter-spacing:.06em}
 .nav-item{
@@ -162,13 +216,15 @@ button.linkish{background:none;border:0;color:var(--blue);cursor:pointer;padding
 .gate-note{display:block}
 
 #main{min-width:0;padding:0 0 60px;height:100%;overflow-y:auto}
+/* the teal title bar: one line — page title on the left, the account
+   menu at the far right. Each page's longer description is kept as the
+   title's tooltip. */
 .topbar{
   background:var(--teal-deep);border-bottom:3px solid #E8B93B;
-  padding:16px 30px;display:flex;align-items:flex-end;gap:18px;flex-wrap:wrap;
+  padding:10px 30px;min-height:66px;display:flex;align-items:center;gap:18px;flex-wrap:wrap;
   position:sticky;top:0;z-index:40;
 }
-.topbar h2{font-family:var(--serif);font-size:25.3px;margin:0;font-weight:600;letter-spacing:0;color:#fff}
-.topbar .lede{color:#B9CADC;font-size:14.3px;margin:2px 0 0;max-width:70ch}
+.topbar h2{font-family:var(--serif);font-size:26.4px;line-height:1.2;margin:0;font-weight:700;letter-spacing:0;color:#fff}
 .topbar .spacer{flex:1}
 .wrap{padding:24px 30px;max-width:1500px}
 
@@ -260,6 +316,80 @@ button.cell:hover{outline:2px solid var(--blue);outline-offset:-2px}
 .teacherslots{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:20px}
 @media(max-width:900px){.two{grid-template-columns:1fr}}
 
+/* step-by-step results filter */
+.fsteps{display:grid;gap:12px;padding:16px 18px}
+.fstep{display:grid;grid-template-columns:190px minmax(0,1fr);align-items:center;gap:8px 16px}
+.fstep-head{display:flex;align-items:center;gap:10px}
+.fstep-head .n{
+  flex:none;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;
+  background:var(--teal);color:#fff;font-weight:700;font-size:13.2px;
+}
+.fstep-head .n.opt{background:none;border:1px dashed var(--rule-strong);color:var(--ink-soft)}
+.fstep-head label,.fstep-head .t{font-weight:600;font-size:15px;color:var(--ink)}
+.fstep-head .opt-note{font-weight:400;font-size:12.7px;color:var(--ink-faint);margin-left:4px}
+.fstep.done .fstep-head .n{background:var(--green)}
+.fstep.locked .fstep-head .n:not(.opt){background:#B7C2CF}
+.fstep.locked .fstep-head .t,.fstep.locked .fstep-head label{color:var(--ink-faint)}
+.fstep-opt{border-top:1px solid var(--rule);padding-top:12px;align-items:start}
+.fstep-opt .fstep-head{padding-top:8px}
+.ticks{display:flex;flex-wrap:wrap;gap:8px;align-items:center;min-width:0}
+.ticks select{min-width:240px;max-width:100%;padding:8px 10px;border:1px solid var(--rule-strong);border-radius:2px;background:#fff}
+.ticks select:focus{outline:2px solid var(--teal);outline-offset:0;border-color:var(--teal)}
+.tick{
+  display:inline-flex;align-items:center;gap:8px;padding:6px 12px 6px 10px;cursor:pointer;user-select:none;
+  border:1px solid var(--rule-strong);border-radius:3px;background:#fff;font-size:14.3px;line-height:1.3;
+}
+.tick input{width:15px;height:15px;margin:0;accent-color:var(--teal);cursor:inherit}
+.tick:hover{border-color:var(--teal)}
+.tick.on{border-color:var(--teal);background:var(--teal-wash);font-weight:600}
+.tick.off,.tick.off:hover{opacity:.5;cursor:not-allowed;border-color:var(--rule-strong)}
+.tick:focus-within{outline:2px solid var(--teal);outline-offset:1px}
+.tick-all{background:none;border:0;padding:4px 6px;color:var(--blue);text-decoration:underline;cursor:pointer;font-size:13.2px}
+.tick-all:focus-visible{outline:2px solid var(--teal)}
+.fstep-opt .msf{min-width:180px}
+@media(max-width:760px){.fstep{grid-template-columns:1fr}.fstep-opt .fstep-head{padding-top:0}.ticks select{min-width:0;width:100%}}
+
+/* step-by-step upload */
+.upwiz .panel-body{display:grid;gap:22px}
+.upsteps{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:18px 22px}
+@media(max-width:1180px){.upsteps{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:560px){.upsteps{grid-template-columns:1fr}}
+.upstep{min-width:0}
+.upstep-wide{border-top:1px solid var(--rule);padding-top:18px}
+.upstep-head{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.upstep-head .n{
+  flex:none;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;
+  background:var(--teal);color:#fff;font-weight:700;font-size:13.2px;
+}
+.upstep-head label,.upstep-head .t{font-weight:600;font-size:15.4px;color:var(--ink)}
+.upstep.done .upstep-head .n{background:var(--green)}
+.upstep.locked .upstep-head .n{background:#B7C2CF}
+.upstep.locked .upstep-head label,.upstep.locked .upstep-head .t{color:var(--ink-faint)}
+.upstep select{width:100%;padding:9px 10px;border:1px solid var(--rule-strong);border-radius:2px;background:#fff}
+.upstep select:focus{outline:2px solid var(--teal);outline-offset:0;border-color:var(--teal)}
+.upstep select:disabled{background:#F1F4F7;color:var(--ink-faint);border-color:var(--rule);cursor:not-allowed}
+.upstep .seg{display:inline-flex}
+.upstep .seg button.on{background:var(--teal)}
+.upstep .seg button:focus-visible{outline:2px solid var(--teal);outline-offset:-2px}
+.upstep .seg button:disabled{background:#F1F4F7;color:var(--ink-faint);cursor:not-allowed}
+.upcards{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:18px}
+.upcard{border:1px solid var(--rule);background:var(--surface);min-width:0}
+.upcard.complete{border-color:#A9CBB0}
+.upcard > h4{margin:0;padding:11px 14px;border-bottom:1px solid var(--rule);background:#F7F9FC;
+  display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:16.5px}
+.upcard .inner{padding:14px;display:grid;gap:16px}
+.upzone-label{display:flex;align-items:center;gap:8px;margin-bottom:7px;font-size:14.3px;font-weight:600;color:var(--ink-soft)}
+.upzone-label .l{width:20px;height:20px;border-radius:50%;border:1px solid var(--rule-strong);display:grid;place-items:center;font-size:11.6px;color:var(--ink-soft)}
+.drop.sm{padding:16px 14px}
+.drop.sm .big{font-size:16px;margin-bottom:3px}
+.drop.sm .small{font-size:12.7px}
+.drop:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
+.drop.locked,.drop.locked:hover{cursor:not-allowed;background:#F4F6F9;border-color:var(--rule);color:var(--ink-faint)}
+.upfiles{list-style:none;margin:8px 0 0;padding:0;font-size:13.8px}
+.upfiles li{display:flex;gap:9px;padding:6px 2px;border-top:1px solid #EEF1F5}
+.upfiles li > span{flex:none;width:12px;font-weight:700;text-align:center}
+.upfiles .ok{color:var(--green)} .upfiles .wr{color:var(--amber)} .upfiles .mute{color:var(--ink-faint)}
+
 .log{font-size:13.8px;margin-top:14px;max-height:230px;overflow:auto;border:1px solid var(--rule);background:#FBFCFE}
 .log div{padding:6px 11px;border-bottom:1px solid #EEF1F5;display:flex;gap:8px}
 .log div:last-child{border-bottom:0}
@@ -307,8 +437,16 @@ details.comp .inner{padding:14px}
   .tb-school{font-size:16.5px}
   .stats{grid-template-columns:repeat(2,minmax(0,1fr))}
   .stat:nth-child(2n){border-right:0}
-  .topbar{position:static}
+  .topbar{position:relative}
   .topbar h2{font-size:22px}
+  .tb-right{display:none}
+  /* on a phone the account menu shrinks to just its button, pinned to the
+     top right of the title bar; Refresh moves inside the menu */
+  .topbar.topbar{padding-right:64px;min-height:58px}
+  .usermenu{position:absolute;top:9px;right:12px;margin:0;padding-left:0;border-left:0}
+  .um-hi{display:none}
+  .um-panel{top:calc(100% + 8px);right:0;border-top:1px solid var(--rule);border-radius:4px}
+  .um-mobile{display:block}
   .controls{padding:12px}
   .ctl,.ctl select,.ctl input{min-width:0;width:100%}
   .ctl{flex:1 1 140px}
@@ -321,7 +459,7 @@ details.comp .inner{padding:14px}
   .wrap,.topbar{padding-left:16px;padding-right:16px}
 }
 @media print{
-  #rail,.topbar .spacer,.controls,.btn{display:none!important}
+  #rail,.topbar .spacer,.controls,.btn,.usermenu,.tb-status{display:none!important}
   body{background:#fff}
   .panel{break-inside:avoid;border-color:#999}
   #app.on{height:auto}
@@ -448,8 +586,40 @@ table.grid tr.lsenrow td:first-child{box-shadow:inset 3px 0 0 var(--red)}
 .msf-actions button{background:none;border:0;color:var(--blue);cursor:pointer;padding:0;font-size:13.2px;text-decoration:underline}
 .msf-actions button:hover{color:var(--blue-deep)}
 .msfbar{row-gap:16px}
-table.grid tbody tr.combined-row{background:var(--blue-wash);box-shadow:inset 3px 0 0 var(--blue)}
-table.grid tbody tr.combined-row td{font-weight:600}
+/* a subject split between teachers: the combined row, with each
+   teacher's own row behind the arrow */
+.grp-toggle{
+  display:inline-flex;align-items:center;gap:6px;padding:2px 6px 2px 2px;margin:-2px 0 0 -2px;
+  background:none;border:0;border-radius:3px;cursor:pointer;font:inherit;font-weight:600;color:inherit;text-align:left;
+}
+.grp-toggle:hover{background:var(--teal-wash)}
+.grp-toggle:focus-visible{outline:2px solid var(--teal);outline-offset:1px}
+.grp-toggle .caret{width:16px;height:16px;flex:none;color:var(--teal);transition:transform .15s}
+.grp-toggle[aria-expanded="true"] .caret{transform:rotate(180deg)}
+.grp-toggle .when-open{display:none}
+.grp-toggle[aria-expanded="true"] .when-open{display:inline}
+.grp-toggle[aria-expanded="true"] .when-closed{display:none}
+table.grid tbody tr.combined-row td{background:#F6FAFA}
+table.grid tbody tr.combined-row td:first-child{box-shadow:inset 3px 0 0 var(--teal)}
+table.grid tbody tr.breakdown-row td{background:#FBFCFD;color:var(--ink-soft);font-size:13.8px}
+table.grid tbody tr.breakdown-row td:first-child{padding-left:32px;box-shadow:inset 3px 0 0 var(--teal-wash)}
+.part-label{font-weight:600;color:var(--ink-soft)}
+/* Scores by Student: Male / Female header rows */
+table.grid.scores tbody tr.group-row th{
+  background:var(--teal-wash);color:var(--teal-deep);font-weight:700;text-transform:uppercase;letter-spacing:.05em;
+  font-size:12.7px;padding:7px 9px;text-align:left;border-color:var(--rule);
+}
+table.grid.scores tbody tr.group-row th .count{margin-left:8px;font-weight:600;color:var(--ink-soft);letter-spacing:0}
+table.grid.scores tbody tr.group-row:hover th{background:var(--teal-wash)}
+table.grid .col-sub{font-weight:400;font-size:11.6px;color:var(--ink-faint);margin-top:1px}
+.inline-link{background:none;border:0;padding:0;font:inherit;color:var(--blue);text-decoration:underline;cursor:pointer}
+.tgroup{margin-bottom:20px}
+.tgroup-head{margin-bottom:0;border-left:3px solid var(--teal)}
+.tgroup-bar{display:flex;align-items:center;flex-wrap:wrap;gap:8px 16px;padding:11px 18px;border-top:1px solid var(--rule);background:#FAFBFD}
+.tgroup-bar .grp-toggle{color:var(--teal);padding:4px 8px 4px 4px}
+.tgroup-body{margin:12px 0 0 18px;padding-left:16px;border-left:3px solid var(--teal-wash)}
+@media(max-width:860px){.tgroup-body{margin-left:6px;padding-left:10px}}
+@media print{.tgroup-body[hidden],tr.breakdown-row[hidden]{display:none!important}}
 table.grid tbody tr.needs-grade{background:var(--amber-wash)}
 </style>
 </head>
@@ -491,18 +661,22 @@ table.grid tbody tr.needs-grade{background:var(--amber-wash)}
       <div class="tb-school">Castor Alviar National High School</div>
     </div>
     <div class="tb-spacer"></div>
-    <div class="tb-kicker">Assessment Test Results</div>
+    <div class="tb-right">
+      <div class="tb-kicker">Assessment Test Results</div>
+      <div class="tb-status">
+        <span class="tb-updated" data-updated-text aria-live="polite"></span>
+        <button type="button" class="tb-refresh" data-um-refresh>Refresh</button>
+      </div>
+    </div>
   </div>
   <div id="appBody">
     <aside id="rail">
       <div class="rail-head">
-        <div class="mark">CANHS MEA</div>
-        <div class="school">Castor Alviar National High School</div>
+        <div class="mark">Assessment Test Results</div>
       </div>
       <nav id="nav"></nav>
       <div class="rail-foot">
         <div id="syncState" class="syncstate"><span class="dot idle"></span>Local file</div>
-        <div class="who"><span id="whoami">admin</span> &middot; <button id="signout">Sign out</button></div>
       </div>
     </aside>
     <div id="main"></div>
@@ -2254,6 +2428,7 @@ function scheduleSync(ms) {
 
 function setStatus(s, msg) {
   SYNC.status = s; SYNC.message = msg || '';
+  if (typeof paintUpdated === 'function') paintUpdated(s !== 'syncing');
   const el = document.getElementById('syncState');
   if (!el) return;
   const label = {
@@ -2426,8 +2601,30 @@ function loadFilter() {
       });
       FILTER.term = FILTER.term.map(Number);
       FILTER.grades = FILTER.grades.map(Number);
+      /* the school year is now a single choice (step 1) */
+      if (FILTER.sy.length !== 1) FILTER.sy = [];
     }
   } catch (e) {}
+}
+/* Results show only once steps 1-4 of the filter are done: a school year,
+   and at least one term, assessment and learning area. Grade level and
+   section stay optional. */
+function filterReady() {
+  return FILTER.sy.length === 1 && FILTER.term.length > 0 && FILTER.exam.length > 0 && FILTER.areas.length > 0;
+}
+/* More than one term or assessment on screen at once, so rows and panels
+   need to say which one they belong to. */
+function multiCycleView() {
+  return FILTER.sy.length !== 1 || FILTER.term.length !== 1 || FILTER.exam.length !== 1;
+}
+function cycleLabel(e) { return 'Term ' + e.term + ' ' + examTypeShort(e.examType); }
+function cycleTag(e) { return multiCycleView() ? ' \u00b7 ' + cycleLabel(e) : ''; }
+/* One class = one learning area and grade level in one assessment; a
+   class split between teachers holds one exam per teacher. */
+function classKey(e) { return [e.sy, e.term, e.examType, e.area, e.grade].join('|'); }
+function classTitle(exam) {
+  return exam.area + ' \u2014 Grade ' + exam.grade + cycleTag(exam) +
+    (teacherCountForExam(exam) > 1 || (exam.teacherSlot || 1) > 1 ? ' \u2014 Teacher ' + (exam.teacherSlot || 1) : '');
 }
 /* Whenever the filter narrows a field to exactly one value, mirror it into
    CTX so uploads keep defaulting sensibly. */
@@ -2504,11 +2701,15 @@ function filterSummary(short) {
 }
 /* What cycles actually hold results, for the coverage grid. */
 function cycleCounts() {
-  const m = {};
+  /* distinct learning areas per cycle — a subject split between teachers
+     holds several uploads but is still one learning area */
+  const sets = {};
   DB.exams.forEach(e => {
     const k = e.sy + '|' + e.term + '|' + e.examType;
-    m[k] = (m[k] || 0) + 1;
+    (sets[k] = sets[k] || new Set()).add(e.area);
   });
+  const m = {};
+  Object.keys(sets).forEach(k => { m[k] = sets[k].size; });
   return m;
 }
 
@@ -2595,6 +2796,50 @@ function sheetToRows(ws) {
 }
 
 const UPLOAD_LOG = [];
+
+/* Files an upload under the school year, term, assessment and learning
+   area chosen in the Upload page's steps, whatever the file's own name
+   or heading says. Returns what the file itself said, where that
+   disagrees, so the log can point out a possibly wrong file. */
+function applyPick(obj, pick) {
+  const differs = [];
+  const digits = v => String(v || '').replace(/\D/g, '');
+  if (obj.sy && digits(obj.sy) !== digits(pick.sy)) differs.push('school year ' + obj.sy);
+  if (obj.term && +obj.term !== +pick.term) differs.push('Term ' + obj.term);
+  if (obj.examType && obj.examType !== pick.examType) differs.push(examTypeLabel(obj.examType));
+  if (obj.area && LEARNING_AREAS.includes(obj.area) && obj.area !== pick.area) differs.push(obj.area);
+  obj.sy = pick.sy; obj.term = +pick.term; obj.examType = pick.examType; obj.area = pick.area;
+  return differs;
+}
+/* The "filed under …" log line. Without step choices (older callers),
+   the file's own label is used and any gap falls back to the cycle on
+   screen, exactly as before. */
+function fileUnder(obj, pick, fileName) {
+  if (pick) {
+    const differs = applyPick(obj, pick);
+    return { cls: differs.length ? 'wr' : 'ok', txt: fileName + ' \u2014 filed under ' + obj.sy + ', Term ' + obj.term + ', ' +
+      examTypeLabel(obj.examType) + ', ' + obj.area + (differs.length
+        ? '. The file itself mentions ' + differs.join(', ') + ' \u2014 check that it is the right file.' : '.') };
+  }
+  const guessed = [];
+  if (!obj.sy) { obj.sy = CTX.sy; guessed.push('school year'); }
+  if (!obj.term) { obj.term = CTX.term; guessed.push('term'); }
+  if (!obj.examType) { obj.examType = CTX.exam; guessed.push('exam'); }
+  return { cls: guessed.length ? 'wr' : 'ok', txt: fileName + ' \u2014 filed under ' +
+    obj.sy + ', Term ' + obj.term + ', ' + examTypeLabel(obj.examType) +
+    (guessed.length ? ' (the ' + guessed.join(' and ') + ' were not in the file, so the cycle selected on screen was used \u2014 change it below if that is wrong)' : '.') };
+}
+/* How many teachers a subject's grade level is split across this school
+   year, worked out from the teacher numbers its uploads carry. A grade
+   only Teacher 2 uploaded still counts as one teacher, so its reports
+   carry no "Teacher 2" label. */
+function syncTeacherCount(area, grade, sy) {
+  if (!area || !grade || !sy) return;
+  const slots = new Set(DB.exams.filter(e => e.area === area && e.grade === grade && e.sy === sy).map(e => e.teacherSlot || 1));
+  const n = Math.min(3, Math.max(1, slots.size));
+  if (teacherCountFor(area, grade, sy) !== n) setTeacherCount(area, grade, sy, n);
+}
+
 function logHTML() {
   if (!UPLOAD_LOG.length) {
     return '<div><span class="wr">!</span><span>Waiting for files. Every box accepts any of the three file types.</span></div>';
@@ -2603,7 +2848,7 @@ function logHTML() {
     (l.cls === 'ok' ? '✓' : l.cls === 'er' ? '✕' : '!') + '</span><span>' + esc(l.txt) + '</span>')
     .map(x => '<div>' + x + '</div>').join('');
 }
-async function ingestFile(file, logEl, teacherSlot) {
+async function ingestFile(file, logEl, teacherSlot, pick) {
   teacherSlot = (teacherSlot === 2 || teacherSlot === 3) ? teacherSlot : 1;
   const line = (cls, txt) => {
     UPLOAD_LOG.unshift({ cls, txt, at: Date.now() });
@@ -2630,10 +2875,7 @@ async function ingestFile(file, logEl, teacherSlot) {
   if (looksLikeManualResultsWorkbook(wb)) {
     try {
       const ex = parseManualWorkbook(wb, file.name);
-      const guessed = [];
-      if (!ex.sy) { ex.sy = CTX.sy; guessed.push('school year'); }
-      if (!ex.term) { ex.term = CTX.term; guessed.push('term'); }
-      if (!ex.examType) { ex.examType = CTX.exam; guessed.push('exam'); }
+      const filed = fileUnder(ex, pick, file.name);
       ex.id = nextId(); ex.uploaded = new Date().toISOString(); ex.teacherSlot = teacherSlot;
       const dupIdx = DB.exams.findIndex(e => e.area === ex.area && e.grade === ex.grade &&
         e.sy === ex.sy && +e.term === +ex.term && e.examType === ex.examType && (e.teacherSlot || 1) === teacherSlot);
@@ -2641,9 +2883,8 @@ async function ingestFile(file, logEl, teacherSlot) {
         (teacherSlot > 1 ? ' (Teacher ' + teacherSlot + ')' : '') + ' upload (' + ex.students.length + ' learners, manually entered).'); }
       else { DB.exams.push(ex); line('ok', file.name + ' — ' + ex.area + ' ' + ex.grade +
         (teacherSlot > 1 ? ' (Teacher ' + teacherSlot + ')' : '') + ', ' + ex.students.length + ' learners across ' + Object.keys(ex.sectionItemAgg).length + ' section(s), manually entered (no ZipGrade scan).'); }
-      line(guessed.length ? 'wr' : 'ok', file.name + ' — filed under ' +
-        ex.sy + ', Term ' + ex.term + ', ' + examTypeLabel(ex.examType) +
-        (guessed.length ? ' (the ' + guessed.join(' and ') + ' were not in the file, so the cycle selected on screen was used — change it below if that is wrong)' : '.'));
+      line(filed.cls, filed.txt);
+      if (pick) syncTeacherCount(ex.area, ex.grade, ex.sy);
       line('wr', file.name + ' — this test has no scanned answer sheets, so discrimination, point-biserial and remediation lists are not available for it; mean, MPS, item difficulty and competency mastery are.');
       return { added: 1, ids: [ex.id] };
     } catch (e) {
@@ -2654,16 +2895,14 @@ async function ingestFile(file, logEl, teacherSlot) {
 
   let added = 0;
   const ids = [];
+  const newTos = [];
   for (const sheetName of wb.SheetNames) {
     const rows = sheetToRows(wb.Sheets[sheetName]);
     if (!rows.length) continue;
     try {
       if (looksLikeZipGrade(rows)) {
         const ex = parseZipGrade(rows, file.name);
-        const guessed = [];
-        if (!ex.sy) { ex.sy = CTX.sy; guessed.push('school year'); }
-        if (!ex.term) { ex.term = CTX.term; guessed.push('term'); }
-        if (!ex.examType) { ex.examType = CTX.exam; guessed.push('exam'); }
+        const filed = fileUnder(ex, pick, file.name);
         ex.id = nextId(); ex.sheet = sheetName; ex.uploaded = new Date().toISOString(); ex.teacherSlot = teacherSlot;
         const dupIdx = DB.exams.findIndex(e => e.area === ex.area && e.grade === ex.grade &&
           e.sy === ex.sy && +e.term === +ex.term && e.examType === ex.examType && (e.teacherSlot || 1) === teacherSlot);
@@ -2672,9 +2911,8 @@ async function ingestFile(file, logEl, teacherSlot) {
         else { DB.exams.push(ex); line('ok', file.name + ' — ' + ex.area + ' ' + ex.grade +
           (teacherSlot > 1 ? ' (Teacher ' + teacherSlot + ')' : '') + ', ' + ex.students.length + ' answer sheets, ' + ex.totalItems + ' items.'); }
         ids.push(ex.id);
-        line(guessed.length ? 'wr' : 'ok', file.name + ' — filed under ' +
-          ex.sy + ', Term ' + ex.term + ', ' + examTypeLabel(ex.examType) +
-          (guessed.length ? ' (the ' + guessed.join(' and ') + ' were not in the file, so the cycle selected on screen was used — change it below if that is wrong)' : '.'));
+        line(filed.cls, filed.txt);
+        if (pick) syncTeacherCount(ex.area, ex.grade, ex.sy);
         if (ex.unmatched) line('wr', ex.area + ' ' + ex.grade + ' — ' + ex.unmatched + ' sheet' + (ex.unmatched > 1 ? 's are' : ' is') +
           ' missing a learner name or class in ZipGrade. They are counted in the statistics but grouped under “Unmatched sheets”.');
         added++;
@@ -2694,13 +2932,36 @@ async function ingestFile(file, logEl, teacherSlot) {
         }
       } else if (looksLikeTOS(rows)) {
         const t = parseTOS(rows, file.name, sheetName);
-        if (!t.sy) t.sy = CTX.sy;
-        if (!t.term) t.term = CTX.term;
-        if (!t.examType) t.examType = CTX.exam;
+        let differs = [];
+        if (pick) {
+          /* filed under the step choices and tied to the teacher it was
+             uploaded for, so it pairs with that teacher's own results */
+          differs = applyPick(t, pick);
+          t.teacherSlot = teacherSlot;
+          if (!t.grade) {
+            const gs = [...new Set(DB.exams.filter(e => inPick(e, pick) && (e.teacherSlot || 1) === teacherSlot).map(e => e.grade))];
+            if (gs.length === 1) {
+              t.grade = gs[0];
+              line('ok', file.name + ' [' + sheetName + '] — no grade level in the TOS itself, so Grade ' + t.grade +
+                ' from Teacher ' + teacherSlot + '\u2019s results was used.');
+            } else {
+              line('wr', file.name + ' [' + sheetName + '] — the grade level could not be read from this TOS. ' +
+                'Pick it for the right class in the \u201cTable of specifications\u201d column of \u201cExams on file\u201d below.');
+            }
+          }
+        } else {
+          if (!t.sy) t.sy = CTX.sy;
+          if (!t.term) t.term = CTX.term;
+          if (!t.examType) t.examType = CTX.exam;
+        }
         t.id = nextId(); t.uploaded = new Date().toISOString();
-        const dupIdx = DB.toses.findIndex(x => x.fileName === t.fileName && x.sheetName === t.sheetName);
+        const dupIdx = DB.toses.findIndex(x => x.fileName === t.fileName && x.sheetName === t.sheetName &&
+          (!pick || (inPick(x, pick) && (x.teacherSlot || 1) === teacherSlot)));
         if (dupIdx >= 0) { t.id = DB.toses[dupIdx].id; DB.toses[dupIdx] = t; line('wr', file.name + ' [' + sheetName + '] — replaced the earlier upload of this sheet.'); }
-        else { DB.toses.push(t); line('ok', file.name + ' [' + sheetName + '] — table of specifications for ' + t.subject + ', ' + t.entries.length + ' competencies covering ' + t.mappedItems.length + ' items.'); }
+        else { DB.toses.push(t); line('ok', file.name + ' [' + sheetName + '] — table of specifications for ' + t.subject + ', ' + t.entries.length + (t.entries.length === 1 ? ' competency' : ' competencies') + ' covering ' + t.mappedItems.length + ' items.'); }
+        if (differs.length) line('wr', file.name + ' [' + sheetName + '] — filed under ' + t.sy + ', Term ' + t.term + ', ' +
+          examTypeLabel(t.examType) + ', ' + t.area + ', although the TOS itself mentions ' + differs.join(', ') + ' \u2014 check that it is the right file.');
+        if (pick) newTos.push(t);
         ids.push(t.id);
         added++;
       }
@@ -2708,14 +2969,33 @@ async function ingestFile(file, logEl, teacherSlot) {
       line('er', file.name + ' [' + sheetName + '] — ' + e.message);
     }
   }
+  /* A new TOS from the steps replaces the one this teacher had before for
+     the same class and assessment, so the table just uploaded is the one
+     used. (Several sheets of the one workbook — an original beside a
+     revised copy — are all kept; the best-fitting sheet is used.) */
+  if (pick && newTos.length) {
+    const grades = new Set(newTos.map(t => t.grade).filter(Boolean));
+    const stale = DB.toses.filter(x => !newTos.includes(x) && x.fileName !== file.name && inPick(x, pick) &&
+      (x.teacherSlot || 1) === teacherSlot && grades.has(x.grade));
+    if (stale.length) {
+      const gone = new Set(stale.map(x => x.id));
+      DB.toses = DB.toses.filter(x => !gone.has(x.id));
+      let relinked = false;
+      Object.keys(DB.links).forEach(k => { if (gone.has(DB.links[k])) { delete DB.links[k]; relinked = true; } });
+      if (relinked) save('links');
+      dropRemote([...gone]);
+      line('wr', file.name + ' — replaced Teacher ' + teacherSlot + '\u2019s earlier table of specifications (' +
+        [...new Set(stale.map(x => x.fileName))].join(', ') + ').');
+    }
+  }
   if (!added) line('wr', file.name + ' — no ZipGrade export or table of specifications recognised in this file.');
   return { added, ids };
 }
 
-async function ingestFiles(files, logEl, teacherSlot) {
+async function ingestFiles(files, logEl, teacherSlot, pick) {
   let total = 0;
   const touched = [];
-  for (const f of files) { const r = await ingestFile(f, logEl, teacherSlot); total += r.added; touched.push(...r.ids); }
+  for (const f of files) { const r = await ingestFile(f, logEl, teacherSlot, pick); total += r.added; touched.push(...r.ids); }
   if (total) { save(touched); refreshNavCounts(); render(); }
   return total;
 }
@@ -2900,6 +3180,13 @@ function tosFor(exam) {
   const sameTerm = pool.filter(t => +t.term === +exam.term);
   pool = exact.length ? exact : (sameTerm.length ? sameTerm : pool);
   if (!pool.length) return null;
+  /* A subject split between teachers has different items per teacher, so
+     each teacher's results use that teacher's own table. Tables uploaded
+     before tables carried a teacher number can still be shared, as before. */
+  const slot = exam.teacherSlot || 1;
+  const mine = pool.filter(t => (t.teacherSlot || 1) === slot);
+  if (mine.length) pool = mine;
+  else if (pool.every(t => t.teacherSlot !== undefined)) return null;
   /* One workbook can hold several usable sheets — a revised copy beside the
      original. Prefer the one that best covers this answer sheet. */
   const score = t => {
@@ -3196,16 +3483,138 @@ function renderInner(main) {
 }
 
 function head(title, lede, right) {
-  /* The cycle on screen is shown on every page, so a report is never read
-     without knowing which term and assessment it belongs to. */
-  const chip = DB.exams.length
-    ? '<button class="ctxchip" data-go="dashboard" title="Change the assessment on the dashboard">' +
-      '<span class="k">Showing</span><span class="v">' + esc(ctxLabel()) + '</span></button>'
-    : '';
-  return '<div class="topbar"><div><h2>' + esc(title) + '</h2>' +
-    (lede ? '<p class="lede">' + esc(lede) + '</p>' : '') + '</div>' +
-    '<div class="spacer"></div>' + chip + (right || '') + '</div>';
+  /* No separate "Showing …" readout: the filter boxes under the title
+     already say what the page is narrowed to. */
+  return '<div class="topbar"><h2' + (lede ? ' title="' + esc(lede) + '"' : '') + '>' + esc(title) + '</h2>' +
+    (right || '') + '<div class="spacer"></div>' + userMenuHTML() + '</div>';
 }
+
+/* ============================================================
+   Account menu (right end of the title bar) and the "Updated …
+   / Refresh" line under the banner title
+   ============================================================ */
+let UM_OPEN = false;          // account menu open — survives a re-render
+let LOCAL_USER = '';          // username typed at sign-in when working offline
+let LOCAL_UPDATED = 0;        // offline: when the data on screen was read from this computer
+let REFRESH_ASKED = false;    // the person pressed Refresh and is waiting on it
+
+const ICON_MENU = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><line x1="4" y1="6.5" x2="20" y2="6.5"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17.5" x2="20" y2="17.5"/></svg>';
+const ICON_LOGOUT = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>';
+const ICON_REFRESH = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></svg>';
+
+function whoName() {
+  if (SYNC.mode === 'cloud' && SYNC.user) return SYNC.user.name || SYNC.user.username || 'there';
+  return LOCAL_USER || 'admin';
+}
+function whoLine() {
+  if (SYNC.mode === 'cloud' && SYNC.user) {
+    const line = SYNC.user.email || SYNC.user.username || '';
+    return line === whoName() ? '' : line;
+  }
+  return 'Working on this computer only';
+}
+function roleBlurb() {
+  const r = SYNC.mode === 'cloud' && SYNC.user ? SYNC.user.role : 'admin';
+  if (r === 'admin') return 'Full access, including Setup';
+  if (r === 'head') return 'Department head — can upload and export';
+  return 'Teacher — can view, download and print';
+}
+
+function fmtClock(t) {
+  const d = new Date(t), now = new Date();
+  const time = d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+  if (d.toDateString() === now.toDateString()) return time;
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) + ', ' + time;
+}
+/* What the "Updated" line says. Background syncs every 45 seconds keep the
+   last time on display rather than flashing "Updating…" each time. */
+function updatedInfo() {
+  if (SYNC.mode !== 'cloud') {
+    return { text: LOCAL_UPDATED ? 'Updated ' + fmtClock(LOCAL_UPDATED) : '', bad: false, title: 'Results saved on this computer' };
+  }
+  const last = SYNC.lastSync ? 'Last updated ' + fmtClock(SYNC.lastSync) : 'Not updated yet';
+  if (SYNC.status === 'syncing' && (REFRESH_ASKED || !SYNC.lastSync)) return { text: 'Updating…', bad: false, title: last };
+  if (SYNC.status === 'error') return { text: 'Update failed', bad: true, title: (SYNC.message ? SYNC.message + ' · ' : '') + last };
+  if (SYNC.status === 'offline') return { text: 'Offline', bad: true, title: last };
+  return { text: SYNC.lastSync ? 'Updated ' + fmtClock(SYNC.lastSync) : 'Not updated yet', bad: false, title: 'Results from the school server' };
+}
+function refreshBusy() { return SYNC.mode === 'cloud' && SYNC.status === 'syncing' && (REFRESH_ASKED || !SYNC.lastSync); }
+
+function paintUpdated(settled) {
+  if (settled) REFRESH_ASKED = false;   // a sync just finished, failed or went offline
+  const info = updatedInfo(), busy = refreshBusy();
+  document.querySelectorAll('[data-updated-text]').forEach(el => {
+    el.textContent = info.text;
+    el.title = info.title || '';
+    el.classList.toggle('bad', info.bad);
+  });
+  document.querySelectorAll('[data-um-refresh]').forEach(b => { b.disabled = busy; });
+}
+
+function userMenuHTML() {
+  const name = whoName(), line = whoLine(), info = updatedInfo();
+  return '<div class="usermenu' + (UM_OPEN ? ' open' : '') + '">' +
+    '<span class="um-hi" title="' + esc(name) + '">Hi, ' + esc(name) + '!</span>' +
+    '<button type="button" class="um-toggle" data-um-toggle aria-haspopup="true" aria-controls="umPanel" ' +
+      'aria-expanded="' + UM_OPEN + '" aria-label="Account menu" title="Account">' + ICON_MENU + '</button>' +
+    '<div class="um-panel" id="umPanel"' + (UM_OPEN ? '' : ' hidden') + '>' +
+      '<div class="um-id"><div class="um-name">' + esc(name) + '</div>' +
+        (line ? '<div class="um-mail">' + esc(line) + '</div>' : '') +
+        '<div class="um-role">' + esc(roleBlurb()) + '</div></div>' +
+      '<div class="um-group um-mobile"><button type="button" class="um-item" data-um-refresh' + (refreshBusy() ? ' disabled' : '') + '>' +
+        ICON_REFRESH + '<span>Refresh<span class="um-sub' + (info.bad ? ' bad' : '') + '" data-updated-text>' +
+        esc(info.text) + '</span></span></button></div>' +
+      '<div class="um-group"><button type="button" class="um-item" data-um-logout>' + ICON_LOGOUT + '<span>Log out</span></button></div>' +
+    '</div></div>';
+}
+
+function setUserMenu(open, focusButton) {
+  UM_OPEN = open;
+  document.querySelectorAll('.usermenu').forEach(m => {
+    m.classList.toggle('open', open);
+    const p = m.querySelector('.um-panel'); if (p) p.hidden = !open;
+    const b = m.querySelector('[data-um-toggle]');
+    if (b) { b.setAttribute('aria-expanded', String(open)); if (focusButton) b.focus(); }
+  });
+}
+
+function logOut() {
+  try {
+    sessionStorage.removeItem('canhs-session');
+    sessionStorage.removeItem('canhs-token');
+    sessionStorage.removeItem('canhs-user');
+    sessionStorage.removeItem('canhs-local-user');
+  } catch (e) {}
+  location.reload();
+}
+
+/* Refresh: connected copies pull the latest from the school server;
+   an offline copy re-reads what is saved on this computer (picking up
+   changes made in another tab) and redraws the screen. */
+function refreshData() {
+  if (SYNC.mode === 'cloud') {
+    REFRESH_ASKED = true;
+    paintUpdated();
+    if (SYNC.busy) return;          // a background sync is already running; its result will show
+    syncNow(false);
+    return;
+  }
+  if (storageOK) load();
+  LOCAL_UPDATED = Date.now();
+  render();
+  paintUpdated();
+  toast('Showing the latest results saved on this computer');
+}
+
+document.addEventListener('click', ev => {
+  if (ev.target.closest('[data-um-toggle]')) { setUserMenu(!UM_OPEN); return; }
+  if (ev.target.closest('[data-um-logout]')) { logOut(); return; }
+  if (ev.target.closest('[data-um-refresh]')) { setUserMenu(false); refreshData(); return; }
+  if (UM_OPEN && !ev.target.closest('.um-panel')) setUserMenu(false);
+});
+document.addEventListener('keydown', ev => {
+  if (ev.key === 'Escape' && UM_OPEN) setUserMenu(false, true);
+});
 
 /* The heading used on exports and printed reports. */
 function reportTitle() {
@@ -3288,43 +3697,111 @@ function computeWeakestFlags(exams, cfg) {
   flags.sort((a, b) => a.c.mastery - b.c.mastery);
   return flags;
 }
-/* Flat rows for PDF/Excel export of the weakest-competencies list. */
-function weakestFlagsRows(flags) {
-  return flags.map(f => [f.e.area, f.e.grade, f.c.topic, f.c.competency, f.c.itemCount,
-    round(f.c.mastery, 1), f.e.source === 'manual' ? 'n/a' : (f.c.needingCount + ' of ' + f.c.n)]);
+/* The weakest-competencies list as shown: a competency that two or more
+   teachers of one class both tested (same wording in their TOS) shows as
+   one row at the average of their mastery, with each teacher's own row
+   behind the arrow. A competency only one teacher's TOS lists stays its
+   own row, marked with that teacher. */
+function computeWeakestRows(exams, cfg) {
+  const flags = computeWeakestFlags(exams, cfg);
+  const perClass = {};
+  exams.forEach(e => { const k = classKey(e); perClass[k] = (perClass[k] || 0) + 1; });
+  const words = t => String(t || '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+  const order = [], groups = new Map();
+  flags.forEach(f => {
+    const ck = classKey(f.e);
+    if (perClass[ck] < 2) { order.push({ kind: 'single', f, mastery: f.c.mastery }); return; }
+    const k = 'll:' + ck + '|' + words(f.c.competency || f.c.topic);
+    if (!groups.has(k)) { const g = { kind: 'group', key: k, parts: [] }; groups.set(k, g); order.push(g); }
+    groups.get(k).parts.push(f);
+  });
+  const rows = order.map(r => {
+    if (r.kind === 'single') return r;
+    if (r.parts.length === 1) return { kind: 'single', f: r.parts[0], mastery: r.parts[0].c.mastery, teacherTag: true };
+    const parts = r.parts.slice().sort((a, b) => (a.e.teacherSlot || 1) - (b.e.teacherSlot || 1));
+    const manual = parts.every(f => f.e.source === 'manual');
+    return {
+      kind: 'combined', key: r.key, parts, f: parts[0],
+      mastery: round(parts.reduce((a, f) => a + f.c.mastery, 0) / parts.length, 1),
+      items: parts.map(f => f.c.itemCount).join(' + '),
+      needing: parts.filter(f => f.e.source !== 'manual').reduce((a, f) => a + f.c.needingCount, 0),
+      n: parts.filter(f => f.e.source !== 'manual').reduce((a, f) => a + f.c.n, 0),
+      manual
+    };
+  });
+  rows.sort((a, b) => a.mastery - b.mastery);
+  return rows;
+}
+/* Flat rows for PDF/Excel export of the weakest-competencies list — what
+   is on screen: combined rows, and teachers' own rows where opened. */
+function weakestRowsExport(rows) {
+  const multi = multiCycleView();
+  const out = [];
+  const tag = e => multi ? ' · ' + cycleLabel(e) : '';
+  const one = (f, label) => [label, f.e.grade, f.c.topic, f.c.competency, f.c.itemCount,
+    round(f.c.mastery, 1), f.e.source === 'manual' ? 'n/a' : (f.c.needingCount + ' of ' + f.c.n)];
+  rows.forEach(r => {
+    if (r.kind === 'single') {
+      out.push(one(r.f, r.f.e.area + (r.teacherTag ? ' — Teacher ' + (r.f.e.teacherSlot || 1) : '') + tag(r.f.e)));
+      return;
+    }
+    out.push([r.f.e.area + ' (' + r.parts.length + ' teachers, average)' + tag(r.f.e), r.f.e.grade, r.f.c.topic, r.f.c.competency,
+      r.items, r.mastery, r.manual ? 'n/a' : r.needing + ' of ' + r.n]);
+    if (OPEN_GROUPS.has(r.key)) r.parts.forEach(f => out.push(one(f, f.e.area + ' — Teacher ' + (f.e.teacherSlot || 1) + tag(f.e))));
+  });
+  return out;
 }
 function weakestCompetenciesPanel(exams, cfg, limit) {
-  const flags = computeWeakestFlags(exams, cfg);
-  const shown = limit ? flags.slice(0, limit) : flags;
+  const rows = computeWeakestRows(exams, cfg);
+  const shown = limit ? rows.slice(0, limit) : rows;
+  const multi = multiCycleView();
+  const pill = m => '<span class="pill ' + (m <= cfg.leastLearned ? 'bad' : m >= cfg.mastered ? 'good' : 'warn') + '">' + m.toFixed(1) + '%</span>' +
+    (m <= cfg.leastLearned ? '<div class="comp-sub">least learned</div>' : '');
+  const compCell = c => '<strong>' + esc(c.topic) + '</strong><div class="comp-sub">' + esc(c.competency) +
+    (objectivesMeasuredBy(c).length ? ' <span class="objparen">(' + esc(objectivesMeasuredBy(c).join('; ')) + ')</span>' : '') + '</div>';
+  const remBtn = f => f.e.source === 'manual' ? '<span class="pill mute">manually entered</span>'
+    : '<button class="btn sm ghost" data-rem="' + f.e.id + '|' + f.c.index + '">Remediation list</button>';
 
   let h = '<div class="panel"><h3>Weakest competencies across the school<span class="sub">' +
     'least learned means ' + cfg.leastLearned + '% or fewer of all test takers answered correctly</span></h3>';
-  if (!flags.length) {
+  if (!rows.length) {
     h += '<div class="panel-body"><p style="margin:0;color:var(--ink-soft)">' +
       'Upload a table of specifications for each exam to see competency-level results.</p></div>';
   } else {
     h += '<div class="panel-body flush"><div class="tbl-scroll"><table class="grid tight"><thead><tr>' +
       '<th>Learning area</th><th>Gr.</th><th>Topic and competency</th><th class="num">Items</th>' +
       '<th class="num">Mastery</th><th class="num">For remediation</th><th></th></tr></thead><tbody>';
-    shown.forEach(f => {
-      h += '<tr><td>' + esc(f.e.area) + '</td><td class="num">' + f.e.grade + '</td>' +
-        '<td><strong>' + esc(f.c.topic) + '</strong>' +
-          '<div class="comp-sub">' + esc(f.c.competency) +
-          (objectivesMeasuredBy(f.c).length
-            ? ' <span class="objparen">(' + esc(objectivesMeasuredBy(f.c).join('; ')) + ')</span>' : '') +
-          '</div></td>' +
-        '<td class="num">' + f.c.itemCount + '</td>' +
-        '<td class="num"><span class="pill ' + (f.c.mastery <= cfg.leastLearned ? 'bad' : f.c.mastery >= cfg.mastered ? 'good' : 'warn') + '">' +
-        f.c.mastery.toFixed(1) + '%</span>' +
-        (f.c.mastery <= cfg.leastLearned ? '<div class="comp-sub">least learned</div>' : '') + '</td>' +
-        '<td class="num">' + (f.e.source === 'manual' ? '—' : f.c.needingCount + ' of ' + f.c.n) + '</td>' +
-        '<td>' + (f.e.source === 'manual' ? '<span class="pill mute">manually entered</span>'
-          : '<button class="btn sm ghost" data-rem="' + f.e.id + '|' + f.c.index + '">Remediation list</button>') + '</td></tr>';
+    shown.forEach(r => {
+      const f = r.f, cyc = multi ? '<div class="comp-sub">' + esc(cycleLabel(f.e)) + '</div>' : '';
+      if (r.kind === 'single') {
+        h += '<tr><td>' + esc(f.e.area) + (r.teacherTag ? '<div class="comp-sub">Teacher ' + (f.e.teacherSlot || 1) + '</div>' : '') + cyc + '</td>' +
+          '<td class="num">' + f.e.grade + '</td><td>' + compCell(f.c) + '</td>' +
+          '<td class="num">' + f.c.itemCount + '</td><td class="num">' + pill(f.c.mastery) + '</td>' +
+          '<td class="num">' + (f.e.source === 'manual' ? '—' : f.c.needingCount + ' of ' + f.c.n) + '</td>' +
+          '<td>' + remBtn(f) + '</td></tr>';
+        return;
+      }
+      const open = OPEN_GROUPS.has(r.key);
+      h += '<tr class="combined-row"><td><button type="button" class="grp-toggle" data-grp="' + esc(r.key) + '" aria-expanded="' + open + '" ' +
+          'title="Show or hide each teacher’s figure">' + CARET + '<span>' + esc(f.e.area) + '</span></button>' +
+          '<div class="comp-sub">' + r.parts.length + ' teachers · average</div>' + cyc + '</td>' +
+        '<td class="num">' + f.e.grade + '</td><td>' + compCell(f.c) + '</td>' +
+        '<td class="num">' + esc(r.items) + '</td><td class="num">' + pill(r.mastery) + '</td>' +
+        '<td class="num">' + (r.manual ? '—' : r.needing + ' of ' + r.n) + '</td>' +
+        '<td>' + remBtn(r.parts.find(x => x.e.source !== 'manual') || f) + '</td></tr>';
+      r.parts.forEach(pf => {
+        h += '<tr class="breakdown-row" data-grp-of="' + esc(r.key) + '"' + (open ? '' : ' hidden') + '>' +
+          '<td><span class="part-label">Teacher ' + (pf.e.teacherSlot || 1) + '</span></td><td class="num">' + pf.e.grade + '</td>' +
+          '<td><div class="comp-sub" style="margin:0">' + esc(pf.e.fileName || '') + '</div></td>' +
+          '<td class="num">' + pf.c.itemCount + '</td><td class="num">' + pill(pf.c.mastery) + '</td>' +
+          '<td class="num">' + (pf.e.source === 'manual' ? '—' : pf.c.needingCount + ' of ' + pf.c.n) + '</td>' +
+          '<td>' + remBtn(pf) + '</td></tr>';
+      });
     });
     h += '</tbody></table></div>';
-    if (limit && flags.length > limit) {
+    if (limit && rows.length > limit) {
       h += '<div class="panel-body" style="padding-top:0"><button class="btn sm ghost" data-go="leastLearned">See all ' +
-        flags.length + ' flagged competencies</button></div>';
+        rows.length + ' competencies</button></div>';
     }
     h += '</div>';
   }
@@ -3338,6 +3815,7 @@ function viewDashboard() {
     'Mean percentage score by learning area and grade level for the assessment selected below.');
   h += '<div class="wrap">' + contextBar();
   if (!DB.exams.length) return h + noData('No ZipGrade results have been uploaded.') + '</div>';
+  if (!filterReady()) return h + filterPrompt() + coveragePanel() + '</div>';
 
   const exams = EXAMS();
   if (!exams.length) {
@@ -3379,14 +3857,22 @@ function viewDashboard() {
     h += '<tr><th>' + esc(area) + '</th>';
     let sc = 0, sp = 0;
     grades.forEach(g => {
-      const ex = exams.find(e => e.area === area && e.grade === g);
-      if (!ex) { h += '<td><span class="cell empty">no data</span></td>'; return; }
-      const act = studentsOf(ex);
-      const st = summarise(act, ex.totalItems, cfg);
-      sc += act.reduce((a, s) => a + s.score, 0); sp += act.length * ex.totalItems;
-      h += '<td class="' + ramp(st.mps) + '"><button class="cell" data-drill="' + ex.id + '">' +
-        '<span class="mps">' + st.mps.toFixed(0) + '</span>' +
-        '<span class="meta">' + st.n + ' takers · SD ' + st.sd.toFixed(0) + '</span></button></td>';
+      const cell = exams.filter(e => e.area === area && e.grade === g);
+      if (!cell.length) { h += '<td><span class="cell empty">no data</span></td>'; return; }
+      cell.forEach(e => { const act = studentsOf(e); sc += act.reduce((a, s) => a + s.score, 0); sp += act.length * e.totalItems; });
+      /* A class split between teachers counts once, at the average of its
+         teachers' figures; with several assessments ticked, the cell is
+         the average across them. */
+      const classes = groupByClass(cell).map(gr => teacherGroupSummary(gr.exams, cfg));
+      const mps = round(classes.reduce((a, x) => a + x.mps, 0) / classes.length);
+      const sd = round(classes.reduce((a, x) => a + x.sd, 0) / classes.length);
+      const takers = classes.reduce((a, x) => a + x.n, 0);
+      const teachers = cell.length > classes.length && classes.length === 1 ? cell.length : 0;
+      const meta = classes.length > 1 ? 'average of ' + classes.length + ' assessments'
+        : (teachers ? teachers + ' teachers · ' : '') + takers + ' takers · SD ' + sd.toFixed(0);
+      h += '<td class="' + ramp(mps) + '"><button class="cell" data-drill="' + cell[0].id + '">' +
+        '<span class="mps">' + mps.toFixed(0) + '</span>' +
+        '<span class="meta">' + meta + '</span></button></td>';
     });
     const rowMPS = sp ? round(sc / sp * 100) : null;
     h += '<td class="' + ramp(rowMPS) + '"><span class="cell">' +
@@ -3452,78 +3938,159 @@ function rampLegend() {
 }
 
 /* ---------------- Upload ---------------- */
-/* Panel for subjects where a grade level is split across 2 or 3
-   teachers, each testing with their own items and table of
-   specifications. Picking an area/grade/year here just sets how many
-   teacher slots exist for that combination (teacherCountFor); the
-   actual per-teacher drop zones only appear once that count is above
-   1, so a school with no split subjects sees nothing extra. */
-function multiTeacherPanel() {
-  if (!MT_UI.sy) MT_UI.sy = CTX.sy;
-  if (!MT_UI.area) MT_UI.area = LEARNING_AREAS[0];
-  if (!MT_UI.grade) MT_UI.grade = GRADES[0];
-  const count = teacherCountFor(MT_UI.area, MT_UI.grade, MT_UI.sy);
+/* Uploading goes one step at a time: school year, term, assessment and
+   learning area, then how many teachers share the subject, then each
+   teacher's ZipGrade results followed by that teacher's table of
+   specifications. Every file dropped here is filed under the choices in
+   the steps, whatever its own name says, and carries the number of the
+   teacher it was uploaded for, so each teacher's results are paired
+   with that teacher's own TOS. Grade level is read from the files. */
+const UP_UI = { sy: '', term: '', exam: '', area: '', teachers: 0 };
 
-  let h = '<div class="panel"><h3>Subjects with more than one teacher</h3><div class="panel-body">' +
-    '<p class="sub" style="margin:0 0 16px;max-width:820px">Most subjects have one teacher per grade level and need ' +
-    'nothing here. Where a grade level\u2019s sections are split across 2 or 3 teachers, each testing with their own items ' +
-    'and table of specifications, choose the subject below and tick how many. Mean/MPS/SD will then show each ' +
-    'teacher\u2019s own row plus one combined subject row (MPS, mean and SD averaged across them); item analysis keeps ' +
-    'every teacher\u2019s items on a separate panel, since the items themselves differ.</p>' +
-    '<div class="controls">' +
-    '<div class="ctl"><label for="mtArea">Learning area</label><select id="mtArea">' +
-    LEARNING_AREAS.map(a => '<option value="' + esc(a) + '"' + (MT_UI.area === a ? ' selected' : '') + '>' + esc(a) + '</option>').join('') +
-    '</select></div>' +
-    '<div class="ctl"><label for="mtGrade">Grade level</label><select id="mtGrade">' +
-    GRADES.map(g => '<option value="' + g + '"' + (+MT_UI.grade === g ? ' selected' : '') + '>Grade ' + g + '</option>').join('') +
-    '</select></div>' +
-    '<div class="ctl"><label for="mtSy">School year</label><select id="mtSy">' +
-    SCHOOL_YEARS.map(y => '<option value="' + y + '"' + (MT_UI.sy === y ? ' selected' : '') + '>' + y + '</option>').join('') +
-    '</select></div>' +
-    '<div class="ctl"><label>Teachers</label><div class="seg" id="mtCount">' +
-    [1, 2, 3].map(n => '<button type="button" data-n="' + n + '" class="' + (count === n ? 'on' : '') + '">' +
-      n + (n === 1 ? ' teacher' : ' teachers') + '</button>').join('') +
-    '</div></div></div>';
-
-  if (count > 1) {
-    h += '<div class="teacherslots" style="margin-top:16px">';
-    for (let slot = 1; slot <= count; slot++) {
-      h += '<div class="panel" style="margin-bottom:0"><h3 style="font-size:15.4px">Teacher ' + slot + '</h3><div class="panel-body">' +
-        '<div class="drop" id="dropExamT' + slot + '" tabindex="0" role="button">' +
-        '<div class="big">ZipGrade export</div>' +
-        '<div class="small">' + esc(MT_UI.area) + ', Grade ' + MT_UI.grade + ' \u2014 Teacher ' + slot + '\u2019s results.</div>' +
-        '</div><input type="file" id="fileExamT' + slot + '" multiple accept=".xlsx,.xls,.csv" class="sr">' +
-        '<div class="drop" id="dropTOST' + slot + '" tabindex="0" role="button" style="margin-top:10px">' +
-        '<div class="big">Table of specifications</div>' +
-        '<div class="small">Teacher ' + slot + '\u2019s own TOS.</div>' +
-        '</div><input type="file" id="fileTOST' + slot + '" multiple accept=".xlsx,.xls,.csv" class="sr">' +
-        '</div></div>';
-    }
-    h += '</div>';
+function upPick() {
+  return (UP_UI.sy && UP_UI.term && UP_UI.exam && UP_UI.area)
+    ? { sy: UP_UI.sy, term: +UP_UI.term, examType: UP_UI.exam, area: UP_UI.area } : null;
+}
+function inPick(x, p) {
+  return !!p && x.sy === p.sy && +x.term === +p.term && x.examType === p.examType && x.area === p.area;
+}
+/* The highest teacher number already holding files for these choices,
+   so returning to a subject shows its teachers as they were left. */
+function upTeachersOnFile(p) {
+  let m = 0;
+  DB.exams.forEach(e => { if (inPick(e, p)) m = Math.max(m, e.teacherSlot || 1); });
+  DB.toses.forEach(t => { if (inPick(t, p)) m = Math.max(m, t.teacherSlot || 1); });
+  return m;
+}
+/* A department head is offered only their own learning areas. */
+function upAreaOptions() {
+  const u = SYNC.mode === 'cloud' ? SYNC.user : null;
+  if (u && u.role === 'head' && u.areas && u.areas.length) {
+    const mine = LEARNING_AREAS.filter(a => u.areas.includes(a));
+    if (mine.length) return mine;
   }
+  return LEARNING_AREAS;
+}
+function upStepSelect(n, id, label, value, opts, enabled, placeholder) {
+  const done = enabled && value !== '' && value !== 0;
+  return '<div class="upstep' + (done ? ' done' : '') + (enabled ? '' : ' locked') + '">' +
+    '<div class="upstep-head"><span class="n" aria-hidden="true">' + n + '</span>' +
+    '<label for="' + id + '"><span class="sr">Step ' + n + ': </span>' + esc(label) + '</label></div>' +
+    '<select id="' + id + '"' + (enabled ? '' : ' disabled') + '>' +
+    '<option value="">' + esc(placeholder) + '</option>' +
+    opts.map(o => '<option value="' + esc(o.v) + '"' + (String(o.v) === String(value) ? ' selected' : '') + '>' +
+      esc(o.t) + '</option>').join('') +
+    '</select></div>';
+}
+function upFileLine(kind, main, sub) {
+  const mark = { ok: '✓', wr: '!', mute: '·' }[kind];
+  return '<li><span class="' + kind + '" aria-hidden="true">' + mark + '</span>' +
+    '<div>' + main + (sub ? '<div class="comp-sub">' + esc(sub) + '</div>' : '') + '</div></li>';
+}
+function upTeacherCard(k, p) {
+  const exs = DB.exams.filter(e => inPick(e, p) && (e.teacherSlot || 1) === k).sort((a, b) => a.grade - b.grade);
+  const tss = DB.toses.filter(t => inPick(t, p) && (t.teacherSlot || 1) === k)
+    .sort((a, b) => (a.grade || 99) - (b.grade || 99));
+  const paired = e => { const t = tosFor(e); return t && tss.includes(t) ? t : null; };
+  const complete = exs.length > 0 && exs.every(paired);
+  const pill = complete ? '<span class="pill good">Done</span>'
+    : exs.length ? '<span class="pill warn">TOS next</span>'
+    : '<span class="pill mute">Waiting for files</span>';
+
+  let h = '<div class="upcard' + (complete ? ' complete' : '') + '"><h4>Teacher ' + k + pill + '</h4><div class="inner">';
+
+  /* a. ZipGrade results */
+  h += '<div><div class="upzone-label"><span class="l" aria-hidden="true">a</span>ZipGrade results</div>' +
+    '<div class="drop sm" tabindex="0" role="button" data-up-drop="upFileE' + k + '" data-slot="' + k + '" ' +
+      'aria-label="Upload Teacher ' + k + '’s ZipGrade results">' +
+    '<div class="big">' + (exs.length ? 'Add or replace results' : 'Drop or choose the ZipGrade export') + '</div>' +
+    '<div class="small">Quiz-format .xlsx or .csv, one file per grade level. A manual-results workbook works here too.</div></div>' +
+    '<input type="file" id="upFileE' + k + '" multiple accept=".xlsx,.xls,.csv" class="sr" tabindex="-1">';
+  if (exs.length) {
+    h += '<ul class="upfiles">' + exs.map(e => upFileLine('ok',
+      '<strong>Grade ' + esc(e.grade) + '</strong> — ' + e.students.length +
+      (e.source === 'manual' ? ' learners (manually entered)' : ' answer sheets') + ', ' + e.totalItems + ' items',
+      e.fileName)).join('') + '</ul>';
+  }
+  h += '</div>';
+
+  /* b. table of specifications — opens once this teacher's results are in */
+  h += '<div><div class="upzone-label"><span class="l" aria-hidden="true">b</span>Table of specifications</div>';
+  if (!exs.length) {
+    h += '<div class="drop sm locked" aria-disabled="true"><div class="big">Upload the ZipGrade results first</div>' +
+      '<div class="small">Teacher ' + k + '’s TOS opens once their results are in.</div></div>';
+  } else {
+    h += '<div class="drop sm" tabindex="0" role="button" data-up-drop="upFileT' + k + '" data-slot="' + k + '" ' +
+        'aria-label="Upload Teacher ' + k + '’s table of specifications">' +
+      '<div class="big">' + (tss.length ? 'Add or replace the TOS' : 'Drop or choose the TOS file') + '</div>' +
+      '<div class="small">The DepEd TOS worksheet with competencies, learning objectives and item placement.</div></div>' +
+      '<input type="file" id="upFileT' + k + '" multiple accept=".xlsx,.xls,.csv" class="sr" tabindex="-1">';
+    const lines = [];
+    tss.forEach(t => {
+      const ex = exs.find(e => e.grade === t.grade);
+      const used = ex && paired(ex) === t;
+      const cov = ex ? coverage(ex, t) : null;
+      lines.push(upFileLine(used ? 'ok' : ex ? 'mute' : 'wr',
+        '<strong>' + (t.grade ? 'Grade ' + esc(t.grade) : 'Grade not found') + '</strong> — ' + t.entries.length +
+        (t.entries.length === 1 ? ' competency' : ' competencies') + (cov ? ', ' + cov.mapped + ' of ' + cov.total + ' items mapped' : '') +
+        (!ex ? ' · no Grade ' + esc(t.grade || '?') + ' results for this teacher' : (used ? '' : ' · another sheet fits better')),
+        t.fileName + (t.sheetName ? ' [' + t.sheetName + ']' : '')));
+    });
+    exs.filter(e => !paired(e)).forEach(e => lines.push(upFileLine('wr', '<strong>Grade ' + esc(e.grade) + '</strong> — no TOS yet', '')));
+    if (lines.length) h += '<ul class="upfiles">' + lines.join('') + '</ul>';
+  }
+  return h + '</div></div></div>';
+}
+function upTeachersStep(p) {
+  const enabled = !!p, n = enabled ? UP_UI.teachers : 0;
+  const onFile = enabled ? upTeachersOnFile(p) : 0;
+  let h = '<div class="upstep upstep-wide' + (n ? ' done' : '') + (enabled ? '' : ' locked') + '">' +
+    '<div class="upstep-head"><span class="n" aria-hidden="true">5</span>' +
+    '<span class="t" id="upTeachersLbl"><span class="sr">Step 5: </span>Number of teachers</span></div>' +
+    '<div class="seg" id="upTeachers" role="group" aria-labelledby="upTeachersLbl">' +
+    [1, 2, 3].map(k => '<button type="button" data-n="' + k + '"' + (enabled ? '' : ' disabled') +
+      ' aria-pressed="' + (n === k) + '" class="' + (n === k ? 'on' : '') + '">' + k + (k === 1 ? ' teacher' : ' teachers') +
+      '</button>').join('') +
+    '</div>' +
+    '<div class="hint">Choose 2 or 3 only when a grade level’s sections are split between teachers, each giving their own test and TOS. ' +
+    'Mean, MPS and SD then show each teacher’s row plus one combined row.</div>';
+  if (n && onFile > n) h += '<div class="note" style="margin:10px 0 0">Teacher ' + onFile + ' already has files for this assessment. ' +
+    'They stay on file until removed under “Exams on file” below.</div>';
+  return h + '</div>';
+}
+function upFilesStep(p) {
+  const n = p ? UP_UI.teachers : 0;
+  const allDone = n > 0 && [...Array(n).keys()].every(i => {
+    const exs = DB.exams.filter(e => inPick(e, p) && (e.teacherSlot || 1) === i + 1);
+    return exs.length && exs.every(e => { const t = tosFor(e); return t && (t.teacherSlot || 1) === i + 1 && inPick(t, p); });
+  });
+  let h = '<div class="upstep upstep-wide' + (allDone ? ' done' : '') + (n ? '' : ' locked') + '">' +
+    '<div class="upstep-head"><span class="n" aria-hidden="true">6</span>' +
+    '<span class="t"><span class="sr">Step 6: </span>Upload each teacher’s files</span></div>';
+  if (!n) return h + '<div class="hint" style="margin-top:0">Finish the steps above to open the upload boxes.</div></div>';
+  h += '<div class="hint" style="margin:0 0 12px">For each teacher, upload the ZipGrade results first, then the table of specifications. ' +
+    'Grade level is read from the files.</div><div class="upcards">';
+  for (let k = 1; k <= n; k++) h += upTeacherCard(k, p);
   return h + '</div></div>';
+}
+function uploadSteps() {
+  const s2 = !!UP_UI.sy, s3 = s2 && !!UP_UI.term, s4 = s3 && !!UP_UI.exam;
+  const p = upPick();
+  return '<div class="panel upwiz"><h3>Step by step<span class="sub">each step opens once the one before it is done</span></h3><div class="panel-body">' +
+    '<div class="upsteps">' +
+    upStepSelect(1, 'upSy', 'School year', UP_UI.sy, SCHOOL_YEARS.map(y => ({ v: y, t: y })), true, 'Choose the school year') +
+    upStepSelect(2, 'upTerm', 'Term', UP_UI.term, TERMS.map(t => ({ v: t, t: 'Term ' + t })), s2, 'Choose the term') +
+    upStepSelect(3, 'upExam', 'Assessment', UP_UI.exam, EXAM_TYPES.map(x => ({ v: x.id, t: x.label })), s3, 'Choose the assessment') +
+    upStepSelect(4, 'upArea', 'Learning area', UP_UI.area, upAreaOptions().map(a => ({ v: a, t: a })), s4, 'Choose the learning area') +
+    '</div>' + upTeachersStep(p) + upFilesStep(p) + '</div></div>';
 }
 function viewUpload() {
   let h = head('Upload results',
-    'Drop the ZipGrade quiz-format exports and the tables of specifications here. File type is detected automatically.');
+    'Choose the school year, term, assessment and learning area, then upload each teacher’s ZipGrade results and table of specifications.');
   h += '<div class="wrap">';
   if (!storageOK) h += '<div class="note">This browser is blocking local storage, so uploads will be held in memory only and lost on refresh. Use “Download a backup” on the Settings page to keep a copy.</div>';
 
-  h += '<div class="two">' +
-    '<div class="panel"><h3>ZipGrade exam results</h3><div class="panel-body">' +
-    '<div class="drop" id="dropExam" tabindex="0" role="button">' +
-    '<div class="big">Drop ZipGrade exports</div>' +
-    '<div class="small">Quiz-format .xlsx or .csv, one file per exam. Columns: Quiz Name, Class, Student name, then “#n Points Earned”.</div>' +
-    '</div><input type="file" id="fileExam" multiple accept=".xlsx,.xls,.csv" class="sr"></div></div>' +
-
-    '<div class="panel"><h3>Tables of specifications</h3><div class="panel-body">' +
-    '<div class="drop" id="dropTOS" tabindex="0" role="button">' +
-    '<div class="big">Drop the TOS files</div>' +
-    '<div class="small">The DepEd end-of-term TOS worksheet, with topics, competencies, learning objectives and item placement per cognitive domain.</div>' +
-    '</div><input type="file" id="fileTOS" multiple accept=".xlsx,.xls,.csv" class="sr"></div></div>' +
-    '</div>';
-
-  h += multiTeacherPanel();
+  h += uploadSteps();
 
   h += '<div class="panel"><h3>Upload log</h3><div class="panel-body"><div class="log" id="log">' + logHTML() + '</div></div></div>';
 
@@ -3592,8 +4159,11 @@ function viewUpload() {
   return h;
 }
 
+const EXAM_ORDER = { ST1: 1, ST2: 2, TE: 3 };
 function sortExam(a, b) {
-  return (a.grade - b.grade) || LEARNING_AREAS.indexOf(a.area) - LEARNING_AREAS.indexOf(b.area) || a.area.localeCompare(b.area);
+  return (a.grade - b.grade) || LEARNING_AREAS.indexOf(a.area) - LEARNING_AREAS.indexOf(b.area) || a.area.localeCompare(b.area) ||
+    (+a.term - +b.term) || ((EXAM_ORDER[a.examType] || 9) - (EXAM_ORDER[b.examType] || 9)) ||
+    ((a.teacherSlot || 1) - (b.teacherSlot || 1));
 }
 function coverage(exam, tos) {
   const mapped = new Set(tos.mappedItems.filter(n => n <= exam.totalItems));
@@ -3623,11 +4193,12 @@ function computeMeanMpsSdRows(cfg) {
   const bySection = FILTER.sections.length > 0;
   const raw = [];
   EXAMS().slice().sort(sortExam).forEach(e => {
+    const cycle = cycleLabel(e);
     if (bySection) {
       sectionsOf(e).forEach(sec => {
         const st = summarise(studentsFor(e, sec), e.totalItems, cfg);
         raw.push({
-          area: e.area, grade: e.grade, section: sec, n: st.n, items: e.totalItems,
+          area: e.area, grade: e.grade, section: sec, cycle, n: st.n, items: e.totalItems,
           mean: st.mean, mps: st.mps, sd: st.sd, HP: st.HP, AP: st.AP, LP: st.LP,
           teacher: e.teacherSlot || 1, key: [e.sy, e.term, e.examType, e.area, e.grade, sec].join('|')
         });
@@ -3635,44 +4206,55 @@ function computeMeanMpsSdRows(cfg) {
     } else {
       const st = summarise(studentsOf(e), e.totalItems, cfg);
       raw.push({
-        area: e.area, grade: e.grade, section: '', enrol: enrolFor(e), n: st.n, items: e.totalItems,
+        area: e.area, grade: e.grade, section: '', cycle, enrol: enrolFor(e), n: st.n, items: e.totalItems,
         mean: st.mean, mps: st.mps, sd: st.sd, HP: st.HP, AP: st.AP, LP: st.LP, sections: sectionsOf(e).length,
         teacher: e.teacherSlot || 1, key: [e.sy, e.term, e.examType, e.area, e.grade].join('|')
       });
     }
   });
 
-  /* Where a subject's grade level was tested as more than one set this
-     cycle — more than one teacher, each with their own items — add one
-     combined row right after that group's own rows. Takers and
-     HP/AP/LP are summed (literal counts of different students); mean,
-     MPS and SD are the plain average of each set's own figure, which
-     is how the subject-level MPS was asked to be reported. Rows for
-     the same subject sort adjacently (sortExam groups by grade then
-     area), so a single pass finds each run. */
+  /* Where a class was tested by more than one teacher, each with their
+     own items, the class shows as ONE combined row: enrolment, takers,
+     HP/AP/LP and sections add up (different learners); mean, MPS and SD
+     are the plain average of each teacher's own figure, which is how the
+     subject-level MPS is reported. Each teacher's own row follows it as
+     a "part", hidden until the combined row's arrow is opened. */
   const rows = [];
   let i = 0;
   while (i < raw.length) {
     let j = i;
     while (j < raw.length && raw[j].key === raw[i].key) j++;
     const group = raw.slice(i, j);
-    group.forEach(r => { r.groupSize = group.length; });
-    rows.push(...group);
-    if (group.length > 1) {
+    if (group.length === 1) {
+      rows.push(Object.assign(group[0], { kind: 'single' }));
+    } else {
       const avg = k => round(group.reduce((a, r) => a + r[k], 0) / group.length);
-      const last = group[group.length - 1];
+      const sum = k => group.reduce((a, r) => a + (r[k] || 0), 0);
+      const items = [...new Set(group.map(r => r.items))].sort((a, b) => a - b);
+      const grp = 'mps:' + group[0].key;
+      const f = group[0];
       rows.push({
-        area: last.area, grade: last.grade, section: last.section,
-        enrol: group.reduce((a, r) => a + (r.enrol || 0), 0),
-        n: group.reduce((a, r) => a + r.n, 0), items: last.items,
+        kind: 'combined', combined: true, grp, area: f.area, grade: f.grade, section: f.section, cycle: f.cycle,
+        enrol: sum('enrol'), n: sum('n'), items: items.length === 1 ? items[0] : items.join('/'),
         mean: avg('mean'), mps: avg('mps'), sd: avg('sd'),
-        HP: group.reduce((a, r) => a + r.HP, 0), AP: group.reduce((a, r) => a + r.AP, 0), LP: group.reduce((a, r) => a + r.LP, 0),
-        sections: last.sections, teacher: null, combined: true, setCount: group.length
+        HP: sum('HP'), AP: sum('AP'), LP: sum('LP'), sections: sum('sections'),
+        teacher: null, setCount: group.length
       });
+      group.forEach(r => rows.push(Object.assign(r, { kind: 'part', grp })));
     }
     i = j;
   }
   return rows;
+}
+/* What the downloads include: everything on screen — combined rows, and
+   a teacher's own row only where that breakdown is open. */
+function meanMpsSdShownRows(cfg) {
+  const multi = multiCycleView();
+  return computeMeanMpsSdRows(cfg).filter(r => r.kind !== 'part' || OPEN_GROUPS.has(r.grp)).map(r => Object.assign({}, r, {
+    label: (r.kind === 'part' ? r.area + ' — Teacher ' + r.teacher
+      : r.kind === 'combined' ? r.area + ' (' + r.setCount + ' teachers, combined)' : r.area) +
+      (multi ? ' · ' + r.cycle : '')
+  }));
 }
 function viewAssessmentArea() {
   const cfg = DB.cfg;
@@ -3680,13 +4262,15 @@ function viewAssessmentArea() {
     'Mean, MPS, standard deviation and performance bands, narrowed by the school year, term, assessment, learning area, grade level and section filters below.');
   h += '<div class="wrap">' + contextBar();
   if (!DB.exams.length) return h + noData('No ZipGrade results have been uploaded.') + '</div>';
+  if (!filterReady()) return h + filterPrompt() + '</div>';
   if (!EXAMS().length) return h + noCycleData() + '</div>';
 
   const bySection = FILTER.sections.length > 0;
   const rows = computeMeanMpsSdRows(cfg);
   const cols = bySection ? 11 : 12;
   h += '<div class="panel"><h3>' + (bySection ? 'By learning area, grade level and section' : 'By learning area and grade level') +
-    '<span class="sub">' + rows.length + ' row' + (rows.length === 1 ? '' : 's') + ' match the filters above</span></h3>' +
+    '<span class="sub">' + rows.filter(r => r.kind !== 'part').length + ' row' + (rows.filter(r => r.kind !== 'part').length === 1 ? '' : 's') +
+      ' match the filters above</span></h3>' +
     '<div class="panel-body flush"><div class="tbl-scroll"><table class="grid"><thead><tr>' +
     '<th>Learning area</th><th class="num">Grade</th>' + (bySection ? '<th>Section</th>' : '<th class="num">Enrolment</th>') +
     '<th class="num">Takers</th><th class="num">Items</th>' +
@@ -3694,11 +4278,24 @@ function viewAssessmentArea() {
     '<th class="num">AP</th><th class="num">LP</th>' + (bySection ? '' : '<th class="num">Sections</th>') +
     '<th>Distribution</th></tr></thead><tbody>';
   if (!rows.length) h += '<tr><td colspan="' + cols + '">No class on file matches every ticked filter.</td></tr>';
+  const multi = multiCycleView();
   rows.forEach(r => {
-    const areaLabel = r.combined
-      ? esc(r.area) + '<div class="comp-sub">combined \u2014 average of ' + r.setCount + ' teachers\u2019 results</div>'
-      : esc(r.area) + (r.groupSize > 1 ? '<div class="comp-sub">Teacher ' + r.teacher + '</div>' : '');
-    h += '<tr' + (r.combined ? ' class="combined-row"' : '') + '><td class="rowhead">' + areaLabel + '</td><td class="num">' + r.grade + '</td>' +
+    const open = r.grp && OPEN_GROUPS.has(r.grp);
+    const cyc = multi ? '<div class="comp-sub">' + esc(r.cycle) + '</div>' : '';
+    let areaCell;
+    if (r.kind === 'combined') {
+      areaCell = '<button type="button" class="grp-toggle" data-grp="' + esc(r.grp) + '" aria-expanded="' + open + '" ' +
+        'title="Show or hide each teacher’s row">' + CARET + '<span>' + esc(r.area) + '</span></button>' +
+        '<div class="comp-sub">' + r.setCount + ' teachers · combined' + (multi ? ' · ' + esc(r.cycle) : '') + '</div>';
+    } else if (r.kind === 'part') {
+      areaCell = '<span class="part-label">Teacher ' + r.teacher + '</span>';
+    } else {
+      areaCell = esc(r.area) + cyc;
+    }
+    const cls = r.kind === 'combined' ? 'combined-row' : r.kind === 'part' ? 'breakdown-row' : '';
+    h += '<tr' + (cls ? ' class="' + cls + '"' : '') +
+      (r.kind === 'part' ? ' data-grp-of="' + esc(r.grp) + '"' + (open ? '' : ' hidden') : '') + '>' +
+      '<td class="rowhead">' + areaCell + '</td><td class="num">' + r.grade + '</td>' +
       (bySection ? '<td>' + esc(r.section) + '</td>' : '<td class="num">' + r.enrol + '</td>') +
       '<td class="num">' + r.n + '</td><td class="num">' + r.items + '</td>' +
       '<td class="num">' + r.mean.toFixed(2) + '</td><td class="num"><strong>' + r.mps.toFixed(0) + '</strong></td>' +
@@ -3724,57 +4321,138 @@ function viewAssessmentArea() {
    else, so it excludes LSEN learners the same way studentsOf() always
    does, and respects a subject split across more than one teacher
    automatically (each learner's own class supplies their score). */
+/* Each learner's sex comes from the class roster on the Learners and LSEN
+   page (ZipGrade exports do not carry it). An answer sheet is matched to
+   its roster row by LRN, then learner code, then name within the section,
+   then name within the grade level — names compared ignoring order,
+   punctuation, suffixes and middle initials. */
+function sexLookup(sy) {
+  const sexOf = v => { const t = norm(v).toUpperCase(); return t[0] === 'M' ? 'M' : t[0] === 'F' ? 'F' : ''; };
+  const loose = n => nameKey(n).split(' ').filter(t => t.length > 1).join(' ');
+  const byLrn = {}, byKey = {}, bySecName = {}, byGradeName = {}, dupGrade = new Set();
+  rosterFor(sy).learners.forEach(l => {
+    const x = sexOf(l.sex);
+    if (!x) return;
+    if (l.lrn) byLrn[norm(l.lrn)] = x;
+    byKey[rosterMatchKey(l.grade, l.section, l.code, l.name)] = x;
+    bySecName[l.grade + '|' + norm(l.section).toLowerCase() + '|' + loose(l.name)] = x;
+    const gk = l.grade + '|' + loose(l.name);
+    if (byGradeName[gk] !== undefined && byGradeName[gk] !== x) dupGrade.add(gk);
+    byGradeName[gk] = x;
+  });
+  return (grade, section, id, name) => {
+    if (id && byLrn[norm(id)]) return byLrn[norm(id)];
+    const k = rosterMatchKey(grade, section, id, name);
+    if (byKey[k]) return byKey[k];
+    const sk = grade + '|' + norm(section).toLowerCase() + '|' + loose(name);
+    if (bySecName[sk]) return bySecName[sk];
+    const gk = grade + '|' + loose(name);
+    if (byGradeName[gk] && !dupGrade.has(gk)) return byGradeName[gk];
+    return '';
+  };
+}
+
+/* ---------------- Scores by student ----------------
+   One row per learner, one column per learning area with results for the
+   ticked choices (one column per area and assessment when several terms
+   or assessments are ticked). Each cell is the learner's raw score. Within
+   each section, males come first and then females, each in alphabetical
+   order; learners the roster does not cover follow at the end. Reads the
+   same records as everywhere else, so LSEN exclusions apply as always, and
+   a subject split between teachers needs nothing special (each learner's
+   own class supplies their score). */
 function studentScoreRows() {
   const areas = FILTER.areas.length ? allAreas().filter(a => FILTER.areas.includes(a)) : allAreas();
+  const multi = multiCycleView();
+  const exams = EXAMS().filter(e => areas.includes(e.area)).sort(sortExam);
+  /* columns, in learning-area order then assessment order */
+  const colMap = new Map();
+  exams.forEach(e => {
+    const key = e.area + (multi ? '|' + e.term + '|' + e.examType : '');
+    if (!colMap.has(key)) colMap.set(key, { key, area: e.area, cycle: multi ? cycleLabel(e) : '', totals: new Set(), order: [LEARNING_AREAS.indexOf(e.area), +e.term, EXAM_ORDER[e.examType] || 9] });
+    colMap.get(key).totals.add(e.totalItems);
+  });
+  const cols = [...colMap.values()].sort((x, y) => (x.order[0] - y.order[0]) || x.area.localeCompare(y.area) || (x.order[1] - y.order[1]) || (x.order[2] - y.order[2]));
+
+  const lookups = {};
   const students = new Map();
-  EXAMS().forEach(exam => {
-    if (!areas.includes(exam.area)) return;
+  exams.forEach(exam => {
+    const col = exam.area + (multi ? '|' + exam.term + '|' + exam.examType : '');
+    const sex = lookups[exam.sy] || (lookups[exam.sy] = sexLookup(exam.sy));
     studentsOf(exam).forEach(s => {
-      const key = exam.grade + '|' + s.section + '|' + (s.id || '\u2014') + '|' + nameKey(s.name);
-      if (!students.has(key)) students.set(key, { name: s.name, id: s.id, section: s.section, grade: exam.grade, scores: {} });
-      students.get(key).scores[exam.area] = { score: s.score, total: exam.totalItems };
+      const key = exam.grade + '|' + s.section + '|' + (s.id || '—') + '|' + nameKey(s.name);
+      if (!students.has(key)) students.set(key, { name: s.name, id: s.id, section: s.section, grade: exam.grade, sex: '', scores: {} });
+      const r = students.get(key);
+      if (!r.sex) r.sex = sex(exam.grade, s.section, s.id, s.name);
+      r.scores[col] = s.score;
     });
   });
   const order = sortSections([...new Set([...students.values()].map(r => r.section))]);
+  const sexRank = { M: 0, F: 1, '': 2 };
   const rows = [...students.values()].sort((a, b) =>
-    (order.indexOf(a.section) - order.indexOf(b.section)) || a.name.localeCompare(b.name));
-  return { areas, rows };
+    (order.indexOf(a.section) - order.indexOf(b.section)) || (sexRank[a.sex] - sexRank[b.sex]) ||
+    a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }));
+
+  /* the groups shown as header rows: Male, Female (and Sex not recorded),
+     per section when more than one section is ticked */
+  const groups = [];
+  const SEX_LABEL = { M: 'Male', F: 'Female', '': 'Sex not recorded' };
+  rows.forEach(r => {
+    const label = (order.length > 1 ? r.section + ' — ' : '') + SEX_LABEL[r.sex];
+    const last = groups[groups.length - 1];
+    if (last && last.label === label) last.rows.push(r);
+    else groups.push({ label, sex: r.sex, rows: [r] });
+  });
+  return { areas, cols, rows, groups };
 }
-function studentAverage(row, areas) {
-  const pcts = areas.map(a => row.scores[a]).filter(Boolean).map(sc => 100 * sc.score / sc.total);
-  return pcts.length ? Math.round(pcts.reduce((a, b) => a + b, 0) / pcts.length) : null;
+function scoreColHead(c) {
+  const items = c.totals.size === 1 ? [...c.totals][0] + ' items' : 'items vary';
+  return esc(c.area) + '<div class="col-sub">' + (c.cycle ? esc(c.cycle) + ' · ' : '') + items + '</div>';
 }
 function viewStudentScores() {
   let h = head('Scores by Student',
-    'Every learner\u2019s score in each subject area for the ticked school year, term, assessment and section.');
+    'Every learner’s raw score in each learning area for the ticked school year, term, assessment and section — males first, then females.');
   h += '<div class="wrap">' + contextBar();
   if (!DB.exams.length) return h + noData('No ZipGrade results have been uploaded.') + '</div>';
+  if (!filterReady()) return h + filterPrompt() + '</div>';
   if (!EXAMS().length) return h + noCycleData() + '</div>';
   if (!FILTER.sections.length) {
     h += '<div class="panel"><div class="panel-body"><div class="empty-state"><div class="big">Tick a section above</div>' +
-      '<p>This report lists every learner by name, so pick at least one section from the filters to keep the table to a class-sized list.</p>' +
+      '<p>This report lists every learner by name, so pick at least one section under “Narrow down” to keep the table to a class-sized list.</p>' +
       '</div></div></div>';
     return h + '</div>';
   }
 
-  const { areas, rows } = studentScoreRows();
+  const { cols, rows, groups } = studentScoreRows();
   if (!rows.length) return h + noData('No learner in the ticked section has a result for this cycle.') + '</div>';
-  if (!areas.length) return h + noData('No ticked learning area has results for this cycle.') + '</div>';
+  if (!cols.length) return h + noData('No ticked learning area has results for this cycle.') + '</div>';
 
-  const cell = sc => sc
-    ? '<div>' + sc.score + '/' + sc.total + '</div><div class="comp-sub">' + Math.round(100 * sc.score / sc.total) + '%</div>'
-    : '<span class="pill mute">\u2014</span>';
+  const unknown = rows.filter(r => !r.sex).length;
+  if (unknown) {
+    h += '<div class="note">' + (unknown === rows.length
+      ? 'Male and female can’t be told apart yet: none of these learners were found on a class roster with a Sex column. '
+      : unknown + ' learner' + (unknown === 1 ? ' was' : 's were') + ' not found on the class roster, so ' + (unknown === 1 ? 'is' : 'are') +
+        ' listed last under “Sex not recorded”. ') +
+      (can('settings') || can('upload') ? 'Upload the roster on <button type="button" class="inline-link" data-go="learners">Learners and LSEN</button> to sort them.' : 'Ask the person who uploads results to add the class roster.') +
+      '</div>';
+  }
 
-  h += '<div class="panel"><h3>By learner<span class="sub">' + rows.length + ' learner' + (rows.length === 1 ? '' : 's') +
-    ' \u00b7 ' + areas.length + ' subject' + (areas.length === 1 ? '' : 's') + '</span></h3>' +
-    '<div class="panel-body flush"><div class="tbl-scroll"><table class="grid"><thead><tr>' +
-    '<th>Learner</th><th>Section</th>' + areas.map(a => '<th class="num">' + esc(a) + '</th>').join('') +
-    '<th class="num">Average</th></tr></thead><tbody>';
-  rows.forEach(r => {
-    const avg = studentAverage(r, areas);
-    h += '<tr><td class="rowhead">' + esc(r.name) + '</td><td>' + esc(r.section) + '</td>' +
-      areas.map(a => '<td class="num">' + cell(r.scores[a]) + '</td>').join('') +
-      '<td class="num"><strong>' + (avg === null ? '\u2014' : avg + '%') + '</strong></td></tr>';
+  const span = 2 + cols.length;
+  h += '<div class="panel"><h3>By learner<span class="sub">' +
+    groups.filter(g => g.sex === 'M').reduce((a, g) => a + g.rows.length, 0) + ' male · ' +
+    groups.filter(g => g.sex === 'F').reduce((a, g) => a + g.rows.length, 0) + ' female' +
+    (unknown ? ' · ' + unknown + ' not recorded' : '') + '</span></h3>' +
+    '<div class="panel-body flush"><div class="tbl-scroll"><table class="grid scores"><thead><tr>' +
+    '<th>Learner</th><th>Section</th>' + cols.map(c => '<th class="num">' + scoreColHead(c) + '</th>').join('') +
+    '</tr></thead><tbody>';
+  groups.forEach(g => {
+    h += '<tr class="group-row"><th colspan="' + span + '" scope="colgroup">' + esc(g.label) +
+      '<span class="count">' + g.rows.length + '</span></th></tr>';
+    g.rows.forEach(r => {
+      h += '<tr><td class="rowhead">' + esc(r.name) + '</td><td>' + esc(r.section) + '</td>' +
+        cols.map(c => '<td class="num">' + (r.scores[c.key] === undefined ? '<span class="pill mute">—</span>' : r.scores[c.key]) + '</td>').join('') +
+        '</tr>';
+    });
   });
   h += '</tbody></table></div>' +
     '<div class="dlbar" style="padding:0 16px 16px"><span class="spacer"></span>' +
@@ -3784,18 +4462,18 @@ function viewStudentScores() {
   return h;
 }
 async function exportStudentScoresXLSX() {
-  const { areas, rows } = studentScoreRows();
-  const headRow = ['Learner', 'Section', ...areas, 'Average'];
-  const body = rows.map(r => [
-    r.name, r.section,
-    ...areas.map(a => r.scores[a] ? (r.scores[a].score + '/' + r.scores[a].total) : ''),
-    (() => { const avg = studentAverage(r, areas); return avg === null ? '' : avg + '%'; })()
-  ]);
+  const { cols, groups } = studentScoreRows();
+  const headRow = ['Learner', 'Section', ...cols.map(c => c.area + (c.cycle ? ' (' + c.cycle + ')' : '') +
+    (c.totals.size === 1 ? ' — ' + [...c.totals][0] + ' items' : ''))];
   await simpleTableXLSX({
     sheetName: 'Scores by student',
     title: 'Scores by Student',
     subtitle: ctxLabel(),
-    tables: [{ head: headRow, body }],
+    tables: groups.map(g => ({
+      heading: g.label + ' (' + g.rows.length + ')',
+      head: headRow,
+      body: g.rows.map(r => [r.name, r.section, ...cols.map(c => r.scores[c.key] === undefined ? '' : r.scores[c.key])])
+    })),
     filename: 'Scores by student ' + stampFileDate() + '.xlsx'
   });
 }
@@ -3805,6 +4483,7 @@ function viewLeastLearned() {
     'Every competency across the school at or below the least-learned cut-off, weakest first, narrowed by the filters below.');
   h += '<div class="wrap">' + contextBar();
   if (!DB.exams.length) return h + noData('No ZipGrade results have been uploaded.') + '</div>';
+  if (!filterReady()) return h + filterPrompt() + '</div>';
   if (!EXAMS().length) return h + noCycleData() + '</div>';
 
   h += weakestCompetenciesPanel(EXAMS(), DB.cfg, null);
@@ -3860,21 +4539,148 @@ function msfDropdown(key, label, options, selected, optLabel) {
     '</div></div>';
 }
 
-/* The six tick-multiple filters — school year, term, assessment, learning
-   area, grade level, section — shown at the top of every report page. */
+/* The report filter, one step at a time: 1 school year (a dropdown),
+   then 2 term, 3 assessment and 4 learning area (tick boxes). Each step
+   opens once the one before it is done, and no results show until all
+   four are. Options with nothing uploaded are greyed out. Grade level and
+   section can then narrow things further, optionally. */
+function filterStepHead(n, label, lblId, forId) {
+  return '<div class="fstep-head"><span class="n" aria-hidden="true">' + n + '</span>' +
+    (forId ? '<label for="' + forId + '">' : '<span class="t" id="' + lblId + '">') +
+    '<span class="sr">Step ' + n + ': </span>' + esc(label) + (forId ? '</label>' : '</span>') + '</div>';
+}
+function filterTicks(key, n, label, options, enabled) {
+  const sel = new Set(FILTER[key].map(String));
+  const lblId = 'fs-' + key;
+  const avail = options.filter(o => o.avail);
+  const allOn = avail.length > 0 && avail.every(o => sel.has(String(o.v)));
+  let h = '<div class="fstep' + (enabled && sel.size ? ' done' : '') + (enabled ? '' : ' locked') + '">' +
+    filterStepHead(n, label, lblId) +
+    '<div class="ticks" role="group" aria-labelledby="' + lblId + '">';
+  options.forEach(o => {
+    const on = sel.has(String(o.v));
+    const off = !enabled || (!o.avail && !on);
+    h += '<label class="tick' + (on ? ' on' : '') + (off ? ' off' : '') + '"' +
+      (enabled && !o.avail ? ' title="Nothing uploaded for this yet"' : '') + '>' +
+      '<input type="checkbox" data-msf="' + key + '" data-val="' + esc(String(o.v)) + '"' +
+      (on ? ' checked' : '') + (off ? ' disabled' : '') + '>' + esc(o.t) + '</label>';
+  });
+  if (enabled && avail.length > 1) {
+    h += '<button type="button" class="tick-all" data-tick-all="' + key + '">' + (allOn ? 'Clear' : 'Tick all') + '</button>';
+  }
+  if (enabled && !avail.length && !sel.size) h += '<span class="hint" style="margin:0">Nothing uploaded for these choices yet.</span>';
+  return h + '</div></div>';
+}
+function filterTickOptions(key) {
+  const sy = FILTER.sy[0] || '';
+  const has = pred => DB.exams.some(e => e.sy === sy && pred(e));
+  if (key === 'term') return TERMS.map(t => ({ v: t, t: 'Term ' + t, avail: has(e => +e.term === t) }));
+  if (key === 'exam') return EXAM_TYPES.map(x => ({ v: x.id, t: x.label,
+    avail: has(e => FILTER.term.includes(+e.term) && e.examType === x.id) }));
+  const withData = new Set(filterAreaOptions());
+  const names = LEARNING_AREAS.concat([...withData].filter(a => !LEARNING_AREAS.includes(a)));
+  return names.map(a => ({ v: a, t: a, avail: withData.has(a) }));
+}
 function contextBar() {
-  const areaOpts = filterAreaOptions();
-  const gradeOpts = filterGradeOptions();
-  const secOpts = filterSectionOptions();
-  return '<div class="panel ctxbar"><div class="controls msfbar">' +
-    msfDropdown('sy', 'School year', SCHOOL_YEARS, FILTER.sy) +
-    msfDropdown('term', 'Term', TERMS, FILTER.term, t => 'Term ' + t) +
-    msfDropdown('exam', 'Assessment', EXAM_TYPES.map(x => x.id), FILTER.exam, id => examTypeShort(id)) +
-    msfDropdown('areas', 'Learning area', areaOpts, FILTER.areas) +
-    msfDropdown('grades', 'Grade level', gradeOpts, FILTER.grades, g => 'Grade ' + g) +
-    msfDropdown('sections', 'Section', secOpts, FILTER.sections) +
-    '<div class="ctl grow ctxnow"><label>Showing</label><div class="ctxvalue">' + esc(filterSummary()) + '</div></div>' +
-    '</div></div>';
+  const sy = FILTER.sy.length === 1 ? FILTER.sy[0] : '';
+  const s2 = !!sy, s3 = s2 && FILTER.term.length > 0, s4 = s3 && FILTER.exam.length > 0;
+  const ready = filterReady();
+  let h = '<div class="panel ctxbar"><div class="fsteps">';
+
+  h += '<div class="fstep' + (sy ? ' done' : '') + '">' + filterStepHead(1, 'School year', '', 'fSy') +
+    '<div class="ticks"><select id="fSy" data-filter-sy><option value="">Choose the school year</option>' +
+    SCHOOL_YEARS.map(y => {
+      const any = DB.exams.some(e => e.sy === y);
+      return '<option value="' + esc(y) + '"' + (y === sy ? ' selected' : '') + (!any && y !== sy ? ' disabled' : '') + '>' +
+        esc(y) + (any ? '' : ' \\u2014 nothing uploaded') + '</option>';
+    }).join('') + '</select></div></div>';
+
+  h += filterTicks('term', 2, 'Term', filterTickOptions('term'), s2);
+  h += filterTicks('exam', 3, 'Assessment', filterTickOptions('exam'), s3);
+  h += filterTicks('areas', 4, 'Learning area', s4 ? filterTickOptions('areas') : LEARNING_AREAS.map(a => ({ v: a, t: a, avail: false })), s4);
+
+  h += '<div class="fstep fstep-opt' + (ready ? '' : ' locked') + '">' +
+    '<div class="fstep-head"><span class="n opt" aria-hidden="true">+</span><span class="t">Narrow down <span class="opt-note">optional</span></span></div>';
+  if (ready) {
+    h += '<div class="ticks">' +
+      msfDropdown('grades', 'Grade level', filterGradeOptions(), FILTER.grades, g => 'Grade ' + g) +
+      msfDropdown('sections', 'Section', filterSectionOptions(), FILTER.sections) + '</div>';
+  } else {
+    h += '<div class="ticks"><span class="hint" style="margin:0">Grade level and section open once steps 1 to 4 are done.</span></div>';
+  }
+  return h + '</div></div></div>';
+}
+/* ---------- subjects split between teachers: show the combined figure
+   and keep each teacher's own figures behind an arrow ---------- */
+const OPEN_GROUPS = new Set();   // breakdowns opened — survives re-renders
+const CARET = '<svg class="caret" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6l4 4 4-4" fill="none" ' +
+  'stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+document.addEventListener('click', ev => {
+  const b = ev.target.closest('[data-grp]');
+  if (!b) return;
+  const k = b.dataset.grp, open = !OPEN_GROUPS.has(k);
+  if (open) OPEN_GROUPS.add(k); else OPEN_GROUPS.delete(k);
+  document.querySelectorAll('[data-grp]').forEach(x => { if (x.dataset.grp === k) x.setAttribute('aria-expanded', String(open)); });
+  document.querySelectorAll('[data-grp-of]').forEach(x => { if (x.dataset.grpOf === k) x.hidden = !open; });
+});
+/* Exams that belong to the same class, in page order. */
+function groupByClass(exams) {
+  const out = [], byKey = new Map();
+  exams.slice().sort(sortExam).forEach(e => {
+    const k = classKey(e);
+    if (!byKey.has(k)) { const g = { key: k, exams: [] }; byKey.set(k, g); out.push(g); }
+    byKey.get(k).exams.push(e);
+  });
+  return out;
+}
+/* Takers and HP/AP/LP add up (different learners); mean, MPS and SD are
+   the average of each teacher's own figure — the subject-level figure
+   used on the Mean, MPS, SD page. */
+function teacherGroupSummary(exams, cfg) {
+  const sets = exams.map(e => summarise(studentsOf(e), e.totalItems, cfg));
+  const avg = k => round(sets.reduce((a, x) => a + x[k], 0) / sets.length);
+  const sum = k => sets.reduce((a, x) => a + x[k], 0);
+  return { n: sum('n'), mean: avg('mean'), mps: avg('mps'), sd: avg('sd'), HP: sum('HP'), AP: sum('AP'), LP: sum('LP') };
+}
+/* Per-class pages (item analysis, competencies, remediation): a class
+   with one teacher shows its panel as before; a class split between
+   teachers shows one combined summary, with each teacher's own panel —
+   their items differ, so those are never merged — behind the arrow. */
+function renderClassPanels(exams, cfg, renderOne, what, extraStats) {
+  return groupByClass(exams).map(g => {
+    if (g.exams.length === 1) return renderOne(g.exams[0], cfg);
+    const e0 = g.exams[0], sm = teacherGroupSummary(g.exams, cfg);
+    const key = VIEW + ':' + g.key, open = OPEN_GROUPS.has(key);
+    return '<div class="tgroup">' +
+      '<div class="panel tgroup-head"><h3>' + esc(e0.area + ' — Grade ' + e0.grade + cycleTag(e0)) +
+        '<span class="sub">' + g.exams.length + ' teachers · combined</span></h3>' +
+      '<div class="stats">' + stat('Test takers', sm.n) +
+        stat('Mean percentage score', sm.mps.toFixed(0) + '<small>%</small>', 'blue') +
+        stat('Mean', sm.mean.toFixed(2)) + stat('Standard deviation', sm.sd.toFixed(0)) +
+        (extraStats ? extraStats(g.exams) : '') + '</div>' +
+      '<div class="tgroup-bar"><button type="button" class="grp-toggle" data-grp="' + esc(key) + '" aria-expanded="' + open + '">' +
+        CARET + '<span class="when-closed">Show each teacher’s ' + esc(what) + '</span>' +
+        '<span class="when-open">Hide each teacher’s ' + esc(what) + '</span></button>' +
+        '<span class="hint" style="margin:0">Each teacher gave their own items, so the ' + esc(what) + ' is kept per teacher.</span></div></div>' +
+      '<div class="tgroup-body" data-grp-of="' + esc(key) + '"' + (open ? '' : ' hidden') + '>' +
+        g.exams.map(e => renderOne(e, cfg)).join('') + '</div></div>';
+  }).join('');
+}
+
+/* Shown in place of the results until steps 1-4 are done. */
+function filterPrompt() {
+  const noArea = FILTER.sy.length === 1 && FILTER.term.length && FILTER.exam.length && !filterAreaOptions().length;
+  if (noArea) {
+    return '<div class="panel"><div class="empty-state"><div class="big">Nothing uploaded for these choices yet</div>' +
+      '<p>No results are on file for the school year, term and assessment ticked above. Tick another, or upload the results.</p>' +
+      (can('upload') ? '<button class="btn" data-go="upload">Upload results</button>' : '') + '</div></div>';
+  }
+  const next = !FILTER.sy.length ? 'choose the school year'
+    : !FILTER.term.length ? 'tick at least one term'
+    : !FILTER.exam.length ? 'tick at least one assessment'
+    : 'tick at least one learning area';
+  return '<div class="panel"><div class="empty-state"><div class="big">Choose what to show first</div>' +
+    '<p>Results appear once steps 1 to 4 above are done. Next: ' + next + '.</p></div></div>';
 }
 
 /* One-time delegated event wiring for every msf dropdown on every page —
@@ -3892,6 +4698,16 @@ function bindFilterUi() {
       render();
       return;
     }
+    const tickAll = ev.target.closest('[data-tick-all]');
+    if (tickAll) {
+      const key = tickAll.dataset.tickAll;
+      const avail = filterTickOptions(key).filter(o => o.avail).map(o => o.v);
+      const allOn = avail.every(v => FILTER[key].map(String).includes(String(v)));
+      FILTER[key] = allOn ? [] : avail.slice();
+      saveFilter(); syncCtxFromFilter(); render();
+      const again = document.querySelector('[data-tick-all="' + key + '"]'); if (again) again.focus();
+      return;
+    }
     const allBtn = ev.target.closest('[data-msf-all]');
     if (allBtn) {
       const key = allBtn.dataset.msfAll;
@@ -3902,6 +4718,13 @@ function bindFilterUi() {
     if (!ev.target.closest('.msf-panel') && openMsf) { openMsf = null; render(); }
   });
   document.addEventListener('change', ev => {
+    const sySel = ev.target.closest('[data-filter-sy]');
+    if (sySel) {
+      FILTER.sy = sySel.value ? [sySel.value] : [];
+      saveFilter(); syncCtxFromFilter(); render();
+      const nx = document.querySelector('input[data-msf="term"]:not(:disabled)'); if (nx) nx.focus();
+      return;
+    }
     const cb = ev.target.closest('input[data-msf]');
     if (!cb) return;
     const key = cb.dataset.msf;
@@ -3912,6 +4735,9 @@ function bindFilterUi() {
     if (cb.checked && idx < 0) arr.push(val);
     if (!cb.checked && idx >= 0) arr.splice(idx, 1);
     saveFilter(); syncCtxFromFilter(); render();
+    /* the page is redrawn on every tick — put the focus back where it was */
+    const same = [...document.querySelectorAll('input[data-msf="' + key + '"]')].find(x => x.dataset.val === String(cb.dataset.val));
+    if (same && !same.closest('.msf-panel')) same.focus();
   });
 }
 
@@ -3941,7 +4767,7 @@ function coveragePanel() {
         (!FILTER.exam.length || FILTER.exam.includes(x.id));
       h += '<td class="' + (c ? 'm4' : '') + (here ? ' ctxhere' : '') + '">' +
         '<button class="cell" data-ctx="' + esc(y) + '|' + t + '|' + x.id + '">' +
-        (c ? '<span class="mps">' + c + '</span><span class="meta">learning areas</span>'
+        (c ? '<span class="mps">' + c + '</span><span class="meta">learning area' + (c === 1 ? '' : 's') + '</span>'
            : '<span class="meta">—</span>') + '</button></td>';
     }));
     h += '</tr>';
@@ -3980,9 +4806,6 @@ function studentsFor(exam, section) {
 
 /* ---------------- Item analysis ---------------- */
 const ITEMS_UI = { sort: 'num', onlyFlagged: false };
-/* Which area/grade/year the "Subjects with more than one teacher" panel
-   on the Upload page is currently configuring. */
-const MT_UI = { area: '', grade: '', sy: '' };
 /* Row data for one class's item table, shared between the on-screen panel
    and the Excel export. */
 function itemAnalysisRows(exam, cfg) {
@@ -4010,8 +4833,7 @@ function renderItemsPanel(exam, cfg) {
   const weakDisc = list.filter(i => i.d < 0.20).length;
   const negDisc = list.filter(i => i.d < 0).length;
 
-  let h = '<div class="panel"><h3>' + esc(exam.area) + ' — Grade ' + exam.grade +
-    (teacherCountForExam(exam) > 1 ? ' — Teacher ' + (exam.teacherSlot || 1) : '') +
+  let h = '<div class="panel"><h3>' + esc(classTitle(exam)) +
     (FILTER.sections.length ? ' — ' + esc(FILTER.sections.join(', ')) : ' — all sections') + '</h3>';
   h += '<div class="stats">' +
     stat('Test takers', st.n) +
@@ -4116,6 +4938,7 @@ function viewItems() {
     'Difficulty and discrimination for every item, matched to the competency, learning objective and cognitive domain it was written for. Ticking more than one learning area or grade level shows one panel per class.');
   h += '<div class="wrap">' + contextBar();
   if (!DB.exams.length) return h + noData('No ZipGrade results have been uploaded.') + '</div>';
+  if (!filterReady()) return h + filterPrompt() + '</div>';
   if (!EXAMS().length) return h + noCycleData() + '</div>';
 
   h += '<div class="panel"><div class="controls">' +
@@ -4132,7 +4955,7 @@ function viewItems() {
 
   const exams = EXAMS().slice().sort(sortExam);
   if (!exams.length) h += noData('No class on file matches every ticked filter.');
-  exams.forEach(exam => { h += renderItemsPanel(exam, cfg); });
+  h += renderClassPanels(exams, cfg, renderItemsPanel, 'item analysis');
 
   h += '</div>';
   return h;
@@ -4203,8 +5026,7 @@ function competencyRows(exam, cfg) {
 }
 function renderCompetencyPanel(exam, cfg) {
   const data = competencyRows(exam, cfg);
-  let h = '<div class="panel"><h3>' + esc(exam.area) + ' — Grade ' + exam.grade +
-    (teacherCountForExam(exam) > 1 ? ' — Teacher ' + (exam.teacherSlot || 1) : '') +
+  let h = '<div class="panel"><h3>' + esc(classTitle(exam)) +
     (FILTER.sections.length ? ' — ' + esc(FILTER.sections.join(', ')) : ' — all sections') + '</h3>';
   if (!data) return h + '<div class="panel-body"><div class="empty-state"><div class="big">No table of specifications</div>' +
     '<p>Upload the TOS for ' + esc(exam.area) + ' ' + exam.grade + ', or link an existing one on the upload page.</p>' +
@@ -4260,6 +5082,7 @@ function viewCompetency() {
     'Each competency and learning objective in the table of specifications, with the share of items answered correctly. Ticking more than one learning area or grade level shows one panel per class.');
   h += '<div class="wrap">' + contextBar();
   if (!DB.exams.length) return h + noData('No ZipGrade results have been uploaded.') + '</div>';
+  if (!filterReady()) return h + filterPrompt() + '</div>';
   if (!EXAMS().length) return h + noCycleData() + '</div>';
 
   h += '<div class="panel"><div class="dlbar"><span class="spacer"></span>' +
@@ -4268,7 +5091,7 @@ function viewCompetency() {
 
   const exams = EXAMS().slice().sort(sortExam);
   if (!exams.length) h += noData('No class on file matches every ticked filter.');
-  exams.forEach(exam => { h += renderCompetencyPanel(exam, cfg); });
+  h += renderClassPanels(exams, cfg, renderCompetencyPanel, 'competency results');
 
   h += '</div>';
   return h;
@@ -4276,8 +5099,7 @@ function viewCompetency() {
 
 /* ---------------- Remediation ---------------- */
 function renderRemediationPanel(exam, cfg) {
-  let h = '<div class="panel"><h3>' + esc(exam.area) + ' — Grade ' + exam.grade +
-    (teacherCountForExam(exam) > 1 ? ' — Teacher ' + (exam.teacherSlot || 1) : '') +
+  let h = '<div class="panel"><h3>' + esc(classTitle(exam)) +
     (FILTER.sections.length ? ' — ' + esc(FILTER.sections.join(', ')) : ' — all sections') + '</h3>';
   const tos = tosFor(exam);
   if (!tos) return h + '<div class="panel-body"><div class="empty-state"><div class="big">No table of specifications</div>' +
@@ -4296,8 +5118,7 @@ function renderRemediationPanel(exam, cfg) {
   const anyNeed = new Set();
   ca.forEach(c => c.needing.forEach(x => anyNeed.add(x.student.name + '|' + x.student.id)));
 
-  h += '<div class="panel"><h3>' + esc(exam.area) + ' — Grade ' + exam.grade +
-    (teacherCountForExam(exam) > 1 ? ' — Teacher ' + (exam.teacherSlot || 1) : '') + '<span class="sub">' +
+  h += '<div class="panel"><h3>' + esc(classTitle(exam)) + '<span class="sub">' +
     (FILTER.sections.length ? esc(FILTER.sections.join(', ')) : 'all sections') + '</span></h3>' +
     '<div class="stats">' +
     stat('Learners in the class', ss.length) +
@@ -4347,6 +5168,7 @@ function viewRemediation() {
     'Learners who fall below ' + cfg.remediation + '% on each competency, narrowed by the filters below. Ticking more than one learning area or grade level shows one panel per class.');
   h += '<div class="wrap">' + contextBar();
   if (!DB.exams.length) return h + noData('No ZipGrade results have been uploaded.') + '</div>';
+  if (!filterReady()) return h + filterPrompt() + '</div>';
   if (!EXAMS().length) return h + noCycleData() + '</div>';
 
   h += '<div class="panel"><div class="dlbar"><span class="spacer"></span>' +
@@ -4355,7 +5177,18 @@ function viewRemediation() {
 
   const exams = EXAMS().slice().sort(sortExam);
   if (!exams.length) h += noData('No class on file matches every ticked filter.');
-  exams.forEach(exam => { h += renderRemediationPanel(exam, cfg); });
+  h += renderClassPanels(exams, cfg, renderRemediationPanel, 'remediation list', group => {
+    let need = 0, any = false;
+    group.forEach(e => {
+      const t = tosFor(e);
+      if (!t || e.source === 'manual') return;
+      any = true;
+      const who = new Set();
+      competencyAnalysis(studentsOf(e), t, cfg).forEach(c => c.needing.forEach(x => who.add(x.student.name + '|' + x.student.id)));
+      need += who.size;
+    });
+    return any ? stat('Needing help on at least one competency', need, need ? 'red' : 'green') : '';
+  });
 
   h += '</div>';
   return h;
@@ -4448,8 +5281,20 @@ function viewExport() {
     'Produces “test results.xlsx” in the division summary layout: one row per learning area per grade level, with the item analysis and the least learned and mastered competencies.');
   h += '<div class="wrap">' + contextBar();
   if (!DB.exams.length) return h + noData('No ZipGrade results have been uploaded.') + '</div>';
+  if (!filterReady()) return h + filterPrompt() + '</div>';
   if (!EXAMS().length) return h + noCycleData() + '</div>';
 
+  if (multiCycleView()) {
+    return h + '<div class="panel"><div class="empty-state"><div class="big">Tick one term and one assessment</div>' +
+      '<p>The division summary covers a single assessment. In steps 2 and 3 above, leave just one term and one assessment ticked.</p>' +
+      '</div></div></div>';
+  }
+  const anySplit = GRADES.some(g => LEARNING_AREAS.some(a => { const r = divisionRow(g, a, cfg); return r && r.teachers > 1; }));
+  if (anySplit) {
+    h += '<div class="note info">Where a learning area was taught by more than one teacher, the file shows one combined row: ' +
+      'enrolment, test takers, HP/AP/LP and the number of correct responses per item are added up, and mean, MPS and SD are averaged. ' +
+      'The least learned and most mastered competencies come from the teacher with the most learners. Open the arrow to see each teacher’s figures.</div>';
+  }
   h += '<div class="panel"><h3>What the file will contain<span class="sub">' + esc(ctxLabel()) + '</span></h3><div class="panel-body flush"><div class="tbl-scroll">' +
     '<table class="grid"><thead><tr><th>Grade</th><th>Learning area</th><th class="num">Enrolment</th>' +
     '<th class="num">Takers</th><th class="num">Items</th><th class="num">Mean</th><th class="num">MPS</th>' +
@@ -4459,18 +5304,36 @@ function viewExport() {
   let rowCount = 0;
   GRADES.forEach(g => {
     LEARNING_AREAS.forEach(area => {
-      const ex = EXAMS().find(e => e.grade === g && e.area === area);
-      if (!ex) return;
+      const row = divisionRow(g, area, cfg);
+      if (!row) return;
       rowCount++;
-      const st = summarise(studentsOf(ex), ex.totalItems, cfg);
-      const lm = leastAndMastered(ex, cfg);
-      h += '<tr><td class="num">' + g + '</td><td class="rowhead">' + esc(area) + '</td>' +
-        '<td class="num">' + enrolFor(ex) + '</td><td class="num">' + st.n + '</td>' +
-        '<td class="num">' + ex.totalItems + '</td><td class="num">' + st.mean.toFixed(2) + '</td>' +
-        '<td class="num">' + st.mps.toFixed(0) + '</td><td class="num">' + st.sd.toFixed(0) + '</td>' +
-        '<td class="num">' + st.HP + '</td><td class="num">' + st.AP + '</td><td class="num">' + st.LP + '</td>' +
-        '<td>' + compCell(lm.least, lm.noTOS, 'bad', cfg.leastLearned, 'least learned') + '</td>' +
-        '<td>' + compCell(lm.mastered, lm.noTOS, 'good', cfg.mastered, 'most mastered') + '</td></tr>';
+      const lmCells = '<td>' + compCell(row.lm.least, row.lm.noTOS, 'bad', cfg.leastLearned, 'least learned') + '</td>' +
+        '<td>' + compCell(row.lm.mastered, row.lm.noTOS, 'good', cfg.mastered, 'most mastered') + '</td>';
+      const nums = x => '<td class="num">' + x.enrol + '</td><td class="num">' + x.n + '</td>' +
+        '<td class="num">' + x.items + '</td><td class="num">' + x.mean.toFixed(2) + '</td>' +
+        '<td class="num"><strong>' + x.mps.toFixed(0) + '</strong></td><td class="num">' + x.sd.toFixed(0) + '</td>' +
+        '<td class="num">' + x.HP + '</td><td class="num">' + x.AP + '</td><td class="num">' + x.LP + '</td>';
+      if (row.teachers === 1) {
+        h += '<tr><td class="num">' + g + '</td><td class="rowhead">' + esc(area) + '</td>' + nums(row) + lmCells + '</tr>';
+        return;
+      }
+      /* combined row, with each teacher's own figures behind the arrow */
+      const key = 'div:' + classKey(row.exams[0]), open = OPEN_GROUPS.has(key);
+      const mainSlot = row.main.e.teacherSlot || 1;
+      h += '<tr class="combined-row"><td class="num">' + g + '</td><td class="rowhead">' +
+        '<button type="button" class="grp-toggle" data-grp="' + esc(key) + '" aria-expanded="' + open + '" ' +
+        'title="Show or hide each teacher’s figures">' + CARET + '<span>' + esc(area) + '</span></button>' +
+        '<div class="comp-sub">' + row.teachers + ' teachers · combined</div></td>' + nums(row) +
+        lmCells.replace('<td>', '<td><div class="comp-sub" style="margin:0 0 4px">From Teacher ' + mainSlot + '’s set (' + row.main.enrol + ' learners)</div>') +
+        '</tr>';
+      row.sets.forEach(x => {
+        const slot = x.e.teacherSlot || 1;
+        const used = x === row.main;
+        h += '<tr class="breakdown-row" data-grp-of="' + esc(key) + '"' + (open ? '' : ' hidden') + '>' +
+          '<td></td><td class="rowhead"><span class="part-label">Teacher ' + slot + '</span></td>' +
+          nums({ enrol: x.enrol, n: x.st.n, items: x.e.totalItems, mean: x.st.mean, mps: x.st.mps, sd: x.st.sd, HP: x.st.HP, AP: x.st.AP, LP: x.st.LP }) +
+          '<td colspan="2">' + (used ? '<span class="pill info">least learned and most mastered are taken from this set</span>' : '') + '</td></tr>';
+      });
     });
   });
   h += '</tbody></table></div></div>';
@@ -4540,6 +5403,48 @@ function leastAndMastered(exam, cfg) {
     mastered: mastered.map(pack),
     noTOS: false
   };
+}
+
+/* One learning area and grade level of the division summary. A class
+   split between teachers is combined: enrolment, test takers, HP/AP/LP
+   and each item's number of correct responses (by item number) add up;
+   mean, MPS and SD are the average of the teachers' own figures, as on
+   the Mean, MPS, SD page; total items is the longest test. The least
+   learned and most mastered competencies come from the set of the
+   teacher with the most learners (enrolment, then test takers), since
+   each teacher's items differ. */
+function divisionRow(grade, area, cfg) {
+  const exams = EXAMS().filter(e => e.grade === grade && e.area === area).sort(sortExam);
+  if (!exams.length) return null;
+  const sets = exams.map(e => ({ e, st: summarise(studentsOf(e), e.totalItems, cfg), enrol: enrolFor(e) }));
+  const main = sets.slice().sort((a, b) => (b.enrol - a.enrol) || (b.st.n - a.st.n) ||
+    ((a.e.teacherSlot || 1) - (b.e.teacherSlot || 1)))[0];
+  const one = sets.length === 1;
+  const avg = k => one ? sets[0].st[k] : round(sets.reduce((a, x) => a + x.st[k], 0) / sets.length);
+  const sum = k => sets.reduce((a, x) => a + x.st[k], 0);
+  const correct = [];
+  exams.forEach(e => itemAnalysis(studentsOf(e), e.totalItems).forEach((it, k) => {
+    correct[k] = (correct[k] || 0) + (it.correct || 0);
+  }));
+  return {
+    exams, sets, main, teachers: exams.length,
+    enrol: sets.reduce((a, x) => a + x.enrol, 0), n: sum('n'),
+    items: Math.max(...exams.map(e => e.totalItems)),
+    mean: avg('mean'), mps: avg('mps'), sd: avg('sd'), HP: sum('HP'), AP: sum('AP'), LP: sum('LP'),
+    correct, lm: leastAndMastered(main.e, cfg)
+  };
+}
+function divisionRowNote(row) {
+  return 'Combined from ' + row.teachers + ' teachers: enrolment, takers, HP/AP/LP and item counts added up; ' +
+    'mean, MPS and SD averaged. Least learned and most mastered from Teacher ' + (row.main.e.teacherSlot || 1) +
+    '’s set (' + row.main.enrol + ' learners).';
+}
+/* Worksheet names must be unique within a workbook. */
+function uniqueSheetName(wb, n) {
+  const base = safeSheet(n);
+  let name = base, i = 2;
+  while (wb.getWorksheet(name)) { const suf = ' (' + (i++) + ')'; name = base.slice(0, 31 - suf.length) + suf; }
+  return name;
 }
 
 /* ---------------- Excel writers ---------------- */
@@ -4643,17 +5548,17 @@ function buildSummarySheet(wb, cfg) {
     b.rows.forEach((areaLabel, ri) => {
       const r = first + ri;
       ws.getRow(r).height = 15.75;
-      const exam = (b.gnum <= 10) ? EXAMS().find(e => e.grade === b.gnum && e.area === areaLabel) : null;
-      const st = exam ? summarise(studentsOf(exam), exam.totalItems, cfg) : null;
-      const lm = exam ? leastAndMastered(exam, cfg) : { least: [], mastered: [] };
-      const ia2 = exam ? itemAnalysis(studentsOf(exam), exam.totalItems) : [];
+      const row = (b.gnum <= 10) ? divisionRow(b.gnum, areaLabel, cfg) : null;
+      const lm = row ? row.lm : { least: [], mastered: [] };
 
       const nameCell = ws.getCell(r, 1);
       nameCell.value = areaLabel;
       styleCell(nameCell, { font: { name: 'Century Gothic', size: 11 }, align: { horizontal: 'left', vertical: 'top', wrapText: true } });
+      /* a split subject says so in a cell note, leaving the layout as the template has it */
+      if (row && row.teachers > 1) nameCell.note = divisionRowNote(row);
 
-      const vals = st
-        ? [enrolFor(exam), st.n, exam.totalItems, st.mean, st.mps, st.sd, st.HP, st.AP, st.LP]
+      const vals = row
+        ? [row.enrol, row.n, row.items, row.mean, row.mps, row.sd, row.HP, row.AP, row.LP]
         : [null, null, ITEM_COLS, null, null, null, null, null, null];
       vals.forEach((v, i) => {
         const c = ws.getCell(r, i + 2);
@@ -4666,7 +5571,7 @@ function buildSummarySheet(wb, cfg) {
       });
       for (let k = 0; k < ITEM_COLS; k++) {
         const c = ws.getCell(r, 11 + k);
-        if (ia2[k]) c.value = ia2[k].correct;
+        if (row && row.correct[k] !== undefined) c.value = row.correct[k];
         styleCell(c, { font: { name: 'Century Gothic', size: 10 }, align: { horizontal: 'center', vertical: 'top' } });
       }
       for (let k = 0; k < 3; k++) {
@@ -4719,14 +5624,15 @@ async function downloadFull() {
     const manual = exam.source === 'manual';
     const map = itemMap(tos);
     const ia = itemAnalysis(studentsOf(exam), exam.totalItems);
-    const ws = wb.addWorksheet(safeSheet(exam.area + ' ' + exam.grade));
+    const tag = (teacherCountForExam(exam) > 1 || (exam.teacherSlot || 1) > 1) ? ' T' + (exam.teacherSlot || 1) : '';
+    const ws = wb.addWorksheet(uniqueSheetName(wb, exam.area + ' ' + exam.grade + tag));
     ws.columns = [
       { width: 6 }, { width: 34 }, { width: 52 }, { width: 52 }, { width: 8 }, { width: 9 },
       { width: 9 }, { width: 10 }, { width: 8 }, { width: 16 }, { width: 8 },
       { width: 18 }, { width: 9 }, { width: 22 }
     ];
     let r = 1;
-    ws.getCell(r, 1).value = exam.area + ' ' + exam.grade + ' — item analysis';
+    ws.getCell(r, 1).value = classTitle(exam) + ' — item analysis';
     ws.getCell(r, 1).font = { name: 'Century Gothic', size: 14, bold: true };
     r += 1;
     ws.getCell(r, 1).value = cfg.school + ' · ' + reportTitle() + ' · SY ' + CTX.sy +
@@ -4791,11 +5697,11 @@ async function downloadFull() {
       /* remediation — needs per-student detail, which a manually entered
          exam never has, so this sheet is only meaningful for a scanned one. */
       if (!manual) {
-        const wsR = wb.addWorksheet(safeSheet('Rem ' + exam.area + ' ' + exam.grade));
+        const wsR = wb.addWorksheet(uniqueSheetName(wb, 'Rem ' + exam.area + ' ' + exam.grade + tag));
         wsR.columns = [{ width: 30 }, { width: 46 }, { width: 54 }, { width: 16 }, { width: 28 },
           { width: 14 }, { width: 10 }, { width: 11 }, { width: 15 }, { width: 26 }];
         let rr = 1;
-        wsR.getCell(rr, 1).value = 'Remediation list — ' + exam.area + ' ' + exam.grade;
+        wsR.getCell(rr, 1).value = 'Remediation list — ' + classTitle(exam);
         wsR.getCell(rr, 1).font = { name: 'Century Gothic', size: 14, bold: true };
         rr++;
         wsR.getCell(rr, 1).value = 'Learners below ' + cfg.remediation + '% of the items for a competency.';
@@ -4976,7 +5882,9 @@ function bindView() {
     const ex = DB.exams.find(e => e.id === b.dataset.drill);
     if (!ex) return;
     FILTER.areas = [ex.area]; FILTER.grades = [ex.grade];
-    FILTER.sections = sortSections([...new Set(ex.students.filter(s => !isLSEN(s)).map(s => s.section))]);
+    /* every section of the class, whichever teacher had it */
+    const cls = EXAMS().filter(e => e.area === ex.area && e.grade === ex.grade);
+    FILTER.sections = sortSections([...new Set(cls.flatMap(e => e.students.filter(s => !isLSEN(s)).map(s => s.section)))]);
     saveFilter(); syncCtxFromFilter();
     go('assessmentArea');
   });
@@ -5178,48 +6086,47 @@ function bindView() {
   on('selSort', 'change', e => { ITEMS_UI.sort = e.target.value; render(); });
   on('chkFlag', 'change', e => { ITEMS_UI.onlyFlagged = e.target.checked; render(); });
 
-  /* uploads — the generic pair above is a fixed fallback; whenever the
-     multi-teacher panel is showing 2 or 3 slots it renders its OWN
-     Teacher 1/2/3 zones (dropExamT1..3 etc), so all three need wiring
-     here too, not just T2/T3. */
-  [['dropExam', 'fileExam', 1], ['dropTOS', 'fileTOS', 1], ['dropCreate', 'fileCreate', 1],
-   ['dropExamT1', 'fileExamT1', 1], ['dropTOST1', 'fileTOST1', 1],
-   ['dropExamT2', 'fileExamT2', 2], ['dropTOST2', 'fileTOST2', 2],
-   ['dropExamT3', 'fileExamT3', 3], ['dropTOST3', 'fileTOST3', 3]].forEach(([dz, fi, slot]) => {
-    const d = $(dz), f = $(fi);
-    if (!d || !f) return;
+  /* uploads — the step-by-step boxes. Choosing a step moves the focus on
+     to the next one; changing any of steps 1-4 re-reads how many
+     teachers already have files for the new choice. */
+  const upNext = id => { const el = $(id); if (el && !el.disabled) el.focus(); };
+  const upChanged = () => { const p = upPick(); UP_UI.teachers = p ? upTeachersOnFile(p) : 0; };
+  on('upSy', 'change', e => { UP_UI.sy = e.target.value; upChanged(); render(); upNext('upTerm'); });
+  on('upTerm', 'change', e => { UP_UI.term = e.target.value; upChanged(); render(); upNext('upExam'); });
+  on('upExam', 'change', e => { UP_UI.exam = e.target.value; upChanged(); render(); upNext('upArea'); });
+  on('upArea', 'change', e => {
+    UP_UI.area = e.target.value; upChanged(); render();
+    const b = document.querySelector('#upTeachers button.on') || document.querySelector('#upTeachers button');
+    if (b && !b.disabled) b.focus();
+  });
+  document.querySelectorAll('#upTeachers button').forEach(b => b.onclick = () => {
+    UP_UI.teachers = +b.dataset.n; render();
+    const z = document.querySelector('[data-up-drop]'); if (z) z.focus();
+  });
+  document.querySelectorAll('[data-up-drop]').forEach(d => {
+    const f = $(d.dataset.upDrop), slot = +d.dataset.slot;
+    if (!f) return;
+    const take = async files => {
+      const p = upPick();
+      if (!p || !files.length) return;
+      const log = $('log'); if (log && !UPLOAD_LOG.length) log.innerHTML = '';
+      const n = await ingestFiles(files, $('log'), slot, p);
+      toast(n ? n + ' file' + (n > 1 ? 's' : '') + ' loaded for Teacher ' + slot : 'Nothing could be read from those files', !n);
+    };
     d.onclick = () => f.click();
     d.onkeydown = ev => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); f.click(); } };
     d.ondragover = ev => { ev.preventDefault(); d.classList.add('over'); };
     d.ondragleave = () => d.classList.remove('over');
-    d.ondrop = async ev => {
-      ev.preventDefault(); d.classList.remove('over');
-      const log = $('log'); if (log && !UPLOAD_LOG.length) log.innerHTML = '';
-      const n = await ingestFiles([...ev.dataTransfer.files], $('log'), slot);
-      toast(n ? n + ' file' + (n > 1 ? 's' : '') + ' loaded' : 'Nothing could be read from those files', !n);
-    };
-    f.onchange = async ev => {
-      const log = $('log'); if (log && !UPLOAD_LOG.length) log.innerHTML = '';
-      const n = await ingestFiles([...ev.target.files], $('log'), slot);
-      toast(n ? n + ' file' + (n > 1 ? 's' : '') + ' loaded' : 'Nothing could be read from those files', !n);
-      ev.target.value = '';
-    };
-  });
-
-  /* subjects with more than one teacher */
-  on('mtArea', 'change', e => { MT_UI.area = e.target.value; render(); });
-  on('mtGrade', 'change', e => { MT_UI.grade = +e.target.value; render(); });
-  on('mtSy', 'change', e => { MT_UI.sy = e.target.value; render(); });
-  document.querySelectorAll('#mtCount button').forEach(b => b.onclick = () => {
-    setTeacherCount(MT_UI.area, MT_UI.grade, MT_UI.sy, +b.dataset.n);
-    render();
-    toast(MT_UI.area + ' — Grade ' + MT_UI.grade + ' set to ' + b.dataset.n + (b.dataset.n === '1' ? ' teacher' : ' teachers'));
+    d.ondrop = ev => { ev.preventDefault(); d.classList.remove('over'); take([...ev.dataTransfer.files]); };
+    f.onchange = ev => { const files = [...ev.target.files]; ev.target.value = ''; take(files); };
   });
 
   document.querySelectorAll('[data-delx]').forEach(b => b.onclick = () => {
     if (!confirm('Remove this exam and its results?')) return;
     const id = b.dataset.delx;
+    const gone = DB.exams.find(e => e.id === id);
     DB.exams = DB.exams.filter(e => e.id !== id);
+    if (gone) syncTeacherCount(gone.area, gone.grade, gone.sy);
     dropRemote([id]); saveLocal(); render(); toast('Exam removed');
   });
   document.querySelectorAll('[data-delt]').forEach(b => b.onclick = () => {
@@ -5238,7 +6145,7 @@ function bindView() {
     const clash = DB.exams.find(x => x.id !== e.id && x.area === e.area && x.grade === e.grade &&
       x.sy === e.sy && +x.term === +e.term && x.examType === e.examType && (x.teacherSlot || 1) === newSlot);
     if (clash) { toast('Teacher ' + newSlot + ' is already used by another upload for this class — remove or reslot that one first.', true); render(); return; }
-    e.teacherSlot = newSlot; save(e.id); render(); toast(e.area + ' ' + e.grade + ' set to Teacher ' + newSlot);
+    e.teacherSlot = newSlot; syncTeacherCount(e.area, e.grade, e.sy); save(e.id); render(); toast(e.area + ' ' + e.grade + ' set to Teacher ' + newSlot);
   });
   on('clearExams', 'click', () => {
     if (!confirm('Remove every uploaded exam? Tables of specifications are kept.')) return;
@@ -5259,7 +6166,6 @@ function bindView() {
     DB.cfg.leastLearned = n('cfgLeast', DB.cfg.leastLearned);
     DB.cfg.remediation = n('cfgRem', DB.cfg.remediation);
     save('settings'); render(); toast('Settings saved');
-    document.querySelector('.rail-head .school').textContent = DB.cfg.school;
   });
   on('resetCfg', 'click', () => { DB.cfg = { ...DEFAULT_CFG }; save('settings'); render(); toast('Defaults restored'); });
   document.querySelectorAll('[data-enrol]').forEach(i => i.onchange = () => {
@@ -5387,7 +6293,7 @@ function bindView() {
 function exportDashboardPDF() {
   const exams = EXAMS();
   const areaRows = computeAreaSummary(allAreas(), exams).map(r => [r.area, r.takers, r.mean.toFixed(2), r.mps.toFixed(0), r.sd.toFixed(0)]);
-  const flagRows = weakestFlagsRows(computeWeakestFlags(exams, DB.cfg).slice(0, 14));
+  const flagRows = weakestRowsExport(computeWeakestRows(exams, DB.cfg).slice(0, 14));
   simpleTablePDF({
     title: 'Assessment dashboard',
     subtitle: ctxLabel(),
@@ -5401,7 +6307,7 @@ function exportDashboardPDF() {
 async function exportDashboardXLSX() {
   const exams = EXAMS();
   const areaRows = computeAreaSummary(allAreas(), exams).map(r => [r.area, r.takers, r.mean, r.mps, r.sd]);
-  const flagRows = weakestFlagsRows(computeWeakestFlags(exams, DB.cfg).slice(0, 14));
+  const flagRows = weakestRowsExport(computeWeakestRows(exams, DB.cfg).slice(0, 14));
   await simpleTableXLSX({
     sheetName: 'Dashboard',
     title: 'Assessment dashboard',
@@ -5443,9 +6349,9 @@ function exportAssessmentAreaPDF() {
   const head = bySection
     ? ['Learning area', 'Grade', 'Section', 'Takers', 'Items', 'Mean', 'MPS', 'SD', 'HP', 'AP', 'LP']
     : ['Learning area', 'Grade', 'Enrolment', 'Takers', 'Items', 'Mean', 'MPS', 'SD', 'HP', 'AP', 'LP'];
-  const rows = computeMeanMpsSdRows(DB.cfg).map(r => bySection
-    ? [r.area, r.grade, r.section, r.n, r.items, r.mean.toFixed(2), r.mps.toFixed(0), r.sd.toFixed(0), r.HP, r.AP, r.LP]
-    : [r.area, r.grade, r.enrol, r.n, r.items, r.mean.toFixed(2), r.mps.toFixed(0), r.sd.toFixed(0), r.HP, r.AP, r.LP]);
+  const rows = meanMpsSdShownRows(DB.cfg).map(r => bySection
+    ? [r.label, r.grade, r.section, r.n, r.items, r.mean.toFixed(2), r.mps.toFixed(0), r.sd.toFixed(0), r.HP, r.AP, r.LP]
+    : [r.label, r.grade, r.enrol, r.n, r.items, r.mean.toFixed(2), r.mps.toFixed(0), r.sd.toFixed(0), r.HP, r.AP, r.LP]);
   simpleTablePDF({
     title: 'Mean, MPS, SD',
     subtitle: ctxLabel(),
@@ -5458,9 +6364,9 @@ async function exportAssessmentAreaXLSX() {
   const head = bySection
     ? ['Learning area', 'Grade', 'Section', 'Takers', 'Items', 'Mean', 'MPS', 'SD', 'HP', 'AP', 'LP']
     : ['Learning area', 'Grade', 'Enrolment', 'Takers', 'Items', 'Mean', 'MPS', 'SD', 'HP', 'AP', 'LP'];
-  const rows = computeMeanMpsSdRows(DB.cfg).map(r => bySection
-    ? [r.area, r.grade, r.section, r.n, r.items, r.mean, r.mps, r.sd, r.HP, r.AP, r.LP]
-    : [r.area, r.grade, r.enrol, r.n, r.items, r.mean, r.mps, r.sd, r.HP, r.AP, r.LP]);
+  const rows = meanMpsSdShownRows(DB.cfg).map(r => bySection
+    ? [r.label, r.grade, r.section, r.n, r.items, r.mean, r.mps, r.sd, r.HP, r.AP, r.LP]
+    : [r.label, r.grade, r.enrol, r.n, r.items, r.mean, r.mps, r.sd, r.HP, r.AP, r.LP]);
   await simpleTableXLSX({
     sheetName: 'Mean MPS SD',
     title: 'Mean, MPS, SD',
@@ -5485,7 +6391,7 @@ function competencyExportTables(cfg) {
     const data = competencyRows(exam, cfg);
     if (!data) return null;
     return {
-      heading: exam.area + ' — Grade ' + exam.grade,
+      heading: classTitle(exam),
       head: ['Topic', 'Learning competency', 'Items', 'Mastery %', 'Status', 'For remediation'],
       body: competencyExportRows(exam, data, cfg),
       numFmtCols: [3]
@@ -5516,7 +6422,7 @@ async function exportCompetencyXLSX() {
 
 /* ---------------- Least Learned Competencies export ---------------- */
 function exportLeastLearnedPDF() {
-  const rows = weakestFlagsRows(computeWeakestFlags(EXAMS(), DB.cfg));
+  const rows = weakestRowsExport(computeWeakestRows(EXAMS(), DB.cfg));
   simpleTablePDF({
     title: 'Least Learned Competencies',
     subtitle: ctxLabel(),
@@ -5525,7 +6431,7 @@ function exportLeastLearnedPDF() {
   });
 }
 async function exportLeastLearnedXLSX() {
-  const rows = weakestFlagsRows(computeWeakestFlags(EXAMS(), DB.cfg));
+  const rows = weakestRowsExport(computeWeakestRows(EXAMS(), DB.cfg));
   await simpleTableXLSX({
     sheetName: 'Least learned',
     title: 'Least Learned Competencies',
@@ -5550,7 +6456,7 @@ async function exportItemsXLSX() {
         manual ? 'n/a' : round(it.d, 2), manual ? '—' : it.disc.label, manual ? 'n/a' : round(it.rpb, 2), action(it, manual)];
     });
     return {
-      heading: exam.area + ' — Grade ' + exam.grade,
+      heading: classTitle(exam),
       head: ['Item', 'Topic', 'Learning competency', 'Learning objective', 'Domain', 'Correct', 'Wrong',
         '% correct', 'p', 'Difficulty', 'D', 'Discrimination', 'rpb', 'Action'],
       body: rows, numFmtCols: [7, 8, 10, 12]
@@ -5581,7 +6487,7 @@ async function exportRemediationXLSX() {
         x.student.score + '/' + exam.totalItems]);
     }));
     if (rows.length) tables.push({
-      heading: exam.area + ' — Grade ' + exam.grade,
+      heading: classTitle(exam),
       head: ['Learning area', 'Grade', 'Section', 'Learner', 'Student ID', 'Topic', 'Learning competency',
         'Learning objectives', 'Items', 'Correct', 'Answered', '% on competency', 'Items missed', 'Overall score'],
       body: rows, numFmtCols: [11]
@@ -5738,7 +6644,7 @@ function syncPanel() {
       '<input id="syncUrl" placeholder="https://script.google.com/macros/s/…/exec" value="' + esc(SYNC.url) + '"></div>' +
       '<button class="btn" id="testSync">Test the connection</button>' +
       '<p class="hint">Setting the backend up takes about five minutes and costs nothing — the steps are in the setup guide ' +
-      'that came with this file. Once it is running, sign out and sign back in to switch this page over.</p>';
+      'that came with this file. Once it is running, log out (menu at the top right) and sign back in to switch this page over.</p>';
   }
   h += '</div></div>';
   return h;
@@ -5758,7 +6664,7 @@ function bindSyncPanel() {
       const saved = SYNC.url; SYNC.url = url;
       await api('ping', {});
       try { localStorage.setItem('canhs-url', url); } catch (er) {}
-      toast('The backend answered. Sign out and sign in again to connect.');
+      toast('The backend answered. Log out and sign in again to connect.');
       SYNC.url = url;
       render();
     } catch (err) { toast(err.message, true); }
@@ -6226,6 +7132,7 @@ function viewLearners() {
 
   h += contextBar();
   if (!DB.exams.length) { h += noData('No ZipGrade results have been uploaded.'); return h + '</div>'; }
+  if (!filterReady()) { h += filterPrompt(); return h + '</div>'; }
   if (!EXAMS().length) { h += noCycleData(); return h + '</div>'; }
 
   /* One ticking panel per class that matches the filters above — with
@@ -6661,10 +7568,10 @@ function competencyObjectives(c) {
     load();
     loadCtx();
     loadFilter();
-    document.querySelector('.rail-head .school').textContent = DB.cfg.school;
-    document.getElementById('whoami').textContent = cloud && SYNC.user ? SYNC.user.name : 'admin';
+    LOCAL_UPDATED = Date.now();
     buildNav();
     render();
+    paintUpdated();
     if (cloud) { setStatus('syncing'); startAutoSync(); syncNow(true); }
     else setStatus('idle', 'This copy is not connected to the school server.');
   }
@@ -6686,7 +7593,11 @@ function competencyObjectives(c) {
     } else {
       if (attemptLogin(u.value, p.value)) {
         SYNC.mode = 'local';
-        try { sessionStorage.setItem('canhs-session', '1'); } catch (e) {}
+        LOCAL_USER = String(u.value || '').trim().toLowerCase();
+        try {
+          sessionStorage.setItem('canhs-session', '1');
+          sessionStorage.setItem('canhs-local-user', LOCAL_USER);
+        } catch (e) {}
         enter(false);
       } else {
         err.textContent = 'That username and password did not match.';
@@ -6701,14 +7612,7 @@ function competencyObjectives(c) {
     el.addEventListener('keydown', function (e) { if (e.key === 'Enter') tryLogin(); });
   });
 
-  document.getElementById('signout').onclick = function () {
-    try {
-      sessionStorage.removeItem('canhs-session');
-      sessionStorage.removeItem('canhs-token');
-      sessionStorage.removeItem('canhs-user');
-    } catch (e) {}
-    location.reload();
-  };
+  /* Log out now lives in the account menu at the top right (logOut()). */
 
   var tok = '', surl = '', prof = null, localSess = false;
   try {
@@ -6716,6 +7620,7 @@ function competencyObjectives(c) {
     surl = sessionStorage.getItem('canhs-url') || '';
     prof = JSON.parse(sessionStorage.getItem('canhs-user') || 'null');
     localSess = sessionStorage.getItem('canhs-session') === '1';
+    LOCAL_USER = sessionStorage.getItem('canhs-local-user') || '';
   } catch (e) {}
 
   if (tok && surl && prof) {
