@@ -185,16 +185,23 @@ html,body{height:100%}
 .um-item .um-sub.bad{color:var(--red)}
 .um-mobile{display:none}
 
-#appBody{flex:1;min-height:0;display:grid;grid-template-columns:var(--rail) 1fr}
+/* The single row is held to the space under the banner (minmax(0,1fr)),
+   so a menu taller than the screen scrolls inside the sidebar — with its
+   scrollbar at the sidebar's right edge — instead of stretching the whole
+   page and scrolling the banner out of view. */
+#appBody{flex:1;min-height:0;display:grid;grid-template-columns:var(--rail) 1fr;grid-template-rows:minmax(0,1fr)}
 
 #rail{
   background:var(--teal-deep);color:#D5E0EE;
   display:flex;flex-direction:column;
-  height:100%;
+  height:100%;min-height:0;overflow:hidden;
 }
 .rail-head{padding:20px 20px 16px;border-bottom:1px solid rgba(255,255,255,.14)}
 .rail-head .mark{font-family:var(--serif);font-size:21px;line-height:1.25;color:#fff;font-weight:700;letter-spacing:.01em}
-#nav{flex:1;overflow:auto;padding:10px 0}
+#nav{
+  flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;padding:10px 0;
+  scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.4) rgba(255,255,255,.07);
+}
 .nav-group{padding:14px 20px 5px;font-size:12.1px;color:#E8B93B;letter-spacing:.06em}
 .nav-item{
   display:flex;align-items:center;gap:9px;width:100%;text-align:left;
@@ -318,7 +325,9 @@ button.cell:hover{outline:2px solid var(--blue);outline-offset:-2px}
 
 /* step-by-step results filter */
 .fsteps{display:grid;gap:12px;padding:16px 18px}
-.fstep{display:grid;grid-template-columns:190px minmax(0,1fr);align-items:center;gap:8px 16px}
+.fstep{display:grid;grid-template-columns:170px 104px minmax(0,1fr);align-items:start;gap:8px 12px}
+.fstep-head{min-height:34px}
+.fstep .tick{min-height:34px}
 .fstep-head{display:flex;align-items:center;gap:10px}
 .fstep-head .n{
   flex:none;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;
@@ -326,28 +335,39 @@ button.cell:hover{outline:2px solid var(--blue);outline-offset:-2px}
 }
 .fstep-head .n.opt{background:none;border:1px dashed var(--rule-strong);color:var(--ink-soft)}
 .fstep-head label,.fstep-head .t{font-weight:600;font-size:15px;color:var(--ink)}
-.fstep-head .opt-note{font-weight:400;font-size:12.7px;color:var(--ink-faint);margin-left:4px}
+.fstep-head .opt-note{display:block;font-weight:400;font-size:12.1px;color:var(--ink-faint);margin-top:1px}
 .fstep.done .fstep-head .n{background:var(--green)}
 .fstep.locked .fstep-head .n:not(.opt){background:#B7C2CF}
 .fstep.locked .fstep-head .t,.fstep.locked .fstep-head label{color:var(--ink-faint)}
 .fstep-opt{border-top:1px solid var(--rule);padding-top:12px;align-items:start}
 .fstep-opt .fstep-head{padding-top:8px}
-.ticks{display:flex;flex-wrap:wrap;gap:8px;align-items:center;min-width:0}
-.ticks select{min-width:240px;max-width:100%;padding:8px 10px;border:1px solid var(--rule-strong);border-radius:2px;background:#fff}
+.ticks{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:8px;align-items:stretch;min-width:0}
+.ticks select{grid-column:1 / span 3;min-width:0;width:100%;padding:8px 10px;border:1px solid var(--rule-strong);border-radius:2px;background:#fff}
+.ticks .ticks-note{grid-column:1 / -1;margin:0;align-self:center}
+.fstep-all{min-width:0}
 .ticks select:focus{outline:2px solid var(--teal);outline-offset:0;border-color:var(--teal)}
 .tick{
-  display:inline-flex;align-items:center;gap:8px;padding:6px 12px 6px 10px;cursor:pointer;user-select:none;
-  border:1px solid var(--rule-strong);border-radius:3px;background:#fff;font-size:14.3px;line-height:1.3;
+  display:flex;align-items:center;gap:7px;padding:6px 8px;cursor:pointer;user-select:none;min-width:0;
+  border:1px solid var(--rule-strong);border-radius:3px;background:#fff;font-size:14px;line-height:1.25;
 }
+.tick span{min-width:0;overflow-wrap:break-word}
 .tick input{width:15px;height:15px;margin:0;accent-color:var(--teal);cursor:inherit}
 .tick:hover{border-color:var(--teal)}
 .tick.on{border-color:var(--teal);background:var(--teal-wash);font-weight:600}
 .tick.off,.tick.off:hover{opacity:.5;cursor:not-allowed;border-color:var(--rule-strong)}
 .tick:focus-within{outline:2px solid var(--teal);outline-offset:1px}
-.tick-all{background:none;border:0;padding:4px 6px;color:var(--blue);text-decoration:underline;cursor:pointer;font-size:13.2px}
-.tick-all:focus-visible{outline:2px solid var(--teal)}
+.tick.tickall{border-style:dashed;color:var(--ink-soft)}
+.tick.tickall.on{border-style:solid;color:var(--ink)}
+.fstep-all{align-self:start}
 .fstep-opt .msf{min-width:180px}
-@media(max-width:760px){.fstep{grid-template-columns:1fr}.fstep-opt .fstep-head{padding-top:0}.ticks select{min-width:0;width:100%}}
+/* as many columns as fit without wrapping a label ("Values Ed.", "Term Exam") */
+@media(max-width:1599px){.ticks{grid-template-columns:repeat(6,minmax(0,1fr))}}
+@media(max-width:1329px){.ticks{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media(max-width:1099px){.fstep{grid-template-columns:130px 96px minmax(0,1fr)}.ticks{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(min-width:861px) and (max-width:960px){.ticks{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:860px){.ticks{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media(max-width:760px){.fstep{grid-template-columns:1fr auto}.fstep-head{grid-column:1}.fstep-all{grid-column:2;justify-self:end}
+  .ticks{grid-column:1 / -1;grid-template-columns:repeat(2,minmax(0,1fr))}.ticks select{grid-column:1 / -1}}
 
 /* step-by-step upload */
 .upwiz .panel-body{display:grid;gap:22px}
@@ -385,6 +405,24 @@ button.cell:hover{outline:2px solid var(--blue);outline-offset:-2px}
 .drop.sm .small{font-size:12.7px}
 .drop:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
 .drop.locked,.drop.locked:hover{cursor:not-allowed;background:#F4F6F9;border-color:var(--rule);color:var(--ink-faint)}
+.drop.has{border-style:solid;border-color:#A9CBB0;background:var(--green-wash)}
+.drop.has .big{color:var(--green);font-weight:600}
+.drop.has:hover,.drop.has.over{background:#DCEBDF;border-color:var(--green)}
+.upnote{margin-top:8px;padding:9px 12px;background:var(--amber-wash);border:1px solid #E0C48A;font-size:13.2px}
+.upnote ul{margin:4px 0 0;padding-left:18px}
+.upnote li{margin:2px 0}
+details.onfile{margin-top:4px}
+details.onfile > summary{
+  list-style:none;display:flex;align-items:center;flex-wrap:wrap;gap:6px 10px;cursor:pointer;
+  padding:13px 18px;background:var(--surface);border:1px solid var(--rule);margin-bottom:20px;
+}
+details.onfile > summary::-webkit-details-marker{display:none}
+details.onfile > summary .t{font-family:var(--serif);font-size:17px;font-weight:600}
+details.onfile > summary .sub{font-size:13.8px;color:var(--ink-faint)}
+details.onfile > summary .caret{width:16px;height:16px;color:var(--teal);transition:transform .15s}
+details.onfile[open] > summary .caret{transform:rotate(180deg)}
+details.onfile > summary:hover{background:#F7F9FC}
+details.onfile > summary:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
 .upfiles{list-style:none;margin:8px 0 0;padding:0;font-size:13.8px}
 .upfiles li{display:flex;gap:9px;padding:6px 2px;border-top:1px solid #EEF1F5}
 .upfiles li > span{flex:none;width:12px;font-weight:700;text-align:center}
@@ -451,7 +489,7 @@ details.comp .inner{padding:14px}
   .ctl,.ctl select,.ctl input{min-width:0;width:100%}
   .ctl{flex:1 1 140px}
   .msf{min-width:0;flex:1 1 140px}
-  #rail{position:static;height:auto}
+  #rail{position:static;height:auto;overflow:visible}
   #nav{display:flex;overflow-x:auto;padding:0}
   .nav-group{display:none}
   .nav-item{border-left:0;border-bottom:3px solid transparent;white-space:nowrap;padding:11px 14px}
@@ -604,6 +642,12 @@ table.grid tbody tr.combined-row td:first-child{box-shadow:inset 3px 0 0 var(--t
 table.grid tbody tr.breakdown-row td{background:#FBFCFD;color:var(--ink-soft);font-size:13.8px}
 table.grid tbody tr.breakdown-row td:first-child{padding-left:32px;box-shadow:inset 3px 0 0 var(--teal-wash)}
 .part-label{font-weight:600;color:var(--ink-soft)}
+.ksaline{margin:0 0 4px}
+.ksatag{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:3px;background:var(--teal);color:#fff;font-weight:700;font-size:12.7px;margin-right:6px;vertical-align:1px}
+.ksaword{font-size:12.1px;font-weight:600;color:var(--teal);text-transform:uppercase;letter-spacing:.05em}
+.ksaline:last-child{margin-bottom:0}
+.ksaline strong{color:var(--teal);margin-right:4px}
+select.areasel{font-weight:600;max-width:200px;padding:3px 6px;border:1px solid var(--rule-strong);border-radius:2px;background:#fff}
 /* Scores by Student: Male / Female header rows */
 table.grid.scores tbody tr.group-row th{
   background:var(--teal-wash);color:var(--teal-deep);font-weight:700;text-transform:uppercase;letter-spacing:.05em;
@@ -1169,7 +1213,20 @@ const DOMAIN_NAMES = {
   An: 'Analyzing', E: 'Evaluating', C: 'Creating'
 };
 
-const LEARNING_AREAS = ['Filipino', 'English', 'Mathematics', 'Science',
+/* Learning areas, in the order every screen and report lists them. The
+   stored names stay as they were (saved results and the school server's
+   per-account subject lists use them); what people see is the short
+   name from AREA_LABELS. */
+const LEARNING_AREAS = ['Filipino', 'English', 'Science', 'Mathematics',
+  'Araling Panlipunan', 'TLE', 'MAPEH', 'EsP'];
+const AREA_LABELS = {
+  Filipino: 'Fil', English: 'Eng', Science: 'Sci', Mathematics: 'Math',
+  'Araling Panlipunan': 'AP', TLE: 'TLE', MAPEH: 'MAPEH', EsP: 'Values Ed.'
+};
+function areaLabel(a) { return AREA_LABELS[a] || a; }
+/* The division summary file keeps its template's own row order and
+   full subject names. */
+const DIVISION_AREAS = ['Filipino', 'English', 'Mathematics', 'Science',
   'Araling Panlipunan', 'EsP', 'TLE', 'MAPEH'];
 
 const GRADES = [7, 8, 9, 10];
@@ -1262,12 +1319,19 @@ function parseClass(raw) {
 }
 
 /* "ENGLISH 7_TERM 1" -> {area:'English', grade:7, termText:'TERM 1'} */
+/* "ENGLISH 7_TERM 1" -> English, 7. The subject is usually the first
+   underscore-separated part, but some teachers put the term and test
+   first ("T2_ST1_MAPEH 7"), so when the first part doesn't name a
+   learning area, the other parts are searched for one. */
 function parseQuizName(raw) {
   const s = norm(raw);
-  const parts = s.split('_');
-  const head = parts[0] || s;
-  const termText = parts.length > 1 ? norm(parts.slice(1).join(' ')) : '';
-  return { area: canonArea(head.replace(/\d+/g, ' ')), grade: extractGrade(head), termText };
+  const parts = s.split('_').map(norm).filter(Boolean);
+  const areaOf = t => canonArea(String(t).replace(/\d+/g, ' '));
+  let at = parts.findIndex(t => LEARNING_AREAS.includes(areaOf(t)));
+  if (at < 0) at = 0;
+  const head = parts[at] || s;
+  const rest = parts.filter((_, i) => i !== at);
+  return { area: areaOf(head), grade: extractGrade(head) || extractGrade(s), termText: norm(rest.join(' ')) };
 }
 
 /* Work out school year, term and exam from whatever text is available —
@@ -1401,27 +1465,26 @@ function parseZipGrade(rows, fileName) {
       return isNaN(n) ? (norm(v).toLowerCase() === 'true' ? 1 : 0) : n;
     });
     const hasMarks = marks.some(m => m !== null);
-    /* A scanned sheet counts even when ZipGrade could not match it to a
-       roster entry — dropping it would distort every statistic below. */
     if (!nm && !cls && !sid && !hasMarks) continue;
-    const answered = marks.filter(m => m !== null);
-    const score = answered.reduce((a, b) => a + b, 0);
     const q = idx.quiz >= 0 ? norm(r[idx.quiz]) : '';
     if (q) quizNames.add(q);
+    /* Sheets ZipGrade could not match to a learner (no name or no class)
+       are never taken in — they are counted for the log, then left out of
+       every figure. */
+    if (!nm || !cls) { unmatched++; continue; }
+    const answered = marks.filter(m => m !== null);
+    const score = answered.reduce((a, b) => a + b, 0);
     const pc = parseClass(cls);
-    const isUnmatched = !nm || !cls;
-    if (isUnmatched) unmatched++;
     students.push({
-      name: nm || (sid ? 'Unmatched sheet · ID ' + sid : 'Unmatched sheet'),
-      id: sid,
-      classRaw: cls,
-      section: cls ? pc.section : UNMATCHED_SECTION,
-      grade: pc.grade,
-      unmatched: isUnmatched,
+      name: nm, id: sid, classRaw: cls,
+      section: pc.section, grade: pc.grade,
+      unmatched: false,
       marks, score
     });
   }
-  if (!students.length) throw new Error('No student rows found.');
+  if (!students.length) throw new Error(unmatched
+    ? 'Every answer sheet in this file is an unmatched sheet (no learner name or class in ZipGrade), so nothing was taken in.'
+    : 'No student rows found.');
 
   const quizName = quizNames.size ? [...quizNames][0] : norm(fileName).replace(/\.(xlsx?|csv)$/i, '');
   const q = parseQuizName(quizName);
@@ -1706,7 +1769,47 @@ function parseTOS(rows, fileName, sheetName) {
   });
   if (cComp < 0 || cKSA < 0) throw new Error('Could not locate the competency / objective columns.');
   if (cTopic < 0) cTopic = 0;
-  const cObj = cKSA + 1;
+  /* The "Learning objective" heading can cover several columns — the K/S/A
+     letter and the objective text in either order, sometimes after a
+     blank or numbering column — or three side-by-side K, S and A columns
+     labelled in the row under the heading. Everything up to the next
+     heading belongs to it. */
+  let cObjEnd = rows[hdr].length;
+  for (let j = cKSA + 1; j < rows[hdr].length; j++) if (norm(rows[hdr][j])) { cObjEnd = j; break; }
+  if (cPlace > cKSA && cPlace < cObjEnd) cObjEnd = cPlace;
+  const ksaWord = v => {
+    const t = norm(v).replace(/[().:\-–—\s]/g, '').toUpperCase();
+    if (t === 'K' || t === 'KNOWLEDGE') return 'K';
+    if (t === 'S' || t === 'SKILL' || t === 'SKILLS') return 'S';
+    if (t === 'A' || t === 'ATTITUDE' || t === 'ATTITUDES' || t === 'VALUE' || t === 'VALUES') return 'A';
+    return '';
+  };
+  const ksaCols = {};
+  (rows[hdr + 1] || []).forEach((v, j) => {
+    if (j < cKSA || j >= cObjEnd) return;
+    const k = ksaWord(v);
+    if (k && ksaCols[k] === undefined) ksaCols[k] = j;
+  });
+  const ksaColumns = Object.keys(ksaCols).length >= 2;
+  const readObjective = row => {
+    if (ksaColumns) {
+      const cols = {};
+      Object.keys(ksaCols).forEach(k => { const v = norm(row[ksaCols[k]]); cols[k] = ksaWord(v) ? '' : v; });
+      return { ksa: '', text: '', cols };
+    }
+    let ksa = '', text = '';
+    for (let j = cKSA; j < cObjEnd; j++) {
+      let v = norm(row[j]);
+      if (!v) continue;
+      const k = ksaWord(v);
+      if (k) { if (!ksa) ksa = k; continue; }
+      const inline = v.match(/^\(\s*([KSA])\s*\)\s*(.+)$/i) || v.match(/^([KSA])\s*[.:\-–—]\s+(.+)$/i);
+      if (inline) { if (!ksa) ksa = inline[1].toUpperCase(); v = norm(inline[2]); }
+      if (/^\d{1,3}(\.\d+)?%?$/.test(v)) continue;          // days, weights, item counts
+      if (v.length > text.length) text = v;
+    }
+    return { ksa, text };
+  };
   const place = {};
   if (cPlace >= 0) DOMAINS.forEach((d, k) => { place[d] = cPlace + k; });
 
@@ -1735,8 +1838,9 @@ function parseTOS(rows, fileName, sheetName) {
     if (/^total$/i.test(topic) || /^total$/i.test(comp)) continue;
     if (row.some(c => /^total$/i.test(c)) && !topic && !comp) continue;
 
-    const ksa = norm(row[cKSA] || '');
-    const obj = firstMeaningful(row, cObj, cObj + 2);
+    const ro = readObjective(row);
+    const ksa = ro.ksa, obj = ro.text;
+    const colObj = ro.cols && (ro.cols.K || ro.cols.S || ro.cols.A) ? ro.cols : null;
 
     const pl = {};
     let anyPlace = false;
@@ -1751,19 +1855,32 @@ function parseTOS(rows, fileName, sheetName) {
       entries.push(cur); curObj = null;
     }
     if (!cur) {
-      if (!anyPlace && !ksa) continue;
+      if (!anyPlace && !ksa && !colObj) continue;
       cur = { topic: '', competency: lastComp, objectives: [] };
       entries.push(cur);
     }
-    if (ksa === 'K') { curObj = { K: obj, S: '', A: '', items: [], byDomain: {} }; cur.objectives.push(curObj); }
-    else if ((ksa === 'S' || ksa === 'A') && curObj) curObj[ksa] = obj;
+    if (colObj) {
+      curObj = { K: colObj.K || '', S: colObj.S || '', A: colObj.A || '', items: [], byDomain: {} };
+      cur.objectives.push(curObj);
+    } else if (ksa === 'K') { curObj = { K: obj, S: '', A: '', items: [], byDomain: {} }; cur.objectives.push(curObj); }
+    else if (ksa === 'S' || ksa === 'A') {
+      if (!curObj) { curObj = { K: '', S: '', A: '', items: [], byDomain: {} }; cur.objectives.push(curObj); }
+      curObj[ksa] = obj;
+    }
 
     if (anyPlace) {
       if (!curObj) { curObj = { K: obj, S: '', A: '', items: [], byDomain: {} }; cur.objectives.push(curObj); }
+      /* the K, S or A row an item is placed on says which objective it
+         tests; items on a row with no letter (or K/S/A set side by side)
+         fall back to the cognitive domain — Remembering/Understanding to K,
+         Applying and up to S */
+      curObj.byKsa = curObj.byKsa || { K: [], S: [], A: [] };
       DOMAINS.forEach(d => {
         if (pl[d].length) {
           curObj.byDomain[d] = (curObj.byDomain[d] || []).concat(pl[d]);
           curObj.items = curObj.items.concat(pl[d]);
+          const k = (!colObj && ksa) ? ksa : (['R', 'U'].includes(d) ? 'K' : 'S');
+          curObj.byKsa[k] = curObj.byKsa[k].concat(pl[d]);
         }
       });
     }
@@ -1771,7 +1888,10 @@ function parseTOS(rows, fileName, sheetName) {
 
   entries.forEach(e => {
     e.objectives = e.objectives.filter(o => o.items.length || o.K);
-    e.objectives.forEach(o => { o.items = [...new Set(o.items)].sort((a, b) => a - b); });
+    e.objectives.forEach(o => {
+      o.items = [...new Set(o.items)].sort((a, b) => a - b);
+      if (o.byKsa) ['K', 'S', 'A'].forEach(k => { o.byKsa[k] = [...new Set(o.byKsa[k])].sort((a, b) => a - b); });
+    });
     e.items = [...new Set(e.objectives.flatMap(o => o.items))].sort((a, b) => a - b);
   });
   const kept = entries.filter(e => e.items.length);
@@ -2042,7 +2162,7 @@ function competencyAnalysis(students, tos, cfg, maxItem) {
       correct, possible, n,
       needing, needingCount: needing.length,
       needingPct: n ? round((needing.length / n) * 100) : 0,
-      /* Least learned = 0-35% correct (inclusive), most mastered = 75%+
+      /* Least learned = 0-35% correct (inclusive), most mastered = 76%+
          correct (inclusive) — matches the thresholds used everywhere else
          this competency is judged, so a competency at exactly the cutoff
          isn't silently dropped into "developing". */
@@ -2066,7 +2186,7 @@ function rankLeastLearned(ca, cfg) {
 }
 
 /* The three highest-%-correct competencies that actually qualify as most
-   mastered (75% or more correct, inclusive). Rank 1 is the competency with
+   mastered (76% or more correct, inclusive). Rank 1 is the competency with
    the highest % correct (most learners correct), rank 2 the next highest,
    rank 3 the third highest — same "only real qualifiers, however many
    there are" rule as rankLeastLearned. */
@@ -2121,7 +2241,7 @@ function rankLeastLearnedItems(entries, cfg) {
 }
 
 /* The three highest-%-correct items that actually qualify as most
-   mastered (75% or more correct, inclusive). Rank 1 is the item with the
+   mastered (76% or more correct, inclusive). Rank 1 is the item with the
    highest % correct, rank 2 the next highest, rank 3 the third highest. */
 function rankMostMasteredItems(entries, cfg) {
   return entries.filter(x => x.pct >= cfg.mastered)
@@ -2263,7 +2383,7 @@ function applyRecord(rec) {
     t.updatedBy = rec.updatedBy; t.updatedAt = rec.updatedAt;
     const i = DB.toses.findIndex(x => x.id === t.id);
     if (i >= 0) DB.toses[i] = t; else DB.toses.push(t);
-  } else if (rec.type === 'settings') DB.cfg = { ...DEFAULT_CFG, ...(rec.data || {}) };
+  } else if (rec.type === 'settings') DB.cfg = withDefaults(rec.data);
   else if (rec.type === 'enrolment') DB.enrolment = rec.data || {};
   else if (rec.type === 'lsencount') DB.lsenCount = rec.data || {};
   else if (rec.type === 'lsen') DB.lsen = rec.data || {};
@@ -2524,6 +2644,14 @@ function scopeNote() {
    CANHS MEA — application state, ingestion, navigation
    ============================================================ */
 
+/* Settings from before most mastered moved to 76% carry the old 75% default;
+   bring those up to 76% once. A value chosen later on the Settings page
+   (saved with bandsV 2) is kept as chosen. */
+function withDefaults(c) {
+  const out = { ...DEFAULT_CFG, ...(c || {}) };
+  if (!c || c.bandsV !== 2) { if (+out.mastered === 75) out.mastered = 76; out.bandsV = 2; }
+  return out;
+}
 const DEFAULT_CFG = {
   school: 'Castor Alviar National High School',
   division: 'Division of Calamba City',
@@ -2531,8 +2659,9 @@ const DEFAULT_CFG = {
   examTitle: '',
   hpScore: 38,       // High performing: raw score at or above
   apScore: 25,       // Average performing: raw score at or above (below this is LP)
-  mastered: 75,      // 75-100% of learners correct -> most mastered
+  mastered: 76,      // 76-100% of learners correct -> most mastered
   leastLearned: 35,  // 0-35% of learners correct -> least learned
+  bandsV: 2,         // settings saved since most mastered became 76%
   remediation: 75    // a learner below this % on a competency needs remediation
 };
 
@@ -2623,7 +2752,7 @@ function cycleTag(e) { return multiCycleView() ? ' \u00b7 ' + cycleLabel(e) : ''
    class split between teachers holds one exam per teacher. */
 function classKey(e) { return [e.sy, e.term, e.examType, e.area, e.grade].join('|'); }
 function classTitle(exam) {
-  return exam.area + ' \u2014 Grade ' + exam.grade + cycleTag(exam) +
+  return areaLabel(exam.area) + ' \u2014 Grade ' + exam.grade + cycleTag(exam) +
     (teacherCountForExam(exam) > 1 || (exam.teacherSlot || 1) > 1 ? ' \u2014 Teacher ' + (exam.teacherSlot || 1) : '');
 }
 /* Whenever the filter narrows a field to exactly one value, mirror it into
@@ -2694,7 +2823,7 @@ function filterSummary(short) {
     one(FILTER.sy, v => v, 'school years', short ? 'All SY' : 'All school years'),
     one(FILTER.term, v => (short ? 'T' : 'Term ') + v, 'terms', 'All terms'),
     one(FILTER.exam, v => short ? examTypeShort(v) : examTypeLabel(v), 'assessments', 'All assessments'),
-    one(FILTER.areas, v => v, 'learning areas', 'All learning areas'),
+    one(FILTER.areas, v => areaLabel(v), 'learning areas', 'All learning areas'),
     one(FILTER.grades, v => 'Grade ' + v, 'grade levels', 'All grades'),
     one(FILTER.sections, v => v, 'sections', 'All sections')
   ].join(' · ');
@@ -2765,7 +2894,7 @@ function load() {
     DB.rosters = d.rosters || {};
     DB.teacherSetup = d.teacherSetup || {};
     DB.sectionGrades = d.sectionGrades || DB.sectionGrades;
-    DB.cfg = { ...DEFAULT_CFG, ...(d.cfg || {}) };
+    DB.cfg = withDefaults(d.cfg);
     uid = d.uid || 1;
   } catch (e) { storageOK = false; }
 }
@@ -2807,10 +2936,22 @@ function applyPick(obj, pick) {
   if (obj.sy && digits(obj.sy) !== digits(pick.sy)) differs.push('school year ' + obj.sy);
   if (obj.term && +obj.term !== +pick.term) differs.push('Term ' + obj.term);
   if (obj.examType && obj.examType !== pick.examType) differs.push(examTypeLabel(obj.examType));
-  if (obj.area && LEARNING_AREAS.includes(obj.area) && obj.area !== pick.area) differs.push(obj.area);
+  if (obj.area && LEARNING_AREAS.includes(obj.area) && obj.area !== pick.area) differs.push(areaLabel(obj.area));
   obj.sy = pick.sy; obj.term = +pick.term; obj.examType = pick.examType; obj.area = pick.area;
   return differs;
 }
+/* A file whose own label names a different learning area from step 4 is
+   almost always the wrong file, so it is not filed (it would otherwise
+   replace that teacher's results for the chosen subject). Returns the
+   learning area the file names, or '' when there is no clash. */
+function pickAreaClash(obj, pick) {
+  return pick && obj.area && LEARNING_AREAS.includes(obj.area) && obj.area !== pick.area ? obj.area : '';
+}
+function clashText(fileName, area, pick) {
+  return fileName + ' \u2014 this file is for ' + areaLabel(area) + ', so it was not uploaded under ' + areaLabel(pick.area) +
+    '. To upload it, choose ' + areaLabel(area) + ' in step 4.';
+}
+
 /* The "filed under …" log line. Without step choices (older callers),
    the file's own label is used and any gap falls back to the cycle on
    screen, exactly as before. */
@@ -2818,7 +2959,7 @@ function fileUnder(obj, pick, fileName) {
   if (pick) {
     const differs = applyPick(obj, pick);
     return { cls: differs.length ? 'wr' : 'ok', txt: fileName + ' \u2014 filed under ' + obj.sy + ', Term ' + obj.term + ', ' +
-      examTypeLabel(obj.examType) + ', ' + obj.area + (differs.length
+      examTypeLabel(obj.examType) + ', ' + areaLabel(obj.area) + (differs.length
         ? '. The file itself mentions ' + differs.join(', ') + ' \u2014 check that it is the right file.' : '.') };
   }
   const guessed = [];
@@ -2875,13 +3016,14 @@ async function ingestFile(file, logEl, teacherSlot, pick) {
   if (looksLikeManualResultsWorkbook(wb)) {
     try {
       const ex = parseManualWorkbook(wb, file.name);
+      if (pickAreaClash(ex, pick)) { line('er', clashText(file.name, ex.area, pick)); return { added: 0, ids: [] }; }
       const filed = fileUnder(ex, pick, file.name);
       ex.id = nextId(); ex.uploaded = new Date().toISOString(); ex.teacherSlot = teacherSlot;
       const dupIdx = DB.exams.findIndex(e => e.area === ex.area && e.grade === ex.grade &&
         e.sy === ex.sy && +e.term === +ex.term && e.examType === ex.examType && (e.teacherSlot || 1) === teacherSlot);
-      if (dupIdx >= 0) { ex.id = DB.exams[dupIdx].id; DB.exams[dupIdx] = ex; line('wr', file.name + ' — replaced the earlier ' + ex.area + ' ' + ex.grade +
+      if (dupIdx >= 0) { ex.id = DB.exams[dupIdx].id; DB.exams[dupIdx] = ex; line('wr', file.name + ' — replaced the earlier ' + areaLabel(ex.area) + ' ' + ex.grade +
         (teacherSlot > 1 ? ' (Teacher ' + teacherSlot + ')' : '') + ' upload (' + ex.students.length + ' learners, manually entered).'); }
-      else { DB.exams.push(ex); line('ok', file.name + ' — ' + ex.area + ' ' + ex.grade +
+      else { DB.exams.push(ex); line('ok', file.name + ' — ' + areaLabel(ex.area) + ' ' + ex.grade +
         (teacherSlot > 1 ? ' (Teacher ' + teacherSlot + ')' : '') + ', ' + ex.students.length + ' learners across ' + Object.keys(ex.sectionItemAgg).length + ' section(s), manually entered (no ZipGrade scan).'); }
       line(filed.cls, filed.txt);
       if (pick) syncTeacherCount(ex.area, ex.grade, ex.sy);
@@ -2896,25 +3038,27 @@ async function ingestFile(file, logEl, teacherSlot, pick) {
   let added = 0;
   const ids = [];
   const newTos = [];
+  let refused = false;
   for (const sheetName of wb.SheetNames) {
     const rows = sheetToRows(wb.Sheets[sheetName]);
     if (!rows.length) continue;
     try {
       if (looksLikeZipGrade(rows)) {
         const ex = parseZipGrade(rows, file.name);
+        if (pickAreaClash(ex, pick)) { if (!refused) line('er', clashText(file.name, ex.area, pick)); refused = true; continue; }
         const filed = fileUnder(ex, pick, file.name);
         ex.id = nextId(); ex.sheet = sheetName; ex.uploaded = new Date().toISOString(); ex.teacherSlot = teacherSlot;
         const dupIdx = DB.exams.findIndex(e => e.area === ex.area && e.grade === ex.grade &&
           e.sy === ex.sy && +e.term === +ex.term && e.examType === ex.examType && (e.teacherSlot || 1) === teacherSlot);
-        if (dupIdx >= 0) { ex.id = DB.exams[dupIdx].id; DB.exams[dupIdx] = ex; line('wr', file.name + ' — replaced the earlier ' + ex.area + ' ' + ex.grade +
+        if (dupIdx >= 0) { ex.id = DB.exams[dupIdx].id; DB.exams[dupIdx] = ex; line('wr', file.name + ' — replaced the earlier ' + areaLabel(ex.area) + ' ' + ex.grade +
           (teacherSlot > 1 ? ' (Teacher ' + teacherSlot + ')' : '') + ' upload (' + ex.students.length + ' answer sheets).'); }
-        else { DB.exams.push(ex); line('ok', file.name + ' — ' + ex.area + ' ' + ex.grade +
+        else { DB.exams.push(ex); line('ok', file.name + ' — ' + areaLabel(ex.area) + ' ' + ex.grade +
           (teacherSlot > 1 ? ' (Teacher ' + teacherSlot + ')' : '') + ', ' + ex.students.length + ' answer sheets, ' + ex.totalItems + ' items.'); }
         ids.push(ex.id);
         line(filed.cls, filed.txt);
         if (pick) syncTeacherCount(ex.area, ex.grade, ex.sy);
-        if (ex.unmatched) line('wr', ex.area + ' ' + ex.grade + ' — ' + ex.unmatched + ' sheet' + (ex.unmatched > 1 ? 's are' : ' is') +
-          ' missing a learner name or class in ZipGrade. They are counted in the statistics but grouped under “Unmatched sheets”.');
+        if (ex.unmatched) line('ok', areaLabel(ex.area) + ' ' + ex.grade + ' — ' + ex.unmatched + ' unmatched sheet' + (ex.unmatched > 1 ? 's' : '') +
+          ' (no learner name or class in ZipGrade) left out.');
         added++;
       } else if (looksLikeCreatingItems(rows)) {
         const cr = parseCreatingItems(rows, file.name);
@@ -2923,7 +3067,7 @@ async function ingestFile(file, logEl, teacherSlot, pick) {
           line('er', file.name + ' — the learner names do not match any exam on file. Upload the ZipGrade results for that class first.');
         } else {
           const r = applyCreatingItems(target.exam, cr);
-          line('ok', file.name + ' — items 49 and 50 added to ' + target.exam.area + ' ' + target.exam.grade +
+          line('ok', file.name + ' — items 49 and 50 added to ' + areaLabel(target.exam.area) + ' ' + target.exam.grade +
             ' for ' + r.matched + ' of ' + r.of + ' learners.');
           if (r.unmatched) line('wr', file.name + ' — ' + r.unmatched + ' name' + (r.unmatched > 1 ? 's' : '') +
             ' in the file did not match anyone on the ZipGrade roster.');
@@ -2933,6 +3077,7 @@ async function ingestFile(file, logEl, teacherSlot, pick) {
       } else if (looksLikeTOS(rows)) {
         const t = parseTOS(rows, file.name, sheetName);
         let differs = [];
+        if (pickAreaClash(t, pick)) { if (!refused) line('er', clashText(file.name, t.area, pick)); refused = true; continue; }
         if (pick) {
           /* filed under the step choices and tied to the teacher it was
              uploaded for, so it pairs with that teacher's own results */
@@ -2960,7 +3105,7 @@ async function ingestFile(file, logEl, teacherSlot, pick) {
         if (dupIdx >= 0) { t.id = DB.toses[dupIdx].id; DB.toses[dupIdx] = t; line('wr', file.name + ' [' + sheetName + '] — replaced the earlier upload of this sheet.'); }
         else { DB.toses.push(t); line('ok', file.name + ' [' + sheetName + '] — table of specifications for ' + t.subject + ', ' + t.entries.length + (t.entries.length === 1 ? ' competency' : ' competencies') + ' covering ' + t.mappedItems.length + ' items.'); }
         if (differs.length) line('wr', file.name + ' [' + sheetName + '] — filed under ' + t.sy + ', Term ' + t.term + ', ' +
-          examTypeLabel(t.examType) + ', ' + t.area + ', although the TOS itself mentions ' + differs.join(', ') + ' \u2014 check that it is the right file.');
+          examTypeLabel(t.examType) + ', ' + areaLabel(t.area) + ', although the TOS itself mentions ' + differs.join(', ') + ' \u2014 check that it is the right file.');
         if (pick) newTos.push(t);
         ids.push(t.id);
         added++;
@@ -2988,7 +3133,7 @@ async function ingestFile(file, logEl, teacherSlot, pick) {
         [...new Set(stale.map(x => x.fileName))].join(', ') + ').');
     }
   }
-  if (!added) line('wr', file.name + ' — no ZipGrade export or table of specifications recognised in this file.');
+  if (!added && !refused) line('wr', file.name + ' — no ZipGrade export or table of specifications recognised in this file.');
   return { added, ids };
 }
 
@@ -3391,9 +3536,9 @@ const NAV = [
   { g: 'Assessment Results' },
   { id: 'assessmentArea', label: 'Mean, MPS, SD' },
   { id: 'items', label: 'Item Analysis' },
-  { id: 'remediation', label: 'Remediation List' },
   { id: 'leastLearned', label: 'Least Learned Competencies' },
   { id: 'competency', label: 'Mastered Competencies' },
+  { id: 'remediation', label: 'Remediation List' },
   { g: 'Learner Reports' },
   { id: 'studentScores', label: 'Scores by Student' },
   { g: 'Action' },
@@ -3439,8 +3584,59 @@ function go(v) {
 /* ============================================================
    Router
    ============================================================ */
+/* Uploads filed before the quiz-name reader above could find a subject
+   anywhere in the name (e.g. "T2_ST1_MAPEH 7" read as learning area "T")
+   are corrected automatically: only an upload whose learning area is not
+   one of the school's learning areas is touched, and only when its own
+   quiz name or file name clearly names one. A table of specifications
+   with no learning area takes it from its file name, or from the one
+   learning area of the exams linked to it. */
+function repairLearningAreas() {
+  const fixed = [];
+  /* unmatched ZipGrade sheets are never kept — clear any taken in before */
+  DB.exams.forEach(e => {
+    if (!e.students || !e.students.some(x => x.unmatched || x.section === UNMATCHED_SECTION)) return;
+    e.students = e.students.filter(x => !x.unmatched && x.section !== UNMATCHED_SECTION);
+    e.unmatched = 0;
+    fixed.push(e.id);
+  });
+  DB.exams.forEach(e => {
+    if (LEARNING_AREAS.includes(e.area)) return;
+    let q = parseQuizName(e.quizName || '');
+    if (!LEARNING_AREAS.includes(q.area)) q = parseQuizName(String(e.fileName || '').replace(/\.(xlsx?|csv)$/i, ''));
+    if (!LEARNING_AREAS.includes(q.area)) return;
+    e.area = q.area;
+    if (!e.grade && q.grade) e.grade = q.grade;
+    fixed.push(e.id);
+  });
+  DB.toses.forEach(t => {
+    if (LEARNING_AREAS.includes(t.area)) return;
+    const named = tosFilenameParts(t.fileName || '');
+    let a = named && LEARNING_AREAS.includes(named.area) ? named.area : '';
+    if (!a) [t.subject, t.sheetName, String(t.fileName || '').replace(/\.(xlsx?|csv)$/i, '')].some(x => {
+      const c = parseQuizName(x || '').area; if (LEARNING_AREAS.includes(c)) { a = c; return true; } return false;
+    });
+    let linked = [];
+    if (!a || !t.grade) {
+      linked = DB.exams.filter(e => DB.links[e.id] === t.id);
+      const areas = [...new Set(linked.map(e => e.area))];
+      if (!a && areas.length === 1 && LEARNING_AREAS.includes(areas[0])) a = areas[0];
+    }
+    if (!a) return;
+    t.area = a;
+    const grades = [...new Set(linked.map(e => e.grade))];
+    if (!t.grade && grades.length === 1) t.grade = grades[0];
+    fixed.push(t.id);
+  });
+  if (!fixed.length) return;
+  saveLocal();
+  if (SYNC.mode === 'cloud' && canWriteData()) { fixed.forEach(id => SYNC.dirty.add(id)); scheduleSync(1500); }
+  DB.exams.filter(e => fixed.includes(e.id)).forEach(e => syncTeacherCount(e.area, e.grade, e.sy));
+}
+
 function render() {
   bindFilterUi();
+  repairLearningAreas();
   clampFilter();
   const main = document.getElementById('main');
   try { renderInner(main); }
@@ -3502,9 +3698,16 @@ const ICON_MENU = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" st
 const ICON_LOGOUT = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>';
 const ICON_REFRESH = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></svg>';
 
+/* The administrator account is greeted as the school ("Hi, CANHS!"),
+   whatever name the account itself carries. */
+const ADMIN_DISPLAY_NAME = 'CANHS';
 function whoName() {
-  if (SYNC.mode === 'cloud' && SYNC.user) return SYNC.user.name || SYNC.user.username || 'there';
-  return LOCAL_USER || 'admin';
+  if (SYNC.mode === 'cloud' && SYNC.user) {
+    if (SYNC.user.role === 'admin') return ADMIN_DISPLAY_NAME;
+    return SYNC.user.name || SYNC.user.username || 'there';
+  }
+  if (!LOCAL_USER || LOCAL_USER === 'admin') return ADMIN_DISPLAY_NAME;
+  return LOCAL_USER;
 }
 function whoLine() {
   if (SYNC.mode === 'cloud' && SYNC.user) {
@@ -3674,7 +3877,7 @@ function areaSummaryTable(areas, exams) {
   let h = '<table class="grid"><thead><tr><th>Learning area</th><th class="mid">Takers</th>' +
     '<th class="mid">Mean</th><th class="mid">MPS</th><th class="mid">SD</th></tr></thead><tbody>';
   computeAreaSummary(areas, exams).forEach(r => {
-    h += '<tr><td class="rowhead">' + esc(r.area) + '</td>' +
+    h += '<tr><td class="rowhead">' + esc(areaLabel(r.area)) + '</td>' +
       '<td class="mid">' + r.takers + '</td>' +
       '<td class="mid">' + r.mean.toFixed(2) + '</td>' +
       '<td class="mid"><strong>' + r.mps.toFixed(0) + '</strong></td>' +
@@ -3692,7 +3895,7 @@ function computeWeakestFlags(exams, cfg) {
   exams.forEach(e => {
     const t = tosFor(e);
     if (!t) return;
-    competencyAnalysis(studentsOf(e), t, cfg).forEach(c => flags.push({ e, c }));
+    ksaObjectiveAnalysis(studentsOf(e), t, cfg).forEach(c => flags.push({ e, c }));
   });
   flags.sort((a, b) => a.c.mastery - b.c.mastery);
   return flags;
@@ -3711,7 +3914,7 @@ function computeWeakestRows(exams, cfg) {
   flags.forEach(f => {
     const ck = classKey(f.e);
     if (perClass[ck] < 2) { order.push({ kind: 'single', f, mastery: f.c.mastery }); return; }
-    const k = 'll:' + ck + '|' + words(f.c.competency || f.c.topic);
+    const k = 'll:' + ck + '|' + words(f.c.competency || f.c.topic) + '|' + f.c.ksa + '|' + words(f.c.ksaText);
     if (!groups.has(k)) { const g = { kind: 'group', key: k, parts: [] }; groups.set(k, g); order.push(g); }
     groups.get(k).parts.push(f);
   });
@@ -3738,44 +3941,60 @@ function weakestRowsExport(rows) {
   const multi = multiCycleView();
   const out = [];
   const tag = e => multi ? ' · ' + cycleLabel(e) : '';
-  const one = (f, label) => [label, f.e.grade, f.c.topic, f.c.competency, f.c.itemCount,
+  const obj = c => '(' + c.ksa + ') ' + (c.ksaText || '');
+  const one = (f, label) => [label, f.e.grade, f.c.topic, f.c.competency, obj(f.c), f.c.itemCount,
     round(f.c.mastery, 1), f.e.source === 'manual' ? 'n/a' : (f.c.needingCount + ' of ' + f.c.n)];
   rows.forEach(r => {
     if (r.kind === 'single') {
-      out.push(one(r.f, r.f.e.area + (r.teacherTag ? ' — Teacher ' + (r.f.e.teacherSlot || 1) : '') + tag(r.f.e)));
+      out.push(one(r.f, areaLabel(r.f.e.area) + (r.teacherTag ? ' — Teacher ' + (r.f.e.teacherSlot || 1) : '') + tag(r.f.e)));
       return;
     }
-    out.push([r.f.e.area + ' (' + r.parts.length + ' teachers, average)' + tag(r.f.e), r.f.e.grade, r.f.c.topic, r.f.c.competency,
-      r.items, r.mastery, r.manual ? 'n/a' : r.needing + ' of ' + r.n]);
-    if (OPEN_GROUPS.has(r.key)) r.parts.forEach(f => out.push(one(f, f.e.area + ' — Teacher ' + (f.e.teacherSlot || 1) + tag(f.e))));
+    out.push([areaLabel(r.f.e.area) + ' (' + r.parts.length + ' teachers, average)' + tag(r.f.e), r.f.e.grade, r.f.c.topic, r.f.c.competency,
+      obj(r.f.c), r.items, r.mastery, r.manual ? 'n/a' : r.needing + ' of ' + r.n]);
+    if (OPEN_GROUPS.has(r.key)) r.parts.forEach(f => out.push(one(f, areaLabel(f.e.area) + ' — Teacher ' + (f.e.teacherSlot || 1) + tag(f.e))));
   });
   return out;
 }
+/* Least learned lesson objectives only: 35% or fewer of the test takers
+   answered their items correctly (combined across teachers where a class
+   is split). */
+function leastLearnedRows(exams, cfg) {
+  return computeWeakestRows(exams, cfg).filter(r => r.mastery <= cfg.leastLearned);
+}
 function weakestCompetenciesPanel(exams, cfg, limit) {
-  const rows = computeWeakestRows(exams, cfg);
+  const all = computeWeakestRows(exams, cfg);
+  const rows = all.filter(r => r.mastery <= cfg.leastLearned);
   const shown = limit ? rows.slice(0, limit) : rows;
   const multi = multiCycleView();
   const pill = m => '<span class="pill ' + (m <= cfg.leastLearned ? 'bad' : m >= cfg.mastered ? 'good' : 'warn') + '">' + m.toFixed(1) + '%</span>' +
     (m <= cfg.leastLearned ? '<div class="comp-sub">least learned</div>' : '');
-  const compCell = c => '<strong>' + esc(c.topic) + '</strong><div class="comp-sub">' + esc(c.competency) +
-    (objectivesMeasuredBy(c).length ? ' <span class="objparen">(' + esc(objectivesMeasuredBy(c).join('; ')) + ')</span>' : '') + '</div>';
+  const compCell = c => '<strong>' + esc(c.topic) + '</strong><div class="comp-sub">' + esc(c.competency) + '</div>';
+  /* the specific K, S or A objective this row is about, and its items */
+  const objCell = c => '<span class="ksatag">' + c.ksa + '</span>' +
+    '<span class="ksaword">' + ({ K: 'Knowledge', S: 'Skill', A: 'Attitude' }[c.ksa] || '') + '</span>' +
+    '<div>' + esc(c.ksaText || '\u2014') + '</div><div class="comp-sub">item' + (c.items.length === 1 ? ' ' : 's ') + esc(itemRange(c.items)) + '</div>';
   const remBtn = f => f.e.source === 'manual' ? '<span class="pill mute">manually entered</span>'
     : '<button class="btn sm ghost" data-rem="' + f.e.id + '|' + f.c.index + '">Remediation list</button>';
 
-  let h = '<div class="panel"><h3>Weakest competencies across the school<span class="sub">' +
-    'least learned means ' + cfg.leastLearned + '% or fewer of all test takers answered correctly</span></h3>';
-  if (!rows.length) {
+  let h = '<div class="panel"><h3>Least learned lesson objectives<span class="sub">' +
+    cfg.leastLearned + '% or fewer of the test takers answered the items correctly</span></h3>';
+  if (!all.length) {
     h += '<div class="panel-body"><p style="margin:0;color:var(--ink-soft)">' +
-      'Upload a table of specifications for each exam to see competency-level results.</p></div>';
+      'Upload a table of specifications for each exam to see results for each lesson objective.</p></div>';
+  } else if (!rows.length) {
+    const low = all[0];
+    h += '<div class="panel-body"><p style="margin:0;color:var(--ink-soft)">No lesson objective is least learned \u2014 none is at ' +
+      cfg.leastLearned + '% or below. The lowest is ' + low.mastery.toFixed(1) + '%: (' + esc(low.f.c.ksa) + ') ' +
+      esc(low.f.c.ksaText || low.f.c.competency) + ' \u2014 ' + esc(areaLabel(low.f.e.area)) + ' ' + low.f.e.grade + '.</p></div>';
   } else {
     h += '<div class="panel-body flush"><div class="tbl-scroll"><table class="grid tight"><thead><tr>' +
-      '<th>Learning area</th><th>Gr.</th><th>Topic and competency</th><th class="num">Items</th>' +
+      '<th>Learning area</th><th>Gr.</th><th>Topic and competency</th><th class="w2">Lesson objective (K, S or A)</th><th class="num">Items</th>' +
       '<th class="num">Mastery</th><th class="num">For remediation</th><th></th></tr></thead><tbody>';
     shown.forEach(r => {
       const f = r.f, cyc = multi ? '<div class="comp-sub">' + esc(cycleLabel(f.e)) + '</div>' : '';
       if (r.kind === 'single') {
-        h += '<tr><td>' + esc(f.e.area) + (r.teacherTag ? '<div class="comp-sub">Teacher ' + (f.e.teacherSlot || 1) + '</div>' : '') + cyc + '</td>' +
-          '<td class="num">' + f.e.grade + '</td><td>' + compCell(f.c) + '</td>' +
+        h += '<tr><td>' + esc(areaLabel(f.e.area)) + (r.teacherTag ? '<div class="comp-sub">Teacher ' + (f.e.teacherSlot || 1) + '</div>' : '') + cyc + '</td>' +
+          '<td class="num">' + f.e.grade + '</td><td>' + compCell(f.c) + '</td><td>' + objCell(f.c) + '</td>' +
           '<td class="num">' + f.c.itemCount + '</td><td class="num">' + pill(f.c.mastery) + '</td>' +
           '<td class="num">' + (f.e.source === 'manual' ? '—' : f.c.needingCount + ' of ' + f.c.n) + '</td>' +
           '<td>' + remBtn(f) + '</td></tr>';
@@ -3783,9 +4002,9 @@ function weakestCompetenciesPanel(exams, cfg, limit) {
       }
       const open = OPEN_GROUPS.has(r.key);
       h += '<tr class="combined-row"><td><button type="button" class="grp-toggle" data-grp="' + esc(r.key) + '" aria-expanded="' + open + '" ' +
-          'title="Show or hide each teacher’s figure">' + CARET + '<span>' + esc(f.e.area) + '</span></button>' +
+          'title="Show or hide each teacher’s figure">' + CARET + '<span>' + esc(areaLabel(f.e.area)) + '</span></button>' +
           '<div class="comp-sub">' + r.parts.length + ' teachers · average</div>' + cyc + '</td>' +
-        '<td class="num">' + f.e.grade + '</td><td>' + compCell(f.c) + '</td>' +
+        '<td class="num">' + f.e.grade + '</td><td>' + compCell(f.c) + '</td><td>' + objCell(f.c) + '</td>' +
         '<td class="num">' + esc(r.items) + '</td><td class="num">' + pill(r.mastery) + '</td>' +
         '<td class="num">' + (r.manual ? '—' : r.needing + ' of ' + r.n) + '</td>' +
         '<td>' + remBtn(r.parts.find(x => x.e.source !== 'manual') || f) + '</td></tr>';
@@ -3793,6 +4012,7 @@ function weakestCompetenciesPanel(exams, cfg, limit) {
         h += '<tr class="breakdown-row" data-grp-of="' + esc(r.key) + '"' + (open ? '' : ' hidden') + '>' +
           '<td><span class="part-label">Teacher ' + (pf.e.teacherSlot || 1) + '</span></td><td class="num">' + pf.e.grade + '</td>' +
           '<td><div class="comp-sub" style="margin:0">' + esc(pf.e.fileName || '') + '</div></td>' +
+          '<td><div class="comp-sub" style="margin:0">item' + (pf.c.items.length === 1 ? ' ' : 's ') + esc(itemRange(pf.c.items)) + '</div></td>' +
           '<td class="num">' + pf.c.itemCount + '</td><td class="num">' + pill(pf.c.mastery) + '</td>' +
           '<td class="num">' + (pf.e.source === 'manual' ? '—' : pf.c.needingCount + ' of ' + pf.c.n) + '</td>' +
           '<td>' + remBtn(pf) + '</td></tr>';
@@ -3801,7 +4021,7 @@ function weakestCompetenciesPanel(exams, cfg, limit) {
     h += '</tbody></table></div>';
     if (limit && rows.length > limit) {
       h += '<div class="panel-body" style="padding-top:0"><button class="btn sm ghost" data-go="leastLearned">See all ' +
-        rows.length + ' competencies</button></div>';
+        rows.length + ' least learned objectives</button></div>';
     }
     h += '</div>';
   }
@@ -3854,7 +4074,7 @@ function viewDashboard() {
   h += '<th>All grades</th></tr></thead><tbody>';
 
   areas.forEach(area => {
-    h += '<tr><th>' + esc(area) + '</th>';
+    h += '<tr><th>' + esc(areaLabel(area)) + '</th>';
     let sc = 0, sp = 0;
     grades.forEach(g => {
       const cell = exams.filter(e => e.area === area && e.grade === g);
@@ -3906,7 +4126,7 @@ function viewDashboard() {
     h += '<div class="panel-body flush"><div class="tbl-scroll"><table class="grid"><thead><tr><th>Learning area</th>' +
       '<th class="mid">Takers</th><th class="mid">Mean</th><th class="mid">MPS</th><th class="mid">SD</th></tr></thead><tbody>';
     lsenRows.forEach(r => {
-      h += '<tr><td class="rowhead">' + esc(r.area) + '</td>' +
+      h += '<tr><td class="rowhead">' + esc(areaLabel(r.area)) + '</td>' +
         '<td class="mid">' + r.takers + '</td>' +
         '<td class="mid">' + r.mean.toFixed(2) + '</td>' +
         '<td class="mid"><strong>' + r.mps.toFixed(0) + '</strong></td>' +
@@ -3987,32 +4207,43 @@ function upFileLine(kind, main, sub) {
   return '<li><span class="' + kind + '" aria-hidden="true">' + mark + '</span>' +
     '<div>' + main + (sub ? '<div class="comp-sub">' + esc(sub) + '</div>' : '') + '</div></li>';
 }
+/* Problems found in the last upload into a box (a file that couldn't be
+   read, or whose own label disagrees with the steps) — shown in that box
+   until the next upload there. Routine confirmations are not shown. */
+const UP_PROBLEMS = {};
+function upPickKey(p) { return [p.sy, p.term, p.examType, p.area].join('|'); }
+function upProblemNote(p, zone) {
+  const list = UP_PROBLEMS[upPickKey(p) + '|' + zone];
+  if (!list || !list.length) return '';
+  return '<div class="upnote" role="status"><strong>Please check</strong><ul>' +
+    list.map(t => '<li>' + esc(t) + '</li>').join('') + '</ul></div>';
+}
+/* One teacher's box: the ZipGrade results, then the table of
+   specifications. Whatever is dropped here is filed under the school
+   year, term, assessment and learning area chosen in steps 1-4 and tied
+   to this teacher; grade level is read from each file. */
 function upTeacherCard(k, p) {
   const exs = DB.exams.filter(e => inPick(e, p) && (e.teacherSlot || 1) === k).sort((a, b) => a.grade - b.grade);
-  const tss = DB.toses.filter(t => inPick(t, p) && (t.teacherSlot || 1) === k)
-    .sort((a, b) => (a.grade || 99) - (b.grade || 99));
+  const tss = DB.toses.filter(t => inPick(t, p) && (t.teacherSlot || 1) === k);
   const paired = e => { const t = tosFor(e); return t && tss.includes(t) ? t : null; };
-  const complete = exs.length > 0 && exs.every(paired);
+  const missing = exs.filter(e => !paired(e)).map(e => e.grade);
+  const complete = exs.length > 0 && !missing.length;
   const pill = complete ? '<span class="pill good">Done</span>'
     : exs.length ? '<span class="pill warn">TOS next</span>'
     : '<span class="pill mute">Waiting for files</span>';
+  const gradeList = gs => gs.length === 1 ? 'Grade ' + gs[0] : 'Grades ' + gs.slice(0, -1).join(', ') + ' and ' + gs[gs.length - 1];
 
   let h = '<div class="upcard' + (complete ? ' complete' : '') + '"><h4>Teacher ' + k + pill + '</h4><div class="inner">';
 
   /* a. ZipGrade results */
   h += '<div><div class="upzone-label"><span class="l" aria-hidden="true">a</span>ZipGrade results</div>' +
-    '<div class="drop sm" tabindex="0" role="button" data-up-drop="upFileE' + k + '" data-slot="' + k + '" ' +
+    '<div class="drop sm' + (exs.length ? ' has' : '') + '" tabindex="0" role="button" data-up-drop="upFileE' + k + '" data-slot="' + k + '" ' +
       'aria-label="Upload Teacher ' + k + '’s ZipGrade results">' +
-    '<div class="big">' + (exs.length ? 'Add or replace results' : 'Drop or choose the ZipGrade export') + '</div>' +
-    '<div class="small">Quiz-format .xlsx or .csv, one file per grade level. A manual-results workbook works here too.</div></div>' +
-    '<input type="file" id="upFileE' + k + '" multiple accept=".xlsx,.xls,.csv" class="sr" tabindex="-1">';
-  if (exs.length) {
-    h += '<ul class="upfiles">' + exs.map(e => upFileLine('ok',
-      '<strong>Grade ' + esc(e.grade) + '</strong> — ' + e.students.length +
-      (e.source === 'manual' ? ' learners (manually entered)' : ' answer sheets') + ', ' + e.totalItems + ' items',
-      e.fileName)).join('') + '</ul>';
-  }
-  h += '</div>';
+    (exs.length
+      ? '<div class="big">✓ ZipGrade results uploaded</div><div class="small">Drop or choose again to add another grade level or replace a file.</div>'
+      : '<div class="big">Drop or choose the ZipGrade export</div><div class="small">Quiz-format .xlsx or .csv, one file per grade level. A manual-results workbook works here too.</div>') +
+    '</div><input type="file" id="upFileE' + k + '" multiple accept=".xlsx,.xls,.csv" class="sr" tabindex="-1">' +
+    upProblemNote(p, 'upFileE' + k) + '</div>';
 
   /* b. table of specifications — opens once this teacher's results are in */
   h += '<div><div class="upzone-label"><span class="l" aria-hidden="true">b</span>Table of specifications</div>';
@@ -4020,24 +4251,16 @@ function upTeacherCard(k, p) {
     h += '<div class="drop sm locked" aria-disabled="true"><div class="big">Upload the ZipGrade results first</div>' +
       '<div class="small">Teacher ' + k + '’s TOS opens once their results are in.</div></div>';
   } else {
-    h += '<div class="drop sm" tabindex="0" role="button" data-up-drop="upFileT' + k + '" data-slot="' + k + '" ' +
+    const big = complete ? '✓ Table of specifications uploaded'
+      : tss.length ? 'Add the TOS for ' + gradeList(missing) : 'Drop or choose the TOS file';
+    const small = complete ? 'Drop or choose again to replace it.'
+      : 'The DepEd TOS worksheet with competencies, learning objectives and item placement' +
+        (exs.length > 1 ? ' — one for each grade level uploaded.' : '.');
+    h += '<div class="drop sm' + (complete ? ' has' : '') + '" tabindex="0" role="button" data-up-drop="upFileT' + k + '" data-slot="' + k + '" ' +
         'aria-label="Upload Teacher ' + k + '’s table of specifications">' +
-      '<div class="big">' + (tss.length ? 'Add or replace the TOS' : 'Drop or choose the TOS file') + '</div>' +
-      '<div class="small">The DepEd TOS worksheet with competencies, learning objectives and item placement.</div></div>' +
-      '<input type="file" id="upFileT' + k + '" multiple accept=".xlsx,.xls,.csv" class="sr" tabindex="-1">';
-    const lines = [];
-    tss.forEach(t => {
-      const ex = exs.find(e => e.grade === t.grade);
-      const used = ex && paired(ex) === t;
-      const cov = ex ? coverage(ex, t) : null;
-      lines.push(upFileLine(used ? 'ok' : ex ? 'mute' : 'wr',
-        '<strong>' + (t.grade ? 'Grade ' + esc(t.grade) : 'Grade not found') + '</strong> — ' + t.entries.length +
-        (t.entries.length === 1 ? ' competency' : ' competencies') + (cov ? ', ' + cov.mapped + ' of ' + cov.total + ' items mapped' : '') +
-        (!ex ? ' · no Grade ' + esc(t.grade || '?') + ' results for this teacher' : (used ? '' : ' · another sheet fits better')),
-        t.fileName + (t.sheetName ? ' [' + t.sheetName + ']' : '')));
-    });
-    exs.filter(e => !paired(e)).forEach(e => lines.push(upFileLine('wr', '<strong>Grade ' + esc(e.grade) + '</strong> — no TOS yet', '')));
-    if (lines.length) h += '<ul class="upfiles">' + lines.join('') + '</ul>';
+      '<div class="big">' + esc(big) + '</div><div class="small">' + esc(small) + '</div></div>' +
+      '<input type="file" id="upFileT' + k + '" multiple accept=".xlsx,.xls,.csv" class="sr" tabindex="-1">' +
+      upProblemNote(p, 'upFileT' + k);
   }
   return h + '</div></div></div>';
 }
@@ -4081,7 +4304,7 @@ function uploadSteps() {
     upStepSelect(1, 'upSy', 'School year', UP_UI.sy, SCHOOL_YEARS.map(y => ({ v: y, t: y })), true, 'Choose the school year') +
     upStepSelect(2, 'upTerm', 'Term', UP_UI.term, TERMS.map(t => ({ v: t, t: 'Term ' + t })), s2, 'Choose the term') +
     upStepSelect(3, 'upExam', 'Assessment', UP_UI.exam, EXAM_TYPES.map(x => ({ v: x.id, t: x.label })), s3, 'Choose the assessment') +
-    upStepSelect(4, 'upArea', 'Learning area', UP_UI.area, upAreaOptions().map(a => ({ v: a, t: a })), s4, 'Choose the learning area') +
+    upStepSelect(4, 'upArea', 'Learning area', UP_UI.area, upAreaOptions().map(a => ({ v: a, t: areaLabel(a) })), s4, 'Choose the learning area') +
     '</div>' + upTeachersStep(p) + upFilesStep(p) + '</div></div>';
 }
 function viewUpload() {
@@ -4092,9 +4315,11 @@ function viewUpload() {
 
   h += uploadSteps();
 
-  h += '<div class="panel"><h3>Upload log</h3><div class="panel-body"><div class="log" id="log">' + logHTML() + '</div></div></div>';
-
-  /* inventory */
+  /* everything already uploaded, folded away until needed — to check,
+     correct (learning area, term, assessment, TOS link) or remove */
+  h += '<details class="onfile"' + (UP_UI.onfileOpen ? ' open' : '') + '><summary>' + CARET +
+    '<span class="t">Uploads on file</span><span class="sub">' + DB.exams.length + ' result' + (DB.exams.length === 1 ? '' : 's') +
+    ' \u00b7 ' + DB.toses.length + ' table' + (DB.toses.length === 1 ? '' : 's') + ' of specifications \u2014 open to check, correct or remove</span></summary>';
   h += '<div class="panel"><h3>Exams on file<span class="sub">' + DB.exams.length + ' uploaded</span>' +
     '<span class="spacer"></span>' + (DB.exams.length ? '<button class="btn sm ghost" id="clearExams">Remove all exams</button>' : '') + '</h3>';
   if (!DB.exams.length) h += '<div class="panel-body"><p style="margin:0;color:var(--ink-soft)">No exam results yet.</p></div>';
@@ -4104,11 +4329,12 @@ function viewUpload() {
       '<th class="num">Takers</th><th class="num">Items</th>' +
       '<th class="num">MPS</th><th>Table of specifications</th><th>Coverage</th><th></th></tr></thead><tbody>';
     DB.exams.slice().sort(sortExam).forEach(e => {
-      const st = summarise(studentsOf(e), e.totalItems, DB.cfg);
+      /* every answer sheet on file, whatever the report filter is narrowed to */
+      const st = summarise(e.students.filter(x => !isLSEN(x)), e.totalItems, DB.cfg);
       const t = tosFor(e);
       const cov = t ? coverage(e, t) : null;
       const multi = teacherCountForExam(e) > 1;
-      h += '<tr' + (inContext(e) ? ' class="oncycle"' : '') + '><td><strong>' + esc(e.area) + '</strong>' +
+      h += '<tr' + (inContext(e) ? ' class="oncycle"' : '') + '><td>' + areaSelect('data-area', e.id, e.area) +
         '<div class="comp-sub">' + esc(e.quizName) + '</div>' +
         (multi ? '<div class="comp-sub">Teacher <select data-slot="' + e.id + '" style="display:inline;width:auto;padding:1px 4px">' +
           [1, 2, 3].map(n => '<option value="' + n + '"' + ((e.teacherSlot || 1) === n ? ' selected' : '') + '>' + n + '</option>').join('') +
@@ -4142,7 +4368,7 @@ function viewUpload() {
     DB.toses.forEach(t => {
       const objs = t.entries.reduce((a, e) => a + e.objectives.length, 0);
       h += '<tr><td><strong>' + esc(t.subject || '(untitled)') + '</strong><div class="comp-sub">' + esc(t.fileName) + '</div></td>' +
-        '<td>' + esc(t.area) + '</td><td class="num">' + (t.grade || '—') + '</td>' +
+        '<td>' + areaSelect('data-tarea', t.id, t.area) + '</td><td class="num">' + (t.grade || '—') + '</td>' +
         '<td><select data-tcyc="' + t.id + '|sy">' + SCHOOL_YEARS.map(y =>
           '<option value="' + y + '"' + (t.sy === y ? ' selected' : '') + '>' + y + '</option>').join('') + '</select></td>' +
         '<td><select data-tcyc="' + t.id + '|term">' + TERMS.map(x =>
@@ -4155,11 +4381,19 @@ function viewUpload() {
     });
     h += '</tbody></table></div></div>';
   }
-  h += '</div></div>';
+  h += '</div></details></div>';
   return h;
 }
 
 const EXAM_ORDER = { ST1: 1, ST2: 2, TE: 3 };
+/* A learning-area picker for the "on file" tables, so a wrongly read
+   subject can be corrected by hand. */
+function areaSelect(attr, id, value) {
+  const opts = LEARNING_AREAS.includes(value) ? LEARNING_AREAS : [value].concat(LEARNING_AREAS);
+  return '<select class="areasel" ' + attr + '="' + esc(id) + '" aria-label="Learning area">' +
+    opts.map(a => '<option value="' + esc(a) + '"' + (a === value ? ' selected' : '') + '>' +
+      esc(LEARNING_AREAS.includes(a) ? areaLabel(a) : a + ' (not a learning area)') + '</option>').join('') + '</select>';
+}
 function sortExam(a, b) {
   return (a.grade - b.grade) || LEARNING_AREAS.indexOf(a.area) - LEARNING_AREAS.indexOf(b.area) || a.area.localeCompare(b.area) ||
     (+a.term - +b.term) || ((EXAM_ORDER[a.examType] || 9) - (EXAM_ORDER[b.examType] || 9)) ||
@@ -4251,8 +4485,8 @@ function computeMeanMpsSdRows(cfg) {
 function meanMpsSdShownRows(cfg) {
   const multi = multiCycleView();
   return computeMeanMpsSdRows(cfg).filter(r => r.kind !== 'part' || OPEN_GROUPS.has(r.grp)).map(r => Object.assign({}, r, {
-    label: (r.kind === 'part' ? r.area + ' — Teacher ' + r.teacher
-      : r.kind === 'combined' ? r.area + ' (' + r.setCount + ' teachers, combined)' : r.area) +
+    label: (r.kind === 'part' ? areaLabel(r.area) + ' — Teacher ' + r.teacher
+      : r.kind === 'combined' ? areaLabel(r.area) + ' (' + r.setCount + ' teachers, combined)' : areaLabel(r.area)) +
       (multi ? ' · ' + r.cycle : '')
   }));
 }
@@ -4285,12 +4519,12 @@ function viewAssessmentArea() {
     let areaCell;
     if (r.kind === 'combined') {
       areaCell = '<button type="button" class="grp-toggle" data-grp="' + esc(r.grp) + '" aria-expanded="' + open + '" ' +
-        'title="Show or hide each teacher’s row">' + CARET + '<span>' + esc(r.area) + '</span></button>' +
+        'title="Show or hide each teacher’s row">' + CARET + '<span>' + esc(areaLabel(r.area)) + '</span></button>' +
         '<div class="comp-sub">' + r.setCount + ' teachers · combined' + (multi ? ' · ' + esc(r.cycle) : '') + '</div>';
     } else if (r.kind === 'part') {
       areaCell = '<span class="part-label">Teacher ' + r.teacher + '</span>';
     } else {
-      areaCell = esc(r.area) + cyc;
+      areaCell = esc(areaLabel(r.area)) + cyc;
     }
     const cls = r.kind === 'combined' ? 'combined-row' : r.kind === 'part' ? 'breakdown-row' : '';
     h += '<tr' + (cls ? ' class="' + cls + '"' : '') +
@@ -4407,7 +4641,7 @@ function studentScoreRows() {
 }
 function scoreColHead(c) {
   const items = c.totals.size === 1 ? [...c.totals][0] + ' items' : 'items vary';
-  return esc(c.area) + '<div class="col-sub">' + (c.cycle ? esc(c.cycle) + ' · ' : '') + items + '</div>';
+  return esc(areaLabel(c.area)) + '<div class="col-sub">' + (c.cycle ? esc(c.cycle) + ' · ' : '') + items + '</div>';
 }
 function viewStudentScores() {
   let h = head('Scores by Student',
@@ -4418,7 +4652,7 @@ function viewStudentScores() {
   if (!EXAMS().length) return h + noCycleData() + '</div>';
   if (!FILTER.sections.length) {
     h += '<div class="panel"><div class="panel-body"><div class="empty-state"><div class="big">Tick a section above</div>' +
-      '<p>This report lists every learner by name, so pick at least one section under “Narrow down” to keep the table to a class-sized list.</p>' +
+      '<p>This report lists every learner by name, so tick a grade level in step 5 and at least one section in step 6 to keep the table to a class-sized list.</p>' +
       '</div></div></div>';
     return h + '</div>';
   }
@@ -4463,7 +4697,7 @@ function viewStudentScores() {
 }
 async function exportStudentScoresXLSX() {
   const { cols, groups } = studentScoreRows();
-  const headRow = ['Learner', 'Section', ...cols.map(c => c.area + (c.cycle ? ' (' + c.cycle + ')' : '') +
+  const headRow = ['Learner', 'Section', ...cols.map(c => areaLabel(c.area) + (c.cycle ? ' (' + c.cycle + ')' : '') +
     (c.totals.size === 1 ? ' — ' + [...c.totals][0] + ' items' : ''))];
   await simpleTableXLSX({
     sheetName: 'Scores by student',
@@ -4544,42 +4778,54 @@ function msfDropdown(key, label, options, selected, optLabel) {
    opens once the one before it is done, and no results show until all
    four are. Options with nothing uploaded are greyed out. Grade level and
    section can then narrow things further, optionally. */
-function filterStepHead(n, label, lblId, forId) {
+function filterStepHead(n, label, lblId, forId, note) {
   return '<div class="fstep-head"><span class="n" aria-hidden="true">' + n + '</span>' +
     (forId ? '<label for="' + forId + '">' : '<span class="t" id="' + lblId + '">') +
-    '<span class="sr">Step ' + n + ': </span>' + esc(label) + (forId ? '</label>' : '</span>') + '</div>';
+    '<span class="sr">Step ' + n + ': </span>' + esc(label) +
+    (note ? '<span class="opt-note">' + esc(note) + '</span>' : '') + (forId ? '</label>' : '</span>') + '</div>';
 }
-function filterTicks(key, n, label, options, enabled) {
+/* Each step is a table row: the step, then its "Tick all", then the
+   choices in a fixed set of columns shared by every row — so Term 1,
+   Summative Test 1, Fil, Grade 7 and the first section line up under
+   each other, and so on across. */
+function filterTicks(key, n, label, options, enabled, note, emptyText) {
   const sel = new Set(FILTER[key].map(String));
   const lblId = 'fs-' + key;
   const avail = options.filter(o => o.avail);
   const allOn = avail.length > 0 && avail.every(o => sel.has(String(o.v)));
   let h = '<div class="fstep' + (enabled && sel.size ? ' done' : '') + (enabled ? '' : ' locked') + '">' +
-    filterStepHead(n, label, lblId) +
+    filterStepHead(n, label, lblId, '', note) +
+    /* "Tick all" is the first column of the row, shown as a box like the
+       others: ticked when every available choice is ticked; unticking it
+       clears the row */
+    '<div class="fstep-all"><label class="tick tickall' + (allOn ? ' on' : '') + (enabled && avail.length ? '' : ' off') + '">' +
+      '<input type="checkbox" data-tick-all="' + key + '"' + (allOn ? ' checked' : '') + (enabled && avail.length ? '' : ' disabled') + '>' +
+      '<span>Tick all</span></label></div>' +
     '<div class="ticks" role="group" aria-labelledby="' + lblId + '">';
   options.forEach(o => {
     const on = sel.has(String(o.v));
     const off = !enabled || (!o.avail && !on);
     h += '<label class="tick' + (on ? ' on' : '') + (off ? ' off' : '') + '"' +
-      (enabled && !o.avail ? ' title="Nothing uploaded for this yet"' : '') + '>' +
+      (enabled && !o.avail ? ' title="' + esc((o.full ? o.full + ' \u2014 ' : '') + 'nothing uploaded for this yet') + '"'
+        : o.full ? ' title="' + esc(o.full) + '"' : '') + '>' +
       '<input type="checkbox" data-msf="' + key + '" data-val="' + esc(String(o.v)) + '"' +
-      (on ? ' checked' : '') + (off ? ' disabled' : '') + '>' + esc(o.t) + '</label>';
+      (on ? ' checked' : '') + (off ? ' disabled' : '') + '><span>' + esc(o.t) + '</span></label>';
   });
-  if (enabled && avail.length > 1) {
-    h += '<button type="button" class="tick-all" data-tick-all="' + key + '">' + (allOn ? 'Clear' : 'Tick all') + '</button>';
-  }
-  if (enabled && !avail.length && !sel.size) h += '<span class="hint" style="margin:0">Nothing uploaded for these choices yet.</span>';
+  if (!options.length && emptyText) h += '<span class="hint ticks-note">' + esc(emptyText) + '</span>';
+  if (enabled && options.length && !avail.length && !sel.size) h += '<span class="hint ticks-note">Nothing uploaded for these choices yet.</span>';
   return h + '</div></div>';
 }
 function filterTickOptions(key) {
   const sy = FILTER.sy[0] || '';
   const has = pred => DB.exams.some(e => e.sy === sy && pred(e));
   if (key === 'term') return TERMS.map(t => ({ v: t, t: 'Term ' + t, avail: has(e => +e.term === t) }));
-  if (key === 'exam') return EXAM_TYPES.map(x => ({ v: x.id, t: x.label,
+  if (key === 'exam') return EXAM_TYPES.map(x => ({ v: x.id, t: x.id === 'TE' ? 'Term Exam' : x.short, full: x.label,
     avail: has(e => FILTER.term.includes(+e.term) && e.examType === x.id) }));
+  if (key === 'grades') { const g = filterGradeOptions(); return GRADES.map(n => ({ v: n, t: 'Grade ' + n, avail: g.includes(n) })); }
+  if (key === 'sections') return filterSectionOptions().map(x => ({ v: x, t: x, avail: true }));
   const withData = new Set(filterAreaOptions());
   const names = LEARNING_AREAS.concat([...withData].filter(a => !LEARNING_AREAS.includes(a)));
-  return names.map(a => ({ v: a, t: a, avail: withData.has(a) }));
+  return names.map(a => ({ v: a, t: areaLabel(a), avail: withData.has(a) }));
 }
 function contextBar() {
   const sy = FILTER.sy.length === 1 ? FILTER.sy[0] : '';
@@ -4588,27 +4834,25 @@ function contextBar() {
   let h = '<div class="panel ctxbar"><div class="fsteps">';
 
   h += '<div class="fstep' + (sy ? ' done' : '') + '">' + filterStepHead(1, 'School year', '', 'fSy') +
-    '<div class="ticks"><select id="fSy" data-filter-sy><option value="">Choose the school year</option>' +
+    '<div class="fstep-all"></div><div class="ticks"><select id="fSy" data-filter-sy><option value="">Choose the school year</option>' +
     SCHOOL_YEARS.map(y => {
       const any = DB.exams.some(e => e.sy === y);
       return '<option value="' + esc(y) + '"' + (y === sy ? ' selected' : '') + (!any && y !== sy ? ' disabled' : '') + '>' +
-        esc(y) + (any ? '' : ' \\u2014 nothing uploaded') + '</option>';
+        esc(y) + (any ? '' : ' \u2014 nothing uploaded') + '</option>';
     }).join('') + '</select></div></div>';
 
   h += filterTicks('term', 2, 'Term', filterTickOptions('term'), s2);
   h += filterTicks('exam', 3, 'Assessment', filterTickOptions('exam'), s3);
-  h += filterTicks('areas', 4, 'Learning area', s4 ? filterTickOptions('areas') : LEARNING_AREAS.map(a => ({ v: a, t: a, avail: false })), s4);
+  h += filterTicks('areas', 4, 'Learning area', s4 ? filterTickOptions('areas') : LEARNING_AREAS.map(a => ({ v: a, t: areaLabel(a), avail: false })), s4);
 
-  h += '<div class="fstep fstep-opt' + (ready ? '' : ' locked') + '">' +
-    '<div class="fstep-head"><span class="n opt" aria-hidden="true">+</span><span class="t">Narrow down <span class="opt-note">optional</span></span></div>';
-  if (ready) {
-    h += '<div class="ticks">' +
-      msfDropdown('grades', 'Grade level', filterGradeOptions(), FILTER.grades, g => 'Grade ' + g) +
-      msfDropdown('sections', 'Section', filterSectionOptions(), FILTER.sections) + '</div>';
-  } else {
-    h += '<div class="ticks"><span class="hint" style="margin:0">Grade level and section open once steps 1 to 4 are done.</span></div>';
-  }
-  return h + '</div></div></div>';
+  /* 5 grade level and 6 section narrow the results further; leaving them
+     unticked includes every grade level / section. Sections open once a
+     grade level is ticked, so the list is that grade's own sections. */
+  const s6 = ready && FILTER.grades.length > 0;
+  h += filterTicks('grades', 5, 'Grade level', filterTickOptions('grades'), ready, 'optional \u2014 none ticked shows all');
+  h += filterTicks('sections', 6, 'Section', s6 ? filterTickOptions('sections') : [], s6,
+    'optional \u2014 none ticked shows all', ready ? 'Tick a grade level in step 5 to choose its sections.' : '');
+  return h + '</div></div>';
 }
 /* ---------- subjects split between teachers: show the combined figure
    and keep each teacher's own figures behind an arrow ---------- */
@@ -4652,7 +4896,7 @@ function renderClassPanels(exams, cfg, renderOne, what, extraStats) {
     const e0 = g.exams[0], sm = teacherGroupSummary(g.exams, cfg);
     const key = VIEW + ':' + g.key, open = OPEN_GROUPS.has(key);
     return '<div class="tgroup">' +
-      '<div class="panel tgroup-head"><h3>' + esc(e0.area + ' — Grade ' + e0.grade + cycleTag(e0)) +
+      '<div class="panel tgroup-head"><h3>' + esc(areaLabel(e0.area) + ' — Grade ' + e0.grade + cycleTag(e0)) +
         '<span class="sub">' + g.exams.length + ' teachers · combined</span></h3>' +
       '<div class="stats">' + stat('Test takers', sm.n) +
         stat('Mean percentage score', sm.mps.toFixed(0) + '<small>%</small>', 'blue') +
@@ -4861,7 +5105,7 @@ function renderItemsPanel(exam, cfg) {
       (ITEMS_UI.onlyFlagged ? ', filtered to those needing review' : '') + '</span></div>' +
     '<div class="tbl-scroll"><table class="grid tight"><thead><tr>' +
     '<th class="num">Item</th><th class="w1">Topic</th><th class="w2">Learning competency</th>' +
-    '<th class="w2">Learning objective</th><th class="mid">Domain</th>' +
+    '<th class="w2">Lesson objectives</th><th class="mid">Domain</th>' +
     '<th class="num">Correct</th><th class="num">Wrong</th><th class="num">% correct</th>' +
     '<th class="num">p</th><th>Difficulty</th>' +
     '<th class="num">D</th><th>Discrimination</th><th class="num">r<sub>pb</sub></th><th>Action</th></tr></thead><tbody>';
@@ -4870,9 +5114,7 @@ function renderItemsPanel(exam, cfg) {
     h += '<tr><td class="num"><strong>' + it.num + '</strong></td>' +
       '<td class="w1">' + (m ? '<strong>' + esc(m.topic) + '</strong>' : '<span class="pill mute">not in the TOS</span>') + '</td>' +
       '<td class="w2">' + (m ? esc(m.competency) : '') + '</td>' +
-      '<td class="w2">' + (m && m.objective
-        ? (m.objectiveKind ? '<span class="ksa">' + m.objectiveKind + '</span> ' : '') + esc(m.objective)
-        : '') + '</td>' +
+      '<td class="w2">' + ksaHTML(m) + '</td>' +
       '<td class="mid">' + (m && m.domain ? '<span class="dom" title="' + esc(DOMAIN_NAMES[m.domain] || '') + '">' + m.domain + '</span>' : '—') + '</td>' +
       '<td class="num">' + it.correct + '</td><td class="num">' + it.wrong + '</td>' +
       '<td class="num ' + ramp(it.pct) + '">' + it.pct.toFixed(1) + '</td>' +
@@ -4994,21 +5236,80 @@ function objectiveForDomain(o, domain) {
   return { text, kind };
 }
 
-/* item number -> {topic, competency, objective, objectiveKind, domain} */
+/* The items written for each of an objective group's K, S and A. From the
+   TOS row the items were placed on when known; for tables read before
+   that was recorded, from the cognitive domain (R/U to K, the rest to S).
+   Items whose objective has no text go to one that has. */
+function ksaBuckets(o) {
+  const b = { K: [], S: [], A: [] };
+  if (o.byKsa) ['K', 'S', 'A'].forEach(k => { b[k] = (o.byKsa[k] || []).slice(); });
+  else Object.keys(o.byDomain || {}).forEach(d => (o.byDomain[d] || []).forEach(n => b[KNOWLEDGE_DOMAINS.includes(d) ? 'K' : 'S'].push(n)));
+  const placed = new Set([...b.K, ...b.S, ...b.A]);
+  (o.items || []).forEach(n => { if (!placed.has(n)) b.K.push(n); });
+  const has = k => !!norm(o[k]) && !/^\(?\s*[KSA]\s*\)?$/i.test(norm(o[k]));
+  const home = ['K', 'S', 'A'].find(has);
+  if (home) ['K', 'S', 'A'].forEach(k => { if (k !== home && b[k].length && !has(k)) { b[home] = b[home].concat(b[k]); b[k] = []; } });
+  ['K', 'S', 'A'].forEach(k => { b[k] = [...new Set(b[k])].sort((x, y) => x - y); });
+  return b;
+}
+/* "1, 2, 3, 5, 9, 10" -> "1–3, 5, 9–10" */
+function itemRange(nums) {
+  const out = [];
+  nums.forEach((n, i) => {
+    if (i && n === nums[i - 1] + 1) { out[out.length - 1][1] = n; return; }
+    out.push([n, n]);
+  });
+  return out.map(([a, b]) => a === b ? String(a) : a + '–' + b).join(', ');
+}
+/* Competency analysis split down to each K, S and A objective: one row per
+   objective that has items, with its own mastery and learners below the
+   remediation cut-off, so the specific area to improve is named. */
+function ksaObjectiveAnalysis(students, tos, cfg) {
+  if (!tos) return [];
+  const pseudo = [];
+  tos.entries.forEach((e, ei) => (e.objectives || []).forEach(o => {
+    const b = ksaBuckets(o);
+    ['K', 'S', 'A'].forEach(k => {
+      if (b[k].length) pseudo.push({ topic: e.topic, competency: e.competency, objectives: [o], items: b[k],
+        ksa: k, ksaText: norm(o[k]), entryIndex: ei });
+    });
+  }));
+  return competencyAnalysis(students, { entries: pseudo }, cfg).map(c => {
+    const src = pseudo[c.index];
+    return Object.assign(c, { ksa: src.ksa, ksaText: src.ksaText, index: src.entryIndex });
+  });
+}
+
+/* The lesson objectives an item was written for, as the TOS gives them:
+   "(K) …", "(S) …", "(A) …". A cell holding only the letter itself (from a
+   TOS read before the reader above learned its layout) is skipped. */
+function ksaLines(m) {
+  if (!m || !m.ksa) return m && m.objective && !/^\(?\s*[KSA]\s*\)?$/i.test(norm(m.objective))
+    ? ['(' + (m.objectiveKind || 'K') + ') ' + m.objective] : [];
+  return ['K', 'S', 'A'].filter(k => norm(m.ksa[k]) && !/^\(?\s*[KSA]\s*\)?$/i.test(norm(m.ksa[k])))
+    .map(k => '(' + k + ') ' + norm(m.ksa[k]));
+}
+function ksaHTML(m) {
+  return ksaLines(m).map(t => '<div class="ksaline"><strong>' + esc(t.slice(0, 3)) + '</strong>' + esc(t.slice(3)) + '</div>').join('');
+}
+/* item number -> {topic, competency, objective, objectiveKind, domain, ksa} */
 function itemMap(tos) {
   const m = {};
   if (!tos) return m;
   tos.entries.forEach(e => e.objectives.forEach(o => {
+    const b = ksaBuckets(o);
+    const kindOf = num => ['K', 'S', 'A'].find(k => b[k].includes(num)) || '';
     Object.keys(o.byDomain).forEach(d => o.byDomain[d].forEach(num => {
-      const ob = objectiveForDomain(o, d);
+      const k = kindOf(num);
+      const ob = k ? { text: norm(o[k]), kind: k } : objectiveForDomain(o, d);
       m[num] = { topic: e.topic, competency: e.competency,
-                 objective: ob.text, objectiveKind: ob.kind, domain: d };
+                 objective: ob.text, objectiveKind: ob.kind, domain: d, ksa: { K: o.K, S: o.S, A: o.A } };
     }));
     o.items.forEach(num => {
       if (m[num]) return;
       const ob = objectiveForDomain(o, '');
       m[num] = { topic: e.topic, competency: e.competency,
-                 objective: ob.text, objectiveKind: ob.kind, domain: '' };
+                 objective: ob.text, objectiveKind: ob.kind, domain: '', ksa: { K: o.K, S: o.S, A: o.A } };
     });
   }));
   return m;
@@ -5024,62 +5325,73 @@ function competencyRows(exam, cfg) {
   const ca = competencyAnalysis(ss, tos, cfg);
   return { tos, ss, ca };
 }
+/* Most mastered lesson objectives for one class: each K, S and A objective
+   is judged on its own items, and only those 76% or more of the test
+   takers answered correctly are listed. */
+function masteredObjectives(exam, cfg) {
+  const tos = tosFor(exam);
+  if (!tos) return null;
+  const ss = studentsOf(exam);
+  const oa = ksaObjectiveAnalysis(ss, tos, cfg);
+  return {
+    tos, ss, oa,
+    mastered: oa.filter(c => c.mastery >= cfg.mastered).sort((x, y) => y.mastery - x.mastery),
+    least: oa.filter(c => c.mastery <= cfg.leastLearned)
+  };
+}
 function renderCompetencyPanel(exam, cfg) {
-  const data = competencyRows(exam, cfg);
+  const data = masteredObjectives(exam, cfg);
   let h = '<div class="panel"><h3>' + esc(classTitle(exam)) +
     (FILTER.sections.length ? ' — ' + esc(FILTER.sections.join(', ')) : ' — all sections') + '</h3>';
   if (!data) return h + '<div class="panel-body"><div class="empty-state"><div class="big">No table of specifications</div>' +
-    '<p>Upload the TOS for ' + esc(exam.area) + ' ' + exam.grade + ', or link an existing one on the upload page.</p>' +
+    '<p>Upload the TOS for ' + esc(areaLabel(exam.area)) + ' ' + exam.grade + ', or link an existing one on the upload page.</p>' +
     '<button class="btn" data-go="upload">Go to uploads</button></div></div></div>';
-  const { tos, ss, ca } = data;
-  const least = ca.filter(c => c.status === 'least').length;
-  const mastered = ca.filter(c => c.status === 'mastered').length;
+  const { tos, ss, oa, mastered, least } = data;
   const manual = exam.source === 'manual';
 
   h += '<div class="panel-body" style="padding-bottom:0">' + coverageNote(exam, tos) +
     (manual ? '<div class="note">This test was entered manually (no ZipGrade scan), so mastery % below is exact, but remediation lists are not available for it — only who answered what tells you which learners to work with.</div>' : '') +
-    '</div></div>';
-
-  h += '<div class="panel"><h3>' + esc(tos.subject || tos.area) + '<span class="sub">' + esc(tos.teacher) + '</span></h3>' +
+    '</div>' +
     '<div class="stats">' +
-    stat('Competencies', ca.length) +
-    stat('Mastered', mastered + '<small> (' + cfg.mastered + '%+)</small>', 'green') +
-    stat('Least learned', least + '<small> (under ' + cfg.leastLearned + '%)</small>', 'red') +
+    stat('Lesson objectives (K, S, A)', oa.length) +
+    stat('Most mastered', mastered.length + '<small> (' + cfg.mastered + '% and above)</small>', 'green') +
+    stat('Least learned', least.length + '<small> (' + cfg.leastLearned + '% or below)</small>', 'red') +
     stat('Learners covered', ss.length) +
-    '</div><div class="panel-body">';
+    '</div>';
 
-  ca.slice().sort((a, b) => a.mastery - b.mastery).forEach(c => {
-    const oa = objectiveAnalysis(ss, tos.entries[c.index], cfg);
-    h += '<details class="comp"><summary>' +
-      '<span class="pill ' + toneFor(c.mastery, cfg) + '">' + c.mastery.toFixed(1) + '%</span>' +
-      '<span class="comp-title">' + esc(c.topic) +
-      '<div class="comp-sub">' + esc(c.competency) + '</div></span>' +
-      '<span class="pill mute">' + c.itemCount + ' items</span>' +
-      (manual ? '<span class="pill mute">remediation n/a</span>'
-        : '<span class="pill ' + (c.needingCount ? 'bad' : 'good') + '">' + c.needingCount + ' for remediation</span>') +
-      '</summary><div class="inner">' +
-      '<div class="itemchips">' + c.items.map(n => '<span class="chip' + (n > exam.totalItems ? ' mute" title="not on the answer sheet' : '') + '">' + n + '</span>').join('') + '</div>' +
-      '<table class="grid tight" style="margin-top:12px"><thead><tr><th>Learning objective</th><th class="mid">Domains</th>' +
-      '<th>Items</th><th class="num">Mastery</th><th class="num">For remediation</th><th></th></tr></thead><tbody>';
-    oa.forEach(o => {
-      h += '<tr><td><strong>K.</strong> ' + esc(o.K || '—') +
-        (o.S ? '<div class="comp-sub"><strong>S.</strong> ' + esc(o.S) + '</div>' : '') +
-        (o.A ? '<div class="comp-sub"><strong>A.</strong> ' + esc(o.A) + '</div>' : '') + '</td>' +
-        '<td class="mid">' + o.domains.map(d => '<span class="dom" title="' + esc(DOMAIN_NAMES[d]) + '">' + d + '</span>').join('') + '</td>' +
-        '<td>' + o.items.join(', ') + '</td>' +
-        '<td class="num"><span class="pill ' + toneFor(o.mastery, cfg) + '">' + o.mastery.toFixed(1) + '%</span></td>' +
-        '<td class="num">' + (manual ? '—' : o.needingCount) + '</td>' +
-        '<td>' + (manual ? '' : '<button class="btn sm ghost" data-rem="' + exam.id + '|' + c.index + '">Learners</button>') + '</td></tr>';
-    });
-    h += '</tbody></table></div></details>';
+  if (!mastered.length) {
+    const top = oa.slice().sort((x, y) => y.mastery - x.mastery)[0];
+    h += '<div class="panel-body"><p style="margin:0;color:var(--ink-soft)">No lesson objective is most mastered — none reached ' +
+      cfg.mastered + '%.' + (top ? ' The highest is ' + top.mastery.toFixed(1) + '%: (' + esc(top.ksa) + ') ' + esc(top.ksaText || top.competency) + '.' : '') +
+      '</p></div></div>';
+    return h;
+  }
+  h += '<div class="panel-body flush"><div class="tbl-scroll"><table class="grid tight"><thead><tr>' +
+    '<th>Topic and competency</th><th class="w2">Lesson objective (K, S or A)</th><th class="num">Items</th>' +
+    '<th class="num">Mastery</th><th class="num">For remediation</th><th></th></tr></thead><tbody>';
+  mastered.forEach(c => {
+    h += '<tr><td><strong>' + esc(c.topic) + '</strong><div class="comp-sub">' + esc(c.competency) + '</div></td>' +
+      '<td><span class="ksatag">' + c.ksa + '</span><span class="ksaword">' + ({ K: 'Knowledge', S: 'Skill', A: 'Attitude' }[c.ksa] || '') + '</span>' +
+        '<div>' + esc(c.ksaText || '—') + '</div><div class="comp-sub">item' + (c.items.length === 1 ? ' ' : 's ') + esc(itemRange(c.items)) + '</div></td>' +
+      '<td class="num">' + c.itemCount + '</td>' +
+      '<td class="num"><span class="pill good">' + c.mastery.toFixed(1) + '%</span></td>' +
+      '<td class="num">' + (manual ? '—' : c.needingCount) + '</td>' +
+      '<td>' + (manual ? '' : '<button class="btn sm ghost" data-rem="' + exam.id + '|' + c.index + '">Learners</button>') + '</td></tr>';
   });
-  h += '</div></div>';
-  return h;
+  h += '</tbody></table></div>';
+  const others = oa.length - mastered.length;
+  if (others) {
+    h += '<div class="panel-body" style="padding-top:10px;color:var(--ink-soft);font-size:13.8px">' + others +
+      ' other lesson objective' + (others === 1 ? ' is' : 's are') + ' below ' + cfg.mastered + '%' +
+      (least.length ? ', ' + least.length + ' of them least learned (' + cfg.leastLearned + '% or below) — see ' +
+        '<button type="button" class="inline-link" data-go="leastLearned">Least Learned Competencies</button>' : '') + '.</div>';
+  }
+  return h + '</div>';
 }
 function viewCompetency() {
   const cfg = DB.cfg;
   let h = head('Mastered Competencies',
-    'Each competency and learning objective in the table of specifications, with the share of items answered correctly. Ticking more than one learning area or grade level shows one panel per class.');
+    'The lesson objectives (K, S and A) that 76% or more of the test takers answered correctly, judged on each objective\u2019s own items.');
   h += '<div class="wrap">' + contextBar();
   if (!DB.exams.length) return h + noData('No ZipGrade results have been uploaded.') + '</div>';
   if (!filterReady()) return h + filterPrompt() + '</div>';
@@ -5103,12 +5415,12 @@ function renderRemediationPanel(exam, cfg) {
     (FILTER.sections.length ? ' — ' + esc(FILTER.sections.join(', ')) : ' — all sections') + '</h3>';
   const tos = tosFor(exam);
   if (!tos) return h + '<div class="panel-body"><div class="empty-state"><div class="big">No table of specifications</div>' +
-    '<p>Remediation grouping needs the competencies and item placement from the TOS for ' + esc(exam.area) + ' ' + exam.grade + '.</p>' +
+    '<p>Remediation grouping needs the competencies and item placement from the TOS for ' + esc(areaLabel(exam.area)) + ' ' + exam.grade + '.</p>' +
     '<button class="btn" data-go="upload">Go to uploads</button></div></div></div>';
   if (exam.source === 'manual') return h + '<div class="panel-body"><div class="empty-state"><div class="big">Not available for this test</div>' +
     '<p>This test was entered manually (no ZipGrade scan), so only each item\'s total correct count and each ' +
     'student\'s total score were recorded — not which student answered which item. A remediation list needs that ' +
-    'detail to say who to work with, so it cannot be built for ' + esc(exam.area) + ' ' + exam.grade + ' ' +
+    'detail to say who to work with, so it cannot be built for ' + esc(areaLabel(exam.area)) + ' ' + exam.grade + ' ' +
     esc(examTypeLabel(exam.examType)) + '. Mean, MPS, item difficulty and competency mastery are still available ' +
     'on the other pages for this test.</p></div></div></div>';
 
@@ -5289,7 +5601,7 @@ function viewExport() {
       '<p>The division summary covers a single assessment. In steps 2 and 3 above, leave just one term and one assessment ticked.</p>' +
       '</div></div></div>';
   }
-  const anySplit = GRADES.some(g => LEARNING_AREAS.some(a => { const r = divisionRow(g, a, cfg); return r && r.teachers > 1; }));
+  const anySplit = GRADES.some(g => DIVISION_AREAS.some(a => { const r = divisionRow(g, a, cfg); return r && r.teachers > 1; }));
   if (anySplit) {
     h += '<div class="note info">Where a learning area was taught by more than one teacher, the file shows one combined row: ' +
       'enrolment, test takers, HP/AP/LP and the number of correct responses per item are added up, and mean, MPS and SD are averaged. ' +
@@ -5303,7 +5615,7 @@ function viewExport() {
 
   let rowCount = 0;
   GRADES.forEach(g => {
-    LEARNING_AREAS.forEach(area => {
+    DIVISION_AREAS.forEach(area => {
       const row = divisionRow(g, area, cfg);
       if (!row) return;
       rowCount++;
@@ -5314,7 +5626,7 @@ function viewExport() {
         '<td class="num"><strong>' + x.mps.toFixed(0) + '</strong></td><td class="num">' + x.sd.toFixed(0) + '</td>' +
         '<td class="num">' + x.HP + '</td><td class="num">' + x.AP + '</td><td class="num">' + x.LP + '</td>';
       if (row.teachers === 1) {
-        h += '<tr><td class="num">' + g + '</td><td class="rowhead">' + esc(area) + '</td>' + nums(row) + lmCells + '</tr>';
+        h += '<tr><td class="num">' + g + '</td><td class="rowhead">' + esc(areaLabel(area)) + '</td>' + nums(row) + lmCells + '</tr>';
         return;
       }
       /* combined row, with each teacher's own figures behind the arrow */
@@ -5322,7 +5634,7 @@ function viewExport() {
       const mainSlot = row.main.e.teacherSlot || 1;
       h += '<tr class="combined-row"><td class="num">' + g + '</td><td class="rowhead">' +
         '<button type="button" class="grp-toggle" data-grp="' + esc(key) + '" aria-expanded="' + open + '" ' +
-        'title="Show or hide each teacher’s figures">' + CARET + '<span>' + esc(area) + '</span></button>' +
+        'title="Show or hide each teacher’s figures">' + CARET + '<span>' + esc(areaLabel(area)) + '</span></button>' +
         '<div class="comp-sub">' + row.teachers + ' teachers · combined</div></td>' + nums(row) +
         lmCells.replace('<td>', '<td><div class="comp-sub" style="margin:0 0 4px">From Teacher ' + mainSlot + '’s set (' + row.main.enrol + ' learners)</div>') +
         '</tr>';
@@ -5356,7 +5668,7 @@ function viewExport() {
 
 /* The division form has room for three of each, but only items that
    actually clear the threshold (35% or fewer correct for least learned,
-   75% or more for most mastered) are ever listed — rank 1 is always the
+   76% or more for most mastered) are ever listed — rank 1 is always the
    strongest fit (fewest correct for least learned, most correct for most
    mastered), and a class with fewer than three qualifiers simply lists
    fewer than three. Each entry is one item, named by the competency and
@@ -5489,10 +5801,10 @@ function buildSummarySheet(wb, cfg) {
   ws.getRow(4).height = 26.25;
 
   const blocks = [
-    { grade: 'Grade 7', hdr: 5, rows: LEARNING_AREAS, gnum: 7 },
-    { grade: 'Grade 8', hdr: 17, rows: LEARNING_AREAS, gnum: 8 },
-    { grade: 'Grade 9', hdr: 29, rows: LEARNING_AREAS, gnum: 9 },
-    { grade: 'Grade 10', hdr: 41, rows: LEARNING_AREAS, gnum: 10 }
+    { grade: 'Grade 7', hdr: 5, rows: DIVISION_AREAS, gnum: 7 },
+    { grade: 'Grade 8', hdr: 17, rows: DIVISION_AREAS, gnum: 8 },
+    { grade: 'Grade 9', hdr: 29, rows: DIVISION_AREAS, gnum: 9 },
+    { grade: 'Grade 10', hdr: 41, rows: DIVISION_AREAS, gnum: 10 }
   ];
 
   blocks.forEach((b, bi) => {
@@ -5545,14 +5857,14 @@ function buildSummarySheet(wb, cfg) {
       }
     });
 
-    b.rows.forEach((areaLabel, ri) => {
+    b.rows.forEach((areaName, ri) => {
       const r = first + ri;
       ws.getRow(r).height = 15.75;
-      const row = (b.gnum <= 10) ? divisionRow(b.gnum, areaLabel, cfg) : null;
+      const row = (b.gnum <= 10) ? divisionRow(b.gnum, areaName, cfg) : null;
       const lm = row ? row.lm : { least: [], mastered: [] };
 
       const nameCell = ws.getCell(r, 1);
-      nameCell.value = areaLabel;
+      nameCell.value = areaName;
       styleCell(nameCell, { font: { name: 'Century Gothic', size: 11 }, align: { horizontal: 'left', vertical: 'top', wrapText: true } });
       /* a split subject says so in a cell note, leaving the layout as the template has it */
       if (row && row.teachers > 1) nameCell.note = divisionRowNote(row);
@@ -5625,7 +5937,7 @@ async function downloadFull() {
     const map = itemMap(tos);
     const ia = itemAnalysis(studentsOf(exam), exam.totalItems);
     const tag = (teacherCountForExam(exam) > 1 || (exam.teacherSlot || 1) > 1) ? ' T' + (exam.teacherSlot || 1) : '';
-    const ws = wb.addWorksheet(uniqueSheetName(wb, exam.area + ' ' + exam.grade + tag));
+    const ws = wb.addWorksheet(uniqueSheetName(wb, areaLabel(exam.area) + ' ' + exam.grade + tag));
     ws.columns = [
       { width: 6 }, { width: 34 }, { width: 52 }, { width: 52 }, { width: 8 }, { width: 9 },
       { width: 9 }, { width: 10 }, { width: 8 }, { width: 16 }, { width: 8 },
@@ -5646,17 +5958,18 @@ async function downloadFull() {
     }
     r += 1;
 
-    const heads = ['Item', 'Topic', 'Learning competency', 'Learning objective', 'Domain', 'Correct', 'Wrong',
+    const heads = ['Item', 'Topic', 'Learning competency', 'Lesson objectives', 'Domain', 'Correct', 'Wrong',
       '% correct', 'p', 'Difficulty', 'D', 'Discrimination', 'rpb', 'Action'];
     heads.forEach((v, i) => { const c = ws.getCell(r, i + 1); c.value = v; hdrStyle(c); });
     const headRow = r; r++;
     ia.forEach(it => {
       const m = map[it.num] || {};
       const row = [it.num, m.topic || '', m.competency || '',
-        (m.objectiveKind ? m.objectiveKind + ' — ' : '') + (m.objective || ''), m.domain || '', it.correct, it.wrong,
+        ksaLines(m).join('\n'), m.domain || '', it.correct, it.wrong,
         round(it.pct, 2), it.p, it.diff.label,
         manual ? 'n/a' : it.d, manual ? '—' : it.disc.label, manual ? 'n/a' : it.rpb, action(it, manual)];
       row.forEach((v, i) => { const c = ws.getCell(r, i + 1); c.value = v; cellStyle(c); });
+      ws.getCell(r, 4).alignment = { vertical: 'top', wrapText: true };
       ws.getCell(r, 8).numFmt = '0.00'; ws.getCell(r, 9).numFmt = '0.00';
       if (!manual) { ws.getCell(r, 11).numFmt = '0.00'; ws.getCell(r, 13).numFmt = '0.00'; }
       r++;
@@ -5697,7 +6010,7 @@ async function downloadFull() {
       /* remediation — needs per-student detail, which a manually entered
          exam never has, so this sheet is only meaningful for a scanned one. */
       if (!manual) {
-        const wsR = wb.addWorksheet(uniqueSheetName(wb, 'Rem ' + exam.area + ' ' + exam.grade + tag));
+        const wsR = wb.addWorksheet(uniqueSheetName(wb, 'Rem ' + areaLabel(exam.area) + ' ' + exam.grade + tag));
         wsR.columns = [{ width: 30 }, { width: 46 }, { width: 54 }, { width: 16 }, { width: 28 },
           { width: 14 }, { width: 10 }, { width: 11 }, { width: 15 }, { width: 26 }];
         let rr = 1;
@@ -5799,7 +6112,7 @@ function viewSettings() {
     '<div class="two">' +
     num('High performing — raw score at or above', 'cfgHP', c.hpScore, 100) +
     num('Average performing — raw score at or above', 'cfgAP', c.apScore, 100) +
-    num('Most mastered — answered correctly by this % of test takers or more', 'cfgMastered', c.mastered) +
+    num('Most mastered — answered correctly by this % of test takers or more (76 by default)', 'cfgMastered', c.mastered) +
     num('Least learned — answered correctly by this % of test takers or fewer', 'cfgLeast', c.leastLearned) +
     num('Learner needs remediation below (% of a competency’s items)', 'cfgRem', c.remediation) +
     '</div><button class="btn" id="saveCfg">Save settings</button> ' +
@@ -5824,7 +6137,7 @@ function viewSettings() {
       const ticked = lsenIn(e).length;
       const rec = lsenRecorded(e);
       const mismatch = rec !== null && rec !== ticked;
-      h += '<tr><td class="num">' + e.grade + '</td><td class="rowhead">' + esc(e.area) + '</td>' +
+      h += '<tr><td class="num">' + e.grade + '</td><td class="rowhead">' + esc(areaLabel(e.area)) + '</td>' +
         '<td><input type="number" min="0" class="numin" data-enrol="' + esc(k) + '" value="' +
           esc(DB.enrolment[k] !== undefined ? DB.enrolment[k] : '') +
           '" placeholder="' + studentsOf(e).length + '"></td>' +
@@ -6071,7 +6384,7 @@ function bindView() {
     if (!ex) return;
     ex[field] = field === 'term' ? +sel.value : sel.value;
     save(id); render();
-    toast(ex.area + ' ' + ex.grade + ' filed under ' + ex.sy + ', Term ' + ex.term + ', ' + examTypeShort(ex.examType));
+    toast(areaLabel(ex.area) + ' ' + ex.grade + ' filed under ' + ex.sy + ', Term ' + ex.term + ', ' + examTypeShort(ex.examType));
   });
   document.querySelectorAll('[data-tcyc]').forEach(sel => sel.onchange = () => {
     const [id, field] = sel.dataset.tcyc.split('|');
@@ -6099,6 +6412,8 @@ function bindView() {
     const b = document.querySelector('#upTeachers button.on') || document.querySelector('#upTeachers button');
     if (b && !b.disabled) b.focus();
   });
+  const onfile = document.querySelector('details.onfile');
+  if (onfile) onfile.ontoggle = () => { UP_UI.onfileOpen = onfile.open; };
   document.querySelectorAll('#upTeachers button').forEach(b => b.onclick = () => {
     UP_UI.teachers = +b.dataset.n; render();
     const z = document.querySelector('[data-up-drop]'); if (z) z.focus();
@@ -6109,9 +6424,15 @@ function bindView() {
     const take = async files => {
       const p = upPick();
       if (!p || !files.length) return;
-      const log = $('log'); if (log && !UPLOAD_LOG.length) log.innerHTML = '';
-      const n = await ingestFiles(files, $('log'), slot, p);
-      toast(n ? n + ' file' + (n > 1 ? 's' : '') + ' loaded for Teacher ' + slot : 'Nothing could be read from those files', !n);
+      const since = Date.now();
+      const n = await ingestFiles(files, null, slot, p);
+      const problems = UPLOAD_LOG.filter(l => l.at >= since && (l.cls === 'er' ||
+        (l.cls === 'wr' && !/ \u2014 replaced /.test(l.txt)))).map(l => l.txt).reverse();
+      UP_PROBLEMS[upPickKey(p) + '|' + d.dataset.upDrop] = problems;
+      render();
+      toast(!n ? 'Nothing was uploaded \u2014 see the note in Teacher ' + slot + '\u2019s box'
+        : (n + ' file' + (n > 1 ? 's' : '') + ' uploaded for Teacher ' + slot +
+           (problems.length ? ' \u2014 please check the note in the box' : '')), !n);
     };
     d.onclick = () => f.click();
     d.onkeydown = ev => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); f.click(); } };
@@ -6138,6 +6459,22 @@ function bindView() {
   document.querySelectorAll('[data-link]').forEach(s => s.onchange = () => {
     DB.links[s.dataset.link] = s.value; save('links'); render(); toast('Table of specifications linked');
   });
+  document.querySelectorAll('[data-area]').forEach(s => s.onchange = () => {
+    const e = DB.exams.find(x => x.id === s.dataset.area);
+    if (!e || !LEARNING_AREAS.includes(s.value)) return;
+    const clash = DB.exams.find(x => x.id !== e.id && x.area === s.value && x.grade === e.grade &&
+      x.sy === e.sy && +x.term === +e.term && x.examType === e.examType && (x.teacherSlot || 1) === (e.teacherSlot || 1));
+    if (clash) { toast(areaLabel(s.value) + ' ' + e.grade + ' already has an upload for this assessment' + ((e.teacherSlot || 1) > 1 ? ' and teacher' : '') + ' \u2014 remove that one first.', true); render(); return; }
+    const was = e.area;
+    e.area = s.value;
+    syncTeacherCount(was, e.grade, e.sy); syncTeacherCount(e.area, e.grade, e.sy);
+    save(e.id); render(); toast((e.quizName || e.fileName || 'Upload') + ' is now filed under ' + areaLabel(e.area));
+  });
+  document.querySelectorAll('[data-tarea]').forEach(s => s.onchange = () => {
+    const t = DB.toses.find(x => x.id === s.dataset.tarea);
+    if (!t || !LEARNING_AREAS.includes(s.value)) return;
+    t.area = s.value; save(t.id); render(); toast('Table of specifications filed under ' + areaLabel(t.area));
+  });
   document.querySelectorAll('[data-slot]').forEach(s => s.onchange = () => {
     const e = DB.exams.find(x => x.id === s.dataset.slot);
     if (!e) return;
@@ -6145,7 +6482,7 @@ function bindView() {
     const clash = DB.exams.find(x => x.id !== e.id && x.area === e.area && x.grade === e.grade &&
       x.sy === e.sy && +x.term === +e.term && x.examType === e.examType && (x.teacherSlot || 1) === newSlot);
     if (clash) { toast('Teacher ' + newSlot + ' is already used by another upload for this class — remove or reslot that one first.', true); render(); return; }
-    e.teacherSlot = newSlot; syncTeacherCount(e.area, e.grade, e.sy); save(e.id); render(); toast(e.area + ' ' + e.grade + ' set to Teacher ' + newSlot);
+    e.teacherSlot = newSlot; syncTeacherCount(e.area, e.grade, e.sy); save(e.id); render(); toast(areaLabel(e.area) + ' ' + e.grade + ' set to Teacher ' + newSlot);
   });
   on('clearExams', 'click', () => {
     if (!confirm('Remove every uploaded exam? Tables of specifications are kept.')) return;
@@ -6163,6 +6500,7 @@ function bindView() {
     DB.cfg.examTitle = g('cfgTitle', DB.cfg.examTitle);
     DB.cfg.hpScore = n('cfgHP', DB.cfg.hpScore); DB.cfg.apScore = n('cfgAP', DB.cfg.apScore);
     DB.cfg.mastered = n('cfgMastered', DB.cfg.mastered);
+    DB.cfg.bandsV = 2;
     DB.cfg.leastLearned = n('cfgLeast', DB.cfg.leastLearned);
     DB.cfg.remediation = n('cfgRem', DB.cfg.remediation);
     save('settings'); render(); toast('Settings saved');
@@ -6204,7 +6542,7 @@ function bindView() {
     EXAMS().slice().sort(sortExam).forEach(exam => {
       const { ss, list } = itemAnalysisRows(exam, DB.cfg);
       try { itemAnalysisPDF(exam, ss, list, itemMap(tosFor(exam)), label); any = true; }
-      catch (err) { toast('Could not build the PDF for ' + exam.area + ' ' + exam.grade + ': ' + err.message, true); }
+      catch (err) { toast('Could not build the PDF for ' + areaLabel(exam.area) + ' ' + exam.grade + ': ' + err.message, true); }
     });
     if (any) toast('PDF downloaded');
   });
@@ -6217,7 +6555,7 @@ function bindView() {
       const ca = competencyAnalysis(studentsOf(exam), tos, DB.cfg).slice().sort((a, b) => b.needingCount - a.needingCount);
       if (!ca.some(c => c.needingCount)) return;
       try { remediationPDF(exam, ca, label); any = true; }
-      catch (err) { toast('Could not build the PDF for ' + exam.area + ' ' + exam.grade + ': ' + err.message, true); }
+      catch (err) { toast('Could not build the PDF for ' + areaLabel(exam.area) + ' ' + exam.grade + ': ' + err.message, true); }
     });
     if (any) toast('PDF downloaded'); else toast('No learner on this page falls below the cut-off.', true);
   });
@@ -6271,7 +6609,7 @@ function bindView() {
       DB.enrolment = d.enrolment || {};
       DB.lsenCount = d.lsenCount || {}; DB.lsen = d.lsen || {};
       DB.rosters = d.rosters || {};
-      DB.cfg = { ...DEFAULT_CFG, ...(d.cfg || {}) }; uid = d.uid || 1;
+      DB.cfg = withDefaults(d.cfg); uid = d.uid || 1;
       save(); render();
       const rosterCount = Object.values(DB.rosters).reduce((a, r) => a + ((r && r.learners) ? r.learners.length : 0), 0);
       toast('Backup restored — ' + DB.exams.length + ' exam' + (DB.exams.length === 1 ? '' : 's') +
@@ -6292,29 +6630,29 @@ function bindView() {
 /* ---------------- Dashboard export ---------------- */
 function exportDashboardPDF() {
   const exams = EXAMS();
-  const areaRows = computeAreaSummary(allAreas(), exams).map(r => [r.area, r.takers, r.mean.toFixed(2), r.mps.toFixed(0), r.sd.toFixed(0)]);
-  const flagRows = weakestRowsExport(computeWeakestRows(exams, DB.cfg).slice(0, 14));
+  const areaRows = computeAreaSummary(allAreas(), exams).map(r => [areaLabel(r.area), r.takers, r.mean.toFixed(2), r.mps.toFixed(0), r.sd.toFixed(0)]);
+  const flagRows = weakestRowsExport(leastLearnedRows(exams, DB.cfg).slice(0, 14));
   simpleTablePDF({
     title: 'Assessment dashboard',
     subtitle: ctxLabel(),
     tables: [
       { heading: 'Mean, MPS and SD by learning area', head: ['Learning area', 'Takers', 'Mean', 'MPS', 'SD'], body: areaRows },
-      { heading: 'Weakest competencies across the school', head: ['Learning area', 'Grade', 'Topic', 'Competency', 'Items', 'Mastery %', 'For remediation'], body: flagRows }
+      { heading: 'Least learned lesson objectives', head: ['Learning area', 'Grade', 'Topic', 'Competency', 'Lesson objective (K, S or A)', 'Items', 'Mastery %', 'For remediation'], body: flagRows }
     ],
     filename: 'Dashboard summary ' + stampFileDate() + '.pdf'
   });
 }
 async function exportDashboardXLSX() {
   const exams = EXAMS();
-  const areaRows = computeAreaSummary(allAreas(), exams).map(r => [r.area, r.takers, r.mean, r.mps, r.sd]);
-  const flagRows = weakestRowsExport(computeWeakestRows(exams, DB.cfg).slice(0, 14));
+  const areaRows = computeAreaSummary(allAreas(), exams).map(r => [areaLabel(r.area), r.takers, r.mean, r.mps, r.sd]);
+  const flagRows = weakestRowsExport(leastLearnedRows(exams, DB.cfg).slice(0, 14));
   await simpleTableXLSX({
     sheetName: 'Dashboard',
     title: 'Assessment dashboard',
     subtitle: ctxLabel(),
     tables: [
       { heading: 'Mean, MPS and SD by learning area', head: ['Learning area', 'Takers', 'Mean', 'MPS', 'SD'], body: areaRows, numFmtCols: [2, 3, 4] },
-      { heading: 'Weakest competencies across the school', head: ['Learning area', 'Grade', 'Topic', 'Competency', 'Items', 'Mastery %', 'For remediation'], body: flagRows, numFmtCols: [5] }
+      { heading: 'Least learned lesson objectives', head: ['Learning area', 'Grade', 'Topic', 'Competency', 'Lesson objective (K, S or A)', 'Items', 'Mastery %', 'For remediation'], body: flagRows, numFmtCols: [6] }
     ],
     filename: 'Dashboard summary ' + stampFileDate() + '.xlsx'
   });
@@ -6323,7 +6661,7 @@ async function exportDashboardXLSX() {
 /* ---------------- LSEN — with assessment export ---------------- */
 function exportLSENAssessmentPDF() {
   const rows = computeLSENAssessmentAreaSummary(allAreas(), EXAMS())
-    .map(r => [r.area, r.takers, r.mean.toFixed(2), r.mps.toFixed(0), r.sd.toFixed(0)]);
+    .map(r => [areaLabel(r.area), r.takers, r.mean.toFixed(2), r.mps.toFixed(0), r.sd.toFixed(0)]);
   simpleTablePDF({
     title: 'LSEN - with assessment',
     subtitle: ctxLabel(),
@@ -6333,7 +6671,7 @@ function exportLSENAssessmentPDF() {
 }
 async function exportLSENAssessmentXLSX() {
   const rows = computeLSENAssessmentAreaSummary(allAreas(), EXAMS())
-    .map(r => [r.area, r.takers, r.mean, r.mps, r.sd]);
+    .map(r => [areaLabel(r.area), r.takers, r.mean, r.mps, r.sd]);
   await simpleTableXLSX({
     sheetName: 'LSEN with assessment',
     title: 'LSEN - with assessment',
@@ -6380,21 +6718,21 @@ async function exportAssessmentAreaXLSX() {
    that matches the ticked filters, combined into a single file. ---------------- */
 function competencyExportRows(exam, data, cfg) {
   const manual = exam.source === 'manual';
-  return data.ca.slice().sort((a, b) => a.mastery - b.mastery).map(c => [
-    c.topic, c.competency, c.itemCount, round(c.mastery, 1),
-    c.status === 'least' ? 'Least learned' : c.status === 'mastered' ? 'Mastered' : 'Developing',
+  if (!data.mastered.length) return [['No lesson objective reached ' + cfg.mastered + '%', '', '', '', '', '']];
+  return data.mastered.map(c => [
+    c.topic, c.competency, '(' + c.ksa + ') ' + (c.ksaText || ''), c.itemCount, round(c.mastery, 1),
     manual ? 'n/a' : c.needingCount
   ]);
 }
 function competencyExportTables(cfg) {
   return EXAMS().slice().sort(sortExam).map(exam => {
-    const data = competencyRows(exam, cfg);
+    const data = masteredObjectives(exam, cfg);
     if (!data) return null;
     return {
       heading: classTitle(exam),
-      head: ['Topic', 'Learning competency', 'Items', 'Mastery %', 'Status', 'For remediation'],
+      head: ['Topic', 'Learning competency', 'Lesson objective (K, S or A)', 'Items', 'Mastery %', 'For remediation'],
       body: competencyExportRows(exam, data, cfg),
-      numFmtCols: [3]
+      numFmtCols: [4]
     };
   }).filter(Boolean);
 }
@@ -6422,21 +6760,21 @@ async function exportCompetencyXLSX() {
 
 /* ---------------- Least Learned Competencies export ---------------- */
 function exportLeastLearnedPDF() {
-  const rows = weakestRowsExport(computeWeakestRows(EXAMS(), DB.cfg));
+  const rows = weakestRowsExport(leastLearnedRows(EXAMS(), DB.cfg));
   simpleTablePDF({
     title: 'Least Learned Competencies',
     subtitle: ctxLabel(),
-    tables: [{ head: ['Learning area', 'Grade', 'Topic', 'Competency', 'Items', 'Mastery %', 'For remediation'], body: rows }],
+    tables: [{ head: ['Learning area', 'Grade', 'Topic', 'Competency', 'Lesson objective (K, S or A)', 'Items', 'Mastery %', 'For remediation'], body: rows }],
     filename: 'Least Learned Competencies ' + stampFileDate() + '.pdf'
   });
 }
 async function exportLeastLearnedXLSX() {
-  const rows = weakestRowsExport(computeWeakestRows(EXAMS(), DB.cfg));
+  const rows = weakestRowsExport(leastLearnedRows(EXAMS(), DB.cfg));
   await simpleTableXLSX({
     sheetName: 'Least learned',
     title: 'Least Learned Competencies',
     subtitle: ctxLabel(),
-    tables: [{ head: ['Learning area', 'Grade', 'Topic', 'Competency', 'Items', 'Mastery %', 'For remediation'], body: rows, numFmtCols: [5] }],
+    tables: [{ head: ['Learning area', 'Grade', 'Topic', 'Competency', 'Lesson objective (K, S or A)', 'Items', 'Mastery %', 'For remediation'], body: rows, numFmtCols: [6] }],
     filename: 'Least Learned Competencies ' + stampFileDate() + '.xlsx'
   });
 }
@@ -6451,13 +6789,13 @@ async function exportItemsXLSX() {
     const rows = list.map(it => {
       const m = map[it.num] || {};
       return [it.num, m.topic || '', m.competency || '',
-        (m.objectiveKind ? m.objectiveKind + ' — ' : '') + (m.objective || ''), m.domain || '',
+        ksaLines(m).join('\n'), m.domain || '',
         it.correct, it.wrong, round(it.pct, 2), round(it.p, 2), it.diff.label,
         manual ? 'n/a' : round(it.d, 2), manual ? '—' : it.disc.label, manual ? 'n/a' : round(it.rpb, 2), action(it, manual)];
     });
     return {
       heading: classTitle(exam),
-      head: ['Item', 'Topic', 'Learning competency', 'Learning objective', 'Domain', 'Correct', 'Wrong',
+      head: ['Item', 'Topic', 'Learning competency', 'Lesson objectives', 'Domain', 'Correct', 'Wrong',
         '% correct', 'p', 'Difficulty', 'D', 'Discrimination', 'rpb', 'Action'],
       body: rows, numFmtCols: [7, 8, 10, 12]
     };
@@ -6481,7 +6819,7 @@ async function exportRemediationXLSX() {
     const ca = competencyAnalysis(ss, tos, DB.cfg);
     const rows = [];
     ca.forEach(c => c.needing.forEach(x => {
-      rows.push([exam.area, exam.grade, x.student.section, x.student.name, x.student.id, c.topic, c.competency,
+      rows.push([areaLabel(exam.area), exam.grade, x.student.section, x.student.name, x.student.id, c.topic, c.competency,
         competencyObjectives(c), c.items.filter(n => n <= exam.totalItems).join(' '),
         x.correct, x.total, round(x.pct, 2), missedItems(x.student, c.items).join(' '),
         x.student.score + '/' + exam.totalItems]);
@@ -6766,7 +7104,7 @@ async function creatingTemplate(exam) {
   const ws = wb.addWorksheet('Items 49-50');
   ws.columns = [{ width: 38 }, { width: 16 }, { width: 16 }, { width: 22 }];
   const title = ws.getCell('A1');
-  title.value = exam.area + ' ' + exam.grade + ' — items 49 and 50 (creating questions)';
+  title.value = areaLabel(exam.area) + ' ' + exam.grade + ' — items 49 and 50 (creating questions)';
   title.font = { name: 'Century Gothic', size: 13, bold: true };
   ws.mergeCells('A1:D1');
   const note = ws.getCell('A2');
@@ -6811,8 +7149,8 @@ async function creatingTemplate(exam) {
   ws.views = [{ state: 'frozen', ySplit: 4 }];
   const buf = await wb.xlsx.writeBuffer();
   saveBlob(new Blob([buf], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }),
-    'Items 49-50 ' + exam.area + ' ' + exam.grade + '.xlsx');
-  toast('Blank sheet downloaded for ' + exam.area + ' ' + exam.grade);
+    'Items 49-50 ' + areaLabel(exam.area) + ' ' + exam.grade + '.xlsx');
+  toast('Blank sheet downloaded for ' + areaLabel(exam.area) + ' ' + exam.grade);
 }
 
 /* ---------------- Manual results template ---------------- */
@@ -7153,7 +7491,7 @@ function viewLearners() {
     const shown = q ? inSection.filter(s => (s.name + ' ' + s.id).toLowerCase().includes(q)) : inSection;
     const marked = inSection.filter(isLSEN).length;
 
-    h += '<div class="panel"><h3>' + esc(exam.area) + ' ' + exam.grade +
+    h += '<div class="panel"><h3>' + esc(areaLabel(exam.area)) + ' ' + exam.grade +
       (FILTER.sections.length ? ' — ' + esc(FILTER.sections.join(', ')) : ' — all sections') + '</h3>' +
       '<div class="stats">' +
       stat('Answer sheets', inSection.length) +
@@ -7203,7 +7541,7 @@ function viewLearners() {
 function otherAreasFor(student, exam) {
   const k = learnerKey(student);
   return EXAMS().filter(e => e.id !== exam.id && e.students.some(s => learnerKey(s) === k))
-                .map(e => e.area + ' ' + e.grade);
+                .map(e => areaLabel(e.area) + ' ' + e.grade);
 }
 
 /* Every marked learner, with where they appear. */
@@ -7213,7 +7551,7 @@ function lsenRoster() {
     const k = learnerKey(s);
     if (!DB.lsen[k]) return;
     if (!byKey[k]) byKey[k] = { key: k, name: s.name, id: s.id, where: [] };
-    const w = e.area + ' ' + e.grade;
+    const w = areaLabel(e.area) + ' ' + e.grade;
     if (byKey[k].where.indexOf(w) < 0) byKey[k].where.push(w);
   }));
   return Object.keys(byKey).map(k => byKey[k]).sort((a, b) => a.name.localeCompare(b.name));
@@ -7399,7 +7737,7 @@ async function simpleTableXLSX(opts) {
 function itemAnalysisPDF(exam, students, list, map, label) {
   const manual = exam.source === 'manual';
   const { doc, font, startY } = pdfReport({
-    title: 'Item analysis — ' + exam.area + ' ' + exam.grade + (label ? ' — ' + label : ''),
+    title: 'Item analysis — ' + areaLabel(exam.area) + ' ' + exam.grade + (label ? ' — ' + label : ''),
     subtitle: students.length + ' test takers · ' + exam.totalItems + ' items · difficulty index p is the share answering correctly' +
       (manual ? '. This test was entered manually (no ZipGrade scan), so discrimination and point-biserial are not shown.'
               : '; discrimination index D compares the upper and lower 27% of scorers.')
@@ -7411,13 +7749,13 @@ function itemAnalysisPDF(exam, students, list, map, label) {
     return [it.num,
       m.topic || 'Not in the table of specifications',
       m.competency || '',
-      (m.objectiveKind ? m.objectiveKind + ' — ' : '') + (m.objective || ''),
+      ksaLines(m).join('\n'),
       m.domain ? m.domain : '—', it.correct, it.wrong,
       it.pct.toFixed(1), it.p.toFixed(2), it.diff.label,
       manual ? 'n/a' : it.d.toFixed(2), manual ? '—' : it.disc.label, action(it, manual)];
   });
   doc.autoTable(autoTableOpts(font, startY, {
-    head: [['Item', 'Topic', 'Learning competency', 'Learning objective', 'Domain', 'Correct', 'Wrong',
+    head: [['Item', 'Topic', 'Learning competency', 'Lesson objectives', 'Domain', 'Correct', 'Wrong',
             '% correct', 'p', 'Difficulty', 'D', 'Discrimination', 'Action']],
     body: rows,
     styles: { font: font, fontSize: 6.9, cellPadding: 2.6, lineColor: [203, 212, 224],
@@ -7432,13 +7770,13 @@ function itemAnalysisPDF(exam, students, list, map, label) {
     }
   }));
   pdfFinish(doc, font);
-  doc.save('Item analysis ' + exam.area + ' ' + exam.grade + (label ? ' ' + label : '') + ' ' + stampFileDate() + '.pdf');
+  doc.save('Item analysis ' + areaLabel(exam.area) + ' ' + exam.grade + (label ? ' ' + label : '') + ' ' + stampFileDate() + '.pdf');
 }
 
 /* ---------------- remediation ---------------- */
 function remediationPDF(exam, ca, label) {
   const { doc, font, startY } = pdfReport({
-    title: 'Remediation list — ' + exam.area + ' ' + exam.grade + (label ? ' — ' + label : ''),
+    title: 'Remediation list — ' + areaLabel(exam.area) + ' ' + exam.grade + (label ? ' — ' + label : ''),
     subtitle: 'Learners answering fewer than ' + DB.cfg.remediation +
       '% of a competency’s items correctly, grouped by learning competency and objective.'
   });
@@ -7476,7 +7814,7 @@ function remediationPDF(exam, ca, label) {
     doc.text('No learner in this class falls below the cut-off.', 32, y + 6);
   }
   pdfFinish(doc, font);
-  doc.save('Remediation ' + exam.area + ' ' + exam.grade + (label ? ' ' + label : '') + ' ' + stampFileDate() + '.pdf');
+  doc.save('Remediation ' + areaLabel(exam.area) + ' ' + exam.grade + (label ? ' ' + label : '') + ' ' + stampFileDate() + '.pdf');
 }
 
 /* Objective text used in both the screen tables and the reports. */
