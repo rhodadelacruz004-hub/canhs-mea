@@ -360,6 +360,19 @@ button.cell:hover{outline:2px solid var(--blue);outline-offset:-2px}
 .tick.tickall.on{border-style:solid;color:var(--ink)}
 .fstep-all{align-self:start}
 .fstep-opt .msf{min-width:180px}
+.upbar .tick input[type=radio]{width:15px;height:15px}
+.upcrumbs{display:flex;flex-wrap:wrap;gap:6px 22px;list-style:none;margin:0 0 14px;padding:0;font-size:14px;color:var(--ink-faint)}
+.upcrumbs li{display:flex;align-items:center;gap:8px}
+.upcrumbs .n{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;background:#B7C2CF;color:#fff;font-weight:700;font-size:12.5px}
+.upcrumbs li.on{color:var(--ink);font-weight:600}
+.upcrumbs li.on .n{background:var(--teal)}
+.upcrumbs li.done .n{background:var(--green)}
+.upnav{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:14px 18px;border-top:1px solid var(--rule)}
+.upchosen{padding:12px 18px;border-bottom:1px solid var(--rule);font-size:14.5px;background:#F7F9FC}
+.uptabs{margin:0}
+
+.upbar .fstep-note{margin-top:-4px}
+.upwiz .panel-body > .upstep-wide:first-child{border-top:0;margin-top:0;padding-top:0}
 /* four columns — subjects four to a line — on every screen wide enough
    for "Values Ed." without wrapping; two on the narrowest */
 @media(max-width:1199px){.fstep{grid-template-columns:118px 92px minmax(0,1fr)}.fstep .tick{padding:6px;gap:6px}}
@@ -2960,7 +2973,7 @@ function applyPick(obj, pick) {
   if (obj.examType && obj.examType !== pick.examType) differs.push(examTypeLabel(obj.examType));
   if (obj.area && LEARNING_AREAS.includes(obj.area) && obj.area !== pick.area) differs.push(areaLabel(obj.area));
   obj.sy = pick.sy; obj.term = +pick.term; obj.examType = pick.examType; obj.area = pick.area;
-  if (pick.grade && pick.grade !== 'all' && !obj.grade) obj.grade = +pick.grade;
+  if (pick.grades && pick.grades.length === 1 && !obj.grade) obj.grade = pick.grades[0];
   return differs;
 }
 /* A file whose own label names a different learning area from step 4 is
@@ -2972,16 +2985,20 @@ function pickAreaClash(obj, pick) {
 }
 function clashText(fileName, area, pick) {
   return fileName + ' \u2014 this file is for ' + areaLabel(area) + ', so it was not uploaded under ' + areaLabel(pick.area) +
-    '. To upload it, choose ' + areaLabel(area) + ' in step 5.';
+    '. To upload it, choose ' + areaLabel(area) + ' in step 4.';
 }
 /* A file for a different grade level from the one chosen in step 4 is
-   not filed either. "All grade levels" accepts any grade. */
+   not filed either; several grade levels can be ticked at once. */
+function gradeListText(gs) {
+  gs = gs.slice().sort((a, b) => a - b);
+  return gs.length === 1 ? 'Grade ' + gs[0] : 'Grades ' + gs.slice(0, -1).join(', ') + ' and ' + gs[gs.length - 1];
+}
 function pickClash(obj, pick, fileName) {
   const a = pickAreaClash(obj, pick);
   if (a) return clashText(fileName, a, pick);
-  if (pick && pick.grade && pick.grade !== 'all' && obj.grade && +obj.grade !== +pick.grade)
-    return fileName + ' \u2014 this file is for Grade ' + obj.grade + ', so it was not uploaded under Grade ' + pick.grade +
-      '. To upload it, choose Grade ' + obj.grade + ' (or All grade levels) in step 4.';
+  if (pick && pick.grades && obj.grade && !pick.grades.includes(+obj.grade))
+    return fileName + ' \u2014 this file is for Grade ' + obj.grade + ', so it was not uploaded under ' + gradeListText(pick.grades) +
+      '. To upload it, tick Grade ' + obj.grade + ' in step 5.';
   return '';
 }
 
@@ -4223,7 +4240,7 @@ function rampLegend() {
    the steps, whatever its own name says, and carries the number of the
    teacher it was uploaded for, so each teacher's results are paired
    with that teacher's own TOS. Grade level is read from the files. */
-const UP_UI = { sy: '', term: '', exam: '', grade: '', area: '', teachers: 0 };
+const UP_UI = { sy: '', term: '', exam: '', area: '', grades: [], teachers: 0, page: 1, tk: 1 };
 /* ---------- Saved Files: ZipGrade results and tables of specifications ----------
    Each page lists what is on file, narrowed by its own filter, with a
    tick box on every row. Files can be removed one at a time, as a batch
@@ -4371,12 +4388,12 @@ function removeSaved(examIds, tosIds) {
 }
 
 function upPick() {
-  return (UP_UI.sy && UP_UI.term && UP_UI.exam && UP_UI.grade && UP_UI.area)
-    ? { sy: UP_UI.sy, term: +UP_UI.term, examType: UP_UI.exam, grade: UP_UI.grade === 'all' ? 'all' : +UP_UI.grade, area: UP_UI.area } : null;
+  return (UP_UI.sy && UP_UI.term && UP_UI.exam && UP_UI.area && UP_UI.grades.length)
+    ? { sy: UP_UI.sy, term: +UP_UI.term, examType: UP_UI.exam, area: UP_UI.area, grades: UP_UI.grades.slice().sort((a, b) => a - b) } : null;
 }
 function inPick(x, p) {
   return !!p && x.sy === p.sy && +x.term === +p.term && x.examType === p.examType && x.area === p.area &&
-    (!p.grade || p.grade === 'all' || +x.grade === +p.grade);
+    (!p.grades || p.grades.includes(+x.grade));
 }
 /* The highest teacher number already holding files for these choices,
    so returning to a subject shows its teachers as they were left. */
@@ -4415,7 +4432,7 @@ function upFileLine(kind, main, sub) {
    read, or whose own label disagrees with the steps) — shown in that box
    until the next upload there. Routine confirmations are not shown. */
 const UP_PROBLEMS = {};
-function upPickKey(p) { return [p.sy, p.term, p.examType, p.grade, p.area].join('|'); }
+function upPickKey(p) { return [p.sy, p.term, p.examType, p.area, (p.grades || []).join(',')].join('|'); }
 function upProblemNote(p, zone) {
   const list = UP_PROBLEMS[upPickKey(p) + '|' + zone];
   if (!list || !list.length) return '';
@@ -4481,7 +4498,7 @@ function upTeacherCard(k, p) {
   return h + '</div></div></div>';
 }
 function upTeachersStep(p) {
-  if (p && p.grade === 'all') {
+  if (p && p.grades.length > 1) {
     return '<div class="upstep upstep-wide done">' +
       '<div class="upstep-head"><span class="n" aria-hidden="true">6</span>' +
       '<span class="t"><span class="sr">Step 6: </span>Number of teachers</span></div>' +
@@ -4514,27 +4531,134 @@ function upFilesStep(p) {
   let h = '<div class="upstep upstep-wide' + (allDone ? ' done' : '') + (n ? '' : ' locked') + '">' +
     '<div class="upstep-head"><span class="n" aria-hidden="true">7</span>' +
     '<span class="t"><span class="sr">Step 7: </span>Upload each teacher’s files</span></div>';
-  if (!n) return h + '<div class="hint" style="margin-top:0">Finish the steps above to open the upload boxes.</div></div>';
+  if (!n) return h + '<div class="hint" style="margin-top:0">Finish steps 1 to 6 above to open the upload boxes.</div></div>';
   h += '<div class="hint" style="margin:0 0 12px">Quickest: drop all of a teacher\u2019s files \u2014 ZipGrade results and tables of specifications for every grade level \u2014 into \u201cAll files at once\u201d. ' +
-    'Or upload the ZipGrade results first, then the table of specifications. With \u201cAll grade levels\u201d chosen in step 4, each file\u2019s grade level is read from the file.</div><div class="upcards">';
+    'Or upload the ZipGrade results first, then the table of specifications. Each file\u2019s grade level is read from the file and must be one of the grade levels ticked in step 5.</div><div class="upcards">';
   for (let k = 1; k <= n; k++) h += upTeacherCard(k, p);
   return h + '</div></div>';
 }
+/* The upload choices, laid out like the report filter: one row per step,
+   the choices as tiles in shared columns. Each row takes ONE choice. */
+function upTiles(key, n, label, options, value, enabled, note) {
+  const lblId = 'up-' + key, done = enabled && value !== '' && value !== 0;
+  let h = '<div class="fstep' + (done ? ' done' : '') + (enabled ? '' : ' locked') + '">' +
+    filterStepHead(n, label, lblId, '', note) + '<div class="fstep-all"></div>' +
+    '<div class="ticks" role="radiogroup" aria-labelledby="' + lblId + '">';
+  options.forEach(o => {
+    const on = String(o.v) === String(value), off = !enabled || o.off;
+    h += '<label class="tick' + (on ? ' on' : '') + (off ? ' off' : '') + (o.wide ? ' wide' : '') + '"' + (o.full ? ' title="' + esc(o.full) + '"' : '') + '>' +
+      '<input type="radio" name="up-' + key + '" data-upr="' + key + '" value="' + esc(String(o.v)) + '"' +
+      (on ? ' checked' : '') + (off ? ' disabled' : '') + '><span>' + esc(o.t) + '</span></label>';
+  });
+  return h + '</div></div>';
+}
+/* ---------- the upload wizard ----------
+   Page 1: school year, term, assessment, learning area, grade level(s).
+   Page 2: number of teachers — only when ONE grade level is ticked;
+           several grade levels always mean one set of files.
+   Page 3: the uploads — one box for several grade levels, or one
+           teacher at a time (Teacher 1, Next, Teacher 2 …, Done).  */
+function upSingleGrade(p) { return !!p && p.grades.length === 1; }
+function upPages(p) { return upSingleGrade(p) ? 3 : 2; }
+function upCrumbs(p) {
+  const single = upSingleGrade(p);
+  const steps = [{ n: 1, t: 'Choose the assessment' }].concat(single ? [{ n: 2, t: 'Number of teachers' }] : []).concat([{ n: 3, t: 'Upload the files' }]);
+  const cur = UP_UI.page === 'done' ? 4 : UP_UI.page;
+  return '<ol class="upcrumbs">' + steps.map((x, i) =>
+    '<li class="' + (cur === x.n ? 'on' : cur > x.n ? 'done' : '') + '"><span class="n">' + (i + 1) + '</span>' + esc(x.t) + '</li>').join('') + '</ol>';
+}
+function upChosenLine(p) {
+  return '<div class="upchosen"><strong>' + esc(areaLabel(p.area)) + ' · ' + esc(gradeListText(p.grades)) + '</strong> — ' +
+    esc(p.sy + ', Term ' + p.term + ', ' + examTypeLabel(p.examType)) +
+    ' <button type="button" class="inline-link" data-upgo="1">Change</button></div>';
+}
+function upNav(back, next, nextLabel, nextOff) {
+  return '<div class="upnav">' + (back ? '<button type="button" class="btn ghost" data-upgo="' + back + '">← Back</button>' : '<span></span>') +
+    (next ? '<button type="button" class="btn" data-upgo="' + next + '"' + (nextOff ? ' disabled' : '') + '>' + esc(nextLabel || 'Next') + ' →</button>' : '') + '</div>';
+}
 function uploadSteps() {
-  const s2 = !!UP_UI.sy, s3 = s2 && !!UP_UI.term, s4 = s3 && !!UP_UI.exam, s5 = s4 && !!UP_UI.grade;
   const p = upPick();
-  return '<div class="panel upwiz"><h3>Step by step<span class="sub">each step opens once the one before it is done</span></h3><div class="panel-body">' +
-    '<div class="upsteps">' +
-    upStepSelect(1, 'upSy', 'School year', UP_UI.sy, SCHOOL_YEARS.map(y => ({ v: y, t: y })), true, 'Choose the school year') +
-    upStepSelect(2, 'upTerm', 'Term', UP_UI.term, TERMS.map(t => ({ v: t, t: 'Term ' + t })), s2, 'Choose the term') +
-    upStepSelect(3, 'upExam', 'Assessment', UP_UI.exam, EXAM_TYPES.map(x => ({ v: x.id, t: x.label })), s3, 'Choose the assessment') +
-    upStepSelect(4, 'upGrade', 'Grade level', UP_UI.grade, [{ v: 'all', t: 'All grade levels (read from the files)' }].concat(GRADES.map(g => ({ v: g, t: 'Grade ' + g }))), s4, 'Choose the grade level') +
-    upStepSelect(5, 'upArea', 'Learning area', UP_UI.area, upAreaOptions().map(a => ({ v: a, t: areaLabel(a) })), s5, 'Choose the learning area') +
-    '</div>' + upTeachersStep(p) + upFilesStep(p) + '</div></div>';
+  if (!p && UP_UI.page !== 1) UP_UI.page = 1;
+  if (UP_UI.page === 2 && !upSingleGrade(p)) UP_UI.page = 3;
+  const n = p ? (upSingleGrade(p) ? (UP_UI.teachers || 1) : 1) : 0;
+  if (UP_UI.tk > n) UP_UI.tk = Math.max(1, n);
+  let h = upCrumbs(p);
+
+  if (UP_UI.page === 1) {
+    const s2 = !!UP_UI.sy, s3 = s2 && !!UP_UI.term, s4 = s3 && !!UP_UI.exam, s5 = s4 && !!UP_UI.area;
+    h += '<div class="panel ctxbar upbar"><div class="fsteps">';
+    h += '<div class="fstep' + (UP_UI.sy ? ' done' : '') + '">' + filterStepHead(1, 'School year', '', 'upSy') +
+      '<div class="fstep-all"></div><div class="ticks"><select id="upSy"><option value="">Choose the school year</option>' +
+      SCHOOL_YEARS.map(y => '<option value="' + esc(y) + '"' + (y === UP_UI.sy ? ' selected' : '') + '>' + esc(y) + '</option>').join('') +
+      '</select></div></div>';
+    h += upTiles('term', 2, 'Term', TERMS.map(t => ({ v: t, t: 'Term ' + t })), UP_UI.term, s2);
+    h += upTiles('exam', 3, 'Assessment', EXAM_TYPES.map(x => ({ v: x.id, t: x.id === 'TE' ? 'Term Exam' : x.short, full: x.label })), UP_UI.exam, s3);
+    h += upTiles('area', 4, 'Learning area', upAreaOptions().map(a => ({ v: a, t: areaLabel(a), full: a })), UP_UI.area, s4);
+    const sel = new Set(UP_UI.grades), allOn = GRADES.every(g => sel.has(g));
+    h += '<div class="fstep' + (s5 && sel.size ? ' done' : '') + (s5 ? '' : ' locked') + '">' +
+      filterStepHead(5, 'Grade level', 'up-grades', '') +
+      '<div class="fstep-all"><label class="tick tickall' + (allOn ? ' on' : '') + (s5 ? '' : ' off') + '">' +
+      '<input type="checkbox" data-upg-all' + (allOn ? ' checked' : '') + (s5 ? '' : ' disabled') + '><span>Tick all</span></label></div>' +
+      '<div class="ticks" role="group" aria-labelledby="up-grades">' +
+      GRADES.map(g => '<label class="tick' + (sel.has(g) ? ' on' : '') + (s5 ? '' : ' off') + '">' +
+        '<input type="checkbox" data-upg="' + g + '"' + (sel.has(g) ? ' checked' : '') + (s5 ? '' : ' disabled') + '><span>Grade ' + g + '</span></label>').join('') +
+      '</div></div>';
+    if (p) h += '<div class="fstep fstep-note"><div></div><div></div><div class="hint" style="margin:0">' +
+      (upSingleGrade(p) ? 'One grade level ticked — next, say how many teachers handled it.'
+        : 'Several grade levels ticked — they are uploaded as one set (one teacher), each file’s grade level read from the file.') + '</div></div>';
+    h += '</div>' + upNav(0, upSingleGrade(p) ? 2 : 3, 'Next', !p) + '</div>';
+    return h;
+  }
+
+  if (UP_UI.page === 2) {
+    const onFile = upTeachersOnFile(p);
+    h += '<div class="panel ctxbar upbar">' + upChosenLine(p) + '<div class="fsteps">';
+    h += upTiles('teachers', 6, 'Number of teachers', [1, 2, 3].map(k => ({ v: k, t: k + (k === 1 ? ' teacher' : ' teachers') })), UP_UI.teachers || 1, true);
+    h += '<div class="fstep fstep-note"><div></div><div></div><div class="hint" style="margin:0">' +
+      'Choose 2 or 3 only when ' + esc(gradeListText(p.grades)) + '’s sections are split between teachers, each giving their own test and TOS. ' +
+      'You will then upload Teacher 1’s files, then Teacher 2’s, and so on. Mean, MPS and SD show each teacher’s row plus one combined row.' +
+      (onFile > (UP_UI.teachers || 1) ? ' <strong>Teacher ' + onFile + ' already has files for this assessment</strong> — they stay on file until removed under Saved Files.' : '') +
+      '</div></div>';
+    h += '</div>' + upNav(1, 3, 'Next') + '</div>';
+    return h;
+  }
+
+  if (UP_UI.page === 'done') {
+    h += '<div class="panel ctxbar upbar">' + upChosenLine(p) + '<div class="panel-body">';
+    h += '<h3 style="margin:0 0 10px;font-size:18px">Upload finished</h3><table class="grid tight"><thead><tr><th>Teacher</th><th>ZipGrade results</th><th>Tables of specifications</th><th></th></tr></thead><tbody>';
+    for (let k = 1; k <= n; k++) {
+      const exs = DB.exams.filter(e => inPick(e, p) && (e.teacherSlot || 1) === k).map(e => e.grade).sort((a, b) => a - b);
+      const tss = DB.toses.filter(t => inPick(t, p) && (t.teacherSlot || 1) === k).map(t => t.grade).sort((a, b) => a - b);
+      const missing = [...new Set(exs)].filter(g => !tss.includes(g));
+      h += '<tr><td>Teacher ' + k + '</td><td>' + (exs.length ? esc(gradeListText([...new Set(exs)])) : '<span class="pill mute">none</span>') + '</td>' +
+        '<td>' + (tss.length ? esc(gradeListText([...new Set(tss)])) : '<span class="pill mute">none</span>') + '</td>' +
+        '<td>' + (exs.length && !missing.length ? '<span class="pill good">Done</span>' : '<span class="pill warn">' + (exs.length ? 'TOS missing for ' + esc(gradeListText(missing)) : 'no results') + '</span>') + '</td></tr>';
+    }
+    h += '</tbody></table></div>' +
+      '<div class="upnav"><button type="button" class="btn ghost" data-upgo="3">← Back to the uploads</button>' +
+      '<span style="display:flex;gap:10px;flex-wrap:wrap"><button type="button" class="btn ghost" data-go="savedZip">Open Saved Files</button>' +
+      '<button type="button" class="btn" data-upgo="new">Upload another set</button></span></div></div>';
+    return h;
+  }
+
+  /* page 3: the files */
+  const single = upSingleGrade(p), k = single ? UP_UI.tk : 1;
+  h += '<div class="panel upwiz">' + upChosenLine(p) + '<div class="panel-body">';
+  h += '<div class="hint" style="margin:0">' + (single && n > 1
+      ? '<strong>Teacher ' + k + ' of ' + n + '.</strong> Upload this teacher’s ZipGrade results and table of specifications, then press Next for Teacher ' + (k + 1 <= n ? k + 1 : k) + '.'
+      : single ? 'Upload the ZipGrade results and the table of specifications.'
+      : 'Upload as many ZipGrade results and tables of specifications as you need — one of each per grade level. Each file’s grade level is read from the file and must be one you ticked.') +
+    ' Quickest: drop them all into “All files at once”.</div>';
+  if (single && n > 1) h += '<div class="seg uptabs">' + [...Array(n).keys()].map(i =>
+    '<button type="button" data-uptk="' + (i + 1) + '" class="' + (i + 1 === k ? 'on' : '') + '">Teacher ' + (i + 1) + '</button>').join('') + '</div>';
+  h += '<div class="upcards">' + upTeacherCard(k, p) + '</div></div>';
+  const backTo = single ? (k > 1 ? 'tk' + (k - 1) : 2) : 1;
+  h += (single && k < n) ? upNav(backTo, 'tk' + (k + 1), 'Next: Teacher ' + (k + 1)) : upNav(backTo, 'done', 'Done');
+  return h + '</div>';
 }
 function viewUpload() {
   let h = head('Upload results',
-    'Choose the school year, term, assessment, grade level and learning area, then upload each teacher’s ZipGrade results and table of specifications.');
+    'Choose the school year, term, assessment, learning area and grade level(s), then upload each teacher’s ZipGrade results and table of specifications.');
   h += '<div class="wrap">';
   if (!storageOK) h += '<div class="note">This browser is blocking local storage, so uploads will be held in memory only and lost on refresh. Use “Download a backup” on the Settings page to keep a copy.</div>';
 
@@ -6576,15 +6700,37 @@ function bindView() {
      to the next one; changing any of steps 1-4 re-reads how many
      teachers already have files for the new choice. */
   const upNext = id => { const el = $(id); if (el && !el.disabled) el.focus(); };
-  const upChanged = () => { const p = upPick(); UP_UI.teachers = !p ? 0 : p.grade === 'all' ? 1 : (upTeachersOnFile(p) || 1); };
+  const upChanged = () => { const p = upPick(); UP_UI.teachers = !p ? 0 : p.grades.length > 1 ? 1 : (upTeachersOnFile(p) || 1); };
   on('upSy', 'change', e => { UP_UI.sy = e.target.value; upChanged(); render(); upNext('upTerm'); });
   on('upTerm', 'change', e => { UP_UI.term = e.target.value; upChanged(); render(); upNext('upExam'); });
   on('upExam', 'change', e => { UP_UI.exam = e.target.value; upChanged(); render(); upNext('upGrade'); });
-  on('upGrade', 'change', e => { UP_UI.grade = e.target.value; upChanged(); render(); upNext('upArea'); });
+  document.querySelectorAll('[data-upg]').forEach(c => c.onchange = () => {
+    const g = +c.dataset.upg, set = new Set(UP_UI.grades);
+    if (c.checked) set.add(g); else set.delete(g);
+    UP_UI.grades = GRADES.filter(x => set.has(x)); upChanged(); render();
+  });
+  document.querySelectorAll('[data-upg-all]').forEach(c => c.onchange = () => {
+    UP_UI.grades = c.checked ? GRADES.slice() : []; upChanged(); render();
+  });
   on('upArea', 'change', e => {
     UP_UI.area = e.target.value; upChanged(); render();
     const b = document.querySelector('#upTeachers button.on') || document.querySelector('#upTeachers button');
     if (b && !b.disabled) b.focus();
+  });
+  document.querySelectorAll('[data-upgo]').forEach(b => b.onclick = () => {
+    const v = b.dataset.upgo;
+    if (v === 'new') { UP_UI.area = ''; UP_UI.grades = []; UP_UI.teachers = 0; UP_UI.tk = 1; UP_UI.page = 1; }
+    else if (v.startsWith('tk')) { UP_UI.page = 3; UP_UI.tk = +v.slice(2); }
+    else if (v === 'done') UP_UI.page = 'done';
+    else { UP_UI.page = +v; if (UP_UI.page === 3) UP_UI.tk = Math.max(1, Math.min(UP_UI.tk, UP_UI.teachers || 1)); if (UP_UI.page === 2 || UP_UI.page === 1) UP_UI.tk = 1; }
+    if (UP_UI.page === 3 && b.dataset.upgo === '3' && UP_UI.tk < 1) UP_UI.tk = 1;
+    render(); window.scrollTo(0, 0); const m = document.getElementById('main'); if (m) m.scrollTop = 0;
+  });
+  document.querySelectorAll('[data-uptk]').forEach(b => b.onclick = () => { UP_UI.tk = +b.dataset.uptk; render(); });
+  document.querySelectorAll('[data-upr]').forEach(r => r.onchange = () => {
+    const k = r.dataset.upr;
+    if (k === 'teachers') { UP_UI.teachers = +r.value; render(); return; }
+    UP_UI[k] = r.value; upChanged(); render();
   });
   const onfile = document.querySelector('details.onfile');
   if (onfile) onfile.ontoggle = () => { UP_UI.onfileOpen = onfile.open; };
