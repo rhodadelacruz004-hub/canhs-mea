@@ -399,6 +399,9 @@ button.cell:hover{outline:2px solid var(--blue);outline-offset:-2px}
 .upzone-label{display:flex;align-items:center;gap:8px;margin-bottom:7px;font-size:14.3px;font-weight:600;color:var(--ink-soft)}
 .upzone-label .l{width:20px;height:20px;border-radius:50%;border:1px solid var(--rule-strong);display:grid;place-items:center;font-size:11.6px;color:var(--ink-soft)}
 .drop.sm{padding:16px 14px}
+.drop.upbatch{border-style:solid;border-width:2px}
+.upor{display:flex;align-items:center;gap:10px;margin-top:14px;font-size:12.5px;color:var(--ink-soft)}
+.upor::before,.upor::after{content:"";flex:1;border-top:1px solid var(--rule)}
 .drop.sm .big{font-size:16px;margin-bottom:3px}
 .drop.sm .small{font-size:12.7px}
 .drop:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
@@ -3113,6 +3116,12 @@ async function ingestFile(file, logEl, teacherSlot, pick) {
           examTypeLabel(t.examType) + ', ' + areaLabel(t.area) + ', although the TOS itself mentions ' + differs.join(', ') + ' \u2014 check that it is the right file.');
         if (pick) newTos.push(t);
         ids.push(t.id);
+        let unheld = false;
+        DB.exams.forEach(e => {
+          if (DB.links[e.id] === '' && e.area === t.area && e.grade === t.grade && e.sy === t.sy &&
+              +e.term === +t.term && e.examType === t.examType) { delete DB.links[e.id]; unheld = true; }
+        });
+        if (unheld) save('links');
         added++;
       }
     } catch (e) {
@@ -3140,6 +3149,21 @@ async function ingestFile(file, logEl, teacherSlot, pick) {
   }
   if (!added && !refused) line('wr', file.name + ' — no ZipGrade export or table of specifications recognised in this file.');
   return { added, ids };
+}
+
+/* For a batch upload: answer sheets before tables of specifications, so a
+   TOS (and any item sheet that needs its exam) always finds its results. */
+async function resultsFirst(files) {
+  const tagged = await Promise.all(files.map(async (f, i) => {
+    let k = 1;
+    try {
+      const wb = XLSX.read(await f.arrayBuffer(), { type: 'array', cellDates: false });
+      if (looksLikeManualResultsWorkbook(wb) ||
+          wb.SheetNames.some(n => { const r = sheetToRows(wb.Sheets[n]); return r.length && looksLikeZipGrade(r); })) k = 0;
+    } catch (e) {}
+    return { f, k, i };
+  }));
+  return tagged.sort((a, b) => a.k - b.k || a.i - b.i).map(x => x.f);
 }
 
 async function ingestFiles(files, logEl, teacherSlot, pick) {
@@ -4171,6 +4195,53 @@ function rampLegend() {
    teacher it was uploaded for, so each teacher's results are paired
    with that teacher's own TOS. Grade level is read from the files. */
 const UP_UI = { sy: '', term: '', exam: '', area: '', teachers: 0 };
+/* Batch removal: everything on file for the chosen cycle — results,
+   tables of specifications, or both. 'all' means any value. */
+const BULK = { sy: 'all', term: 'all', exam: 'all', area: 'all', grade: 'all', what: 'both', seeded: false };
+function bulkHit(x) {
+  const b = BULK;
+  return (b.sy === 'all' || x.sy === b.sy) && (b.term === 'all' || +x.term === +b.term) &&
+    (b.exam === 'all' || x.examType === b.exam) && (b.area === 'all' || x.area === b.area) &&
+    (b.grade === 'all' || +x.grade === +b.grade);
+}
+function bulkMatches() {
+  return {
+    exams: BULK.what === 'tos' ? [] : DB.exams.filter(bulkHit),
+    toses: BULK.what === 'results' ? [] : DB.toses.filter(bulkHit)
+  };
+}
+function bulkPanel() {
+  if (!DB.exams.length && !DB.toses.length) return '';
+  /* start from whatever is chosen in the upload steps */
+  if (!BULK.seeded) {
+    BULK.seeded = true;
+    if (UP_UI.sy) BULK.sy = UP_UI.sy;
+    if (UP_UI.term) BULK.term = +UP_UI.term;
+    if (UP_UI.exam) BULK.exam = UP_UI.exam;
+    if (UP_UI.area) BULK.area = UP_UI.area;
+  }
+  const m = bulkMatches();
+  const all = DB.exams.concat(DB.toses);
+  const areas = [...new Set(all.map(x => x.area))].sort();
+  const grades = [...new Set(all.map(x => +x.grade).filter(Boolean))].sort((a, b) => a - b);
+  const opt = (v, t, cur) => '<option value="' + esc(String(v)) + '"' + (String(cur) === String(v) ? ' selected' : '') + '>' + esc(t) + '</option>';
+  const sel = (id, lbl, html) => '<label style="display:grid;gap:3px;font-size:12.5px;color:var(--ink-soft)">' + lbl +
+    '<select id="' + id + '" style="width:auto">' + html + '</select></label>';
+  const n = m.exams.length + m.toses.length;
+  const parts = [];
+  if (BULK.what !== 'tos') parts.push(m.exams.length + ' result' + (m.exams.length === 1 ? '' : 's'));
+  if (BULK.what !== 'results') parts.push(m.toses.length + ' TOS sheet' + (m.toses.length === 1 ? '' : 's'));
+  return '<div class="panel"><h3>Remove by batch<span class="sub">choose the files to clear, then remove them in one go</span></h3>' +
+    '<div class="panel-body" style="display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end">' +
+    sel('bkWhat', 'Remove', opt('both', 'Results and TOS', BULK.what) + opt('results', 'Results only', BULK.what) + opt('tos', 'TOS only', BULK.what)) +
+    sel('bkSy', 'School year', opt('all', 'All', BULK.sy) + SCHOOL_YEARS.map(y => opt(y, y, BULK.sy)).join('')) +
+    sel('bkTerm', 'Term', opt('all', 'All', BULK.term) + TERMS.map(x => opt(x, 'Term ' + x, BULK.term)).join('')) +
+    sel('bkExam', 'Assessment', opt('all', 'All', BULK.exam) + EXAM_TYPES.map(x => opt(x.id, x.label, BULK.exam)).join('')) +
+    sel('bkArea', 'Learning area', opt('all', 'All', BULK.area) + areas.map(a => opt(a, areaLabel(a), BULK.area)).join('')) +
+    sel('bkGrade', 'Grade', opt('all', 'All', BULK.grade) + grades.map(g => opt(g, 'Grade ' + g, BULK.grade)).join('')) +
+    '<button class="btn sm ghost" id="bkRemove"' + (n ? '' : ' disabled') + '>Remove ' + parts.join(' and ') + '</button>' +
+    '</div></div>';
+}
 
 function upPick() {
   return (UP_UI.sy && UP_UI.term && UP_UI.exam && UP_UI.area)
@@ -4240,6 +4311,18 @@ function upTeacherCard(k, p) {
 
   let h = '<div class="upcard' + (complete ? ' complete' : '') + '"><h4>Teacher ' + k + pill + '</h4><div class="inner">';
 
+  /* Batch: every file for this teacher in one go — results and TOS for
+     all grade levels. Each file is recognised by its content. */
+  h += '<div><div class="upzone-label"><span class="l" aria-hidden="true">\u2605</span>All files at once</div>' +
+    '<div class="drop sm upbatch" tabindex="0" role="button" data-up-drop="upFileB' + k + '" data-slot="' + k + '" ' +
+      'aria-label="Upload all of Teacher ' + k + '\u2019s files at once">' +
+    '<div class="big">Drop or choose all the files together</div>' +
+    '<div class="small">ZipGrade results and tables of specifications for every grade level, in one selection. ' +
+      'Each file is recognised automatically and paired by grade level.</div>' +
+    '</div><input type="file" id="upFileB' + k + '" multiple accept=".xlsx,.xls,.csv" class="sr" tabindex="-1">' +
+    upProblemNote(p, 'upFileB' + k) +
+    '<div class="upor"><span>or upload them one kind at a time</span></div></div>';
+
   /* a. ZipGrade results */
   h += '<div><div class="upzone-label"><span class="l" aria-hidden="true">a</span>ZipGrade results</div>' +
     '<div class="drop sm' + (exs.length ? ' has' : '') + '" tabindex="0" role="button" data-up-drop="upFileE' + k + '" data-slot="' + k + '" ' +
@@ -4296,8 +4379,8 @@ function upFilesStep(p) {
     '<div class="upstep-head"><span class="n" aria-hidden="true">6</span>' +
     '<span class="t"><span class="sr">Step 6: </span>Upload each teacher’s files</span></div>';
   if (!n) return h + '<div class="hint" style="margin-top:0">Finish the steps above to open the upload boxes.</div></div>';
-  h += '<div class="hint" style="margin:0 0 12px">For each teacher, upload the ZipGrade results first, then the table of specifications. ' +
-    'Grade level is read from the files.</div><div class="upcards">';
+  h += '<div class="hint" style="margin:0 0 12px">Quickest: drop all of a teacher\u2019s files \u2014 ZipGrade results and tables of specifications for every grade level \u2014 into \u201cAll files at once\u201d. ' +
+    'Or upload the ZipGrade results first, then the table of specifications. Grade level is read from the files.</div><div class="upcards">';
   for (let k = 1; k <= n; k++) h += upTeacherCard(k, p);
   return h + '</div></div>';
 }
@@ -4325,6 +4408,7 @@ function viewUpload() {
   h += '<details class="onfile"' + (UP_UI.onfileOpen ? ' open' : '') + '><summary>' + CARET +
     '<span class="t">Uploads on file</span><span class="sub">' + DB.exams.length + ' result' + (DB.exams.length === 1 ? '' : 's') +
     ' \u00b7 ' + DB.toses.length + ' table' + (DB.toses.length === 1 ? '' : 's') + ' of specifications \u2014 open to check, correct or remove</span></summary>';
+  h += bulkPanel();
   h += '<div class="panel"><h3>Exams on file<span class="sub">' + DB.exams.length + ' uploaded</span>' +
     '<span class="spacer"></span>' + (DB.exams.length ? '<button class="btn sm ghost" id="clearExams">Remove all exams</button>' : '') + '</h3>';
   if (!DB.exams.length) h += '<div class="panel-body"><p style="margin:0;color:var(--ink-soft)">No exam results yet.</p></div>';
@@ -4364,6 +4448,7 @@ function viewUpload() {
   h += '</div>';
 
   h += '<div class="panel"><h3>Tables of specifications on file<span class="sub">' + DB.toses.length + ' uploaded</span></h3>';
+
   if (!DB.toses.length) h += '<div class="panel-body"><p style="margin:0;color:var(--ink-soft)">No tables of specifications yet. Without one, item analysis still runs, but competency and remediation reporting cannot.</p></div>';
   else {
     h += '<div class="panel-body flush"><div class="tbl-scroll"><table class="grid tight"><thead><tr>' +
@@ -6413,7 +6498,7 @@ function bindView() {
      to the next one; changing any of steps 1-4 re-reads how many
      teachers already have files for the new choice. */
   const upNext = id => { const el = $(id); if (el && !el.disabled) el.focus(); };
-  const upChanged = () => { const p = upPick(); UP_UI.teachers = p ? upTeachersOnFile(p) : 0; };
+  const upChanged = () => { const p = upPick(); UP_UI.teachers = p ? (upTeachersOnFile(p) || 1) : 0; };
   on('upSy', 'change', e => { UP_UI.sy = e.target.value; upChanged(); render(); upNext('upTerm'); });
   on('upTerm', 'change', e => { UP_UI.term = e.target.value; upChanged(); render(); upNext('upExam'); });
   on('upExam', 'change', e => { UP_UI.exam = e.target.value; upChanged(); render(); upNext('upArea'); });
@@ -6435,13 +6520,23 @@ function bindView() {
       const p = upPick();
       if (!p || !files.length) return;
       const since = Date.now();
+      const batch = /^upFileB/.test(d.dataset.upDrop);
+      const cnt = () => [DB.exams.filter(e => inPick(e, p) && (e.teacherSlot || 1) === slot).length,
+                         DB.toses.filter(t => inPick(t, p) && (t.teacherSlot || 1) === slot).length];
+      if (batch) {
+        const big = d.querySelector('.big'); if (big) big.textContent = 'Reading ' + files.length + ' file' + (files.length === 1 ? '' : 's') + '\u2026';
+        files = await resultsFirst(files);
+      }
       const n = await ingestFiles(files, null, slot, p);
       const problems = UPLOAD_LOG.filter(l => l.at >= since && (l.cls === 'er' ||
         (l.cls === 'wr' && !/ \u2014 replaced /.test(l.txt)))).map(l => l.txt).reverse();
       UP_PROBLEMS[upPickKey(p) + '|' + d.dataset.upDrop] = problems;
       render();
+      const after = cnt();
+      const plural = (x, w) => x + ' ' + w + (x === 1 ? '' : 's');
       toast(!n ? 'Nothing was uploaded \u2014 see the note in Teacher ' + slot + '\u2019s box'
-        : (n + ' file' + (n > 1 ? 's' : '') + ' uploaded for Teacher ' + slot +
+        : ((batch ? plural(after[0], 'result') + ' and ' + plural(after[1], 'TOS sheet') + ' on file for Teacher ' + slot
+                  : n + ' file' + (n > 1 ? 's' : '') + ' uploaded for Teacher ' + slot) +
            (problems.length ? ' \u2014 please check the note in the box' : '')), !n);
     };
     d.onclick = () => f.click();
@@ -6493,6 +6588,35 @@ function bindView() {
       x.sy === e.sy && +x.term === +e.term && x.examType === e.examType && (x.teacherSlot || 1) === newSlot);
     if (clash) { toast('Teacher ' + newSlot + ' is already used by another upload for this class — remove or reslot that one first.', true); render(); return; }
     e.teacherSlot = newSlot; syncTeacherCount(e.area, e.grade, e.sy); save(e.id); render(); toast(areaLabel(e.area) + ' ' + e.grade + ' set to Teacher ' + newSlot);
+  });
+  ['bkWhat', 'bkSy', 'bkTerm', 'bkExam', 'bkArea', 'bkGrade'].forEach(id => on(id, 'change', ev => {
+    const k = { bkWhat: 'what', bkSy: 'sy', bkTerm: 'term', bkExam: 'exam', bkArea: 'area', bkGrade: 'grade' }[id];
+    const v = ev.target.value;
+    BULK[k] = (k === 'term' || k === 'grade') && v !== 'all' ? +v : v;
+    render();
+  }));
+  on('bkRemove', 'click', () => {
+    const b = BULK, m = bulkMatches();
+    if (!m.exams.length && !m.toses.length) return;
+    const desc = [b.sy === 'all' ? 'all school years' : b.sy,
+      b.term === 'all' ? 'all terms' : 'Term ' + b.term,
+      b.exam === 'all' ? 'all assessments' : examTypeLabel(b.exam),
+      b.area === 'all' ? 'all learning areas' : areaLabel(b.area),
+      b.grade === 'all' ? 'all grades' : 'Grade ' + b.grade].join(', ');
+    const what = [m.exams.length ? m.exams.length + ' exam result' + (m.exams.length === 1 ? '' : 's') : '',
+      m.toses.length ? m.toses.length + ' table' + (m.toses.length === 1 ? '' : 's') + ' of specifications' : ''].filter(Boolean).join(' and ');
+    if (!confirm('Remove ' + what + ' for ' + desc + '?\n\nThis cannot be undone.' +
+      (m.toses.length && !m.exams.length ? '\nExams for this selection will be left with no TOS mapped until new tables are uploaded.' : ''))) return;
+    const exIds = new Set(m.exams.map(e => e.id)), tIds = new Set(m.toses.map(t => t.id));
+    DB.exams = DB.exams.filter(e => !exIds.has(e.id));
+    DB.toses = DB.toses.filter(t => !tIds.has(t.id));
+    Object.keys(DB.links).forEach(k => { if (exIds.has(k) || tIds.has(DB.links[k])) delete DB.links[k]; });
+    /* exams kept whose TOS was cleared stay unmapped, rather than borrowing another term's table */
+    if (tIds.size) DB.exams.forEach(e => { if (bulkHit(e)) DB.links[e.id] = ''; });
+    const seen = new Set();
+    m.exams.forEach(e => { const k = e.area + '|' + e.grade + '|' + e.sy; if (!seen.has(k)) { seen.add(k); syncTeacherCount(e.area, e.grade, e.sy); } });
+    dropRemote([...exIds, ...tIds]); save('links'); refreshNavCounts(); render();
+    toast('Removed ' + what);
   });
   on('clearExams', 'click', () => {
     if (!confirm('Remove every uploaded exam? Tables of specifications are kept.')) return;
